@@ -309,7 +309,7 @@ html[data-theme="dark"] .rhero .ri{background:rgba(255,255,255,.07)}
 
 /* bottom nav */
 nav.bn{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;pointer-events:none}
-nav.bn .in{pointer-events:auto;width:100%;max-width:560px;display:grid;grid-template-columns:repeat(7,1fr);background:var(--card);background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px calc(2px + var(--safe-r)) calc(6px + var(--safe-b)) calc(2px + var(--safe-l));height:calc(var(--nav-h) + var(--safe-b))}
+nav.bn .in{pointer-events:auto;width:100%;max-width:560px;display:grid;grid-template-columns:repeat(6,1fr);background:var(--card);background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px calc(2px + var(--safe-r)) calc(6px + var(--safe-b)) calc(2px + var(--safe-l));height:calc(var(--nav-h) + var(--safe-b))}
 nav.bn a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--muted);font-size:10.5px;font-weight:600;border-radius:14px;min-height:52px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-tap-highlight-color:transparent}
 nav.bn a .ic{width:46px;height:30px;border-radius:15px;display:grid;place-items:center;font-size:21px;transition:background-color .2s,color .2s}
 nav.bn a.sel{color:var(--accent)}
@@ -464,7 +464,7 @@ nav.bn a .ic{transition:background-color .2s,transform .2s}
 .fab:active{transform:scale(.9)} .fab[disabled]{opacity:.4}
 @media (min-width:600px){.fab{right:calc(50% - 262px)}}
 .tform .tbig{display:block;width:100%;text-align:center;font-size:52px;font-weight:700;border:0;background:var(--card2);border-radius:20px;padding:14px 0;color:var(--text);font-family:inherit;letter-spacing:-.02em}
-.dsel{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+.dsel{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
 .dsel button{height:40px;border-radius:12px;font-weight:700;font-size:13px;background:var(--card);color:var(--text2);text-transform:capitalize;transition:background-color .15s,color .15s}
 .dsel button.on{background:var(--accent);color:#fff}
 .dpre{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
