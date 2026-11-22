@@ -100,7 +100,7 @@
     u = String(u || '').trim().replace(/\/+$/, '');
     if (!u) return '';
     if (!/^https?:\/\//i.test(u)) u = 'http://' + u;
-    try { const x = new URL(u); return x.origin + x.pathname.replace(/\/+$/, ''); } catch (e) { return ''; }
+    try { const x = new URL(u); return x.origin; } catch (e) { return ''; }  // ignore copied paths like /lovelace/0 or /local/comfort/index.html
   }
   const wsUrl = (u) => u.replace(/^http/i, 'ws') + '/api/websocket';
 
