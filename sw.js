@@ -2,7 +2,7 @@
    - Caches only the app's own files, so the app opens even without internet.
    - Network first: when online you always get the newest version you uploaded, no version bump needed.
    - Home Assistant traffic (WebSocket) is never touched or cached. */
-const CACHE = 'comfort-home-v1.1.1';
+const CACHE = 'comfort-home-v1.3.0';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'icons.js', 'demo-ha.js', 'manifest.json',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 const SCOPE = new URL('./', self.location).pathname;
