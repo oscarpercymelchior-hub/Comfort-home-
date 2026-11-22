@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.5.0';
+  const VERSION = '1.7.0';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -36,7 +36,9 @@
       'Brightness': 'Helderheid', 'Warmth': 'Warmte', 'Colour': 'Kleur', 'Moods': 'Sfeer', 'Relax': 'Ontspannen', 'Read': 'Lezen', 'Focus': 'Focus', 'Night light': 'Nachtlampje', 'Effects': 'Effecten', 'Speed': 'Snelheid', 'Position': 'Positie', 'Volume': 'Volume', 'Now playing': 'Nu speelt', 'Oscillate': 'Zwenken',
       'All lights off': 'Alle lampen uit', 'Lights on': 'Lampen aan', 'Lights off': 'Lampen uit', 'Main': 'Hoofd', 'Set as main': 'Maak hoofd', 'Swipe for your other air conditioners': 'Veeg voor je andere airco’s',
       '{n} on': '{n} aan', 'All off': 'Alles uit', '{n} open': '{n} open', '{n} unavailable': '{n} niet beschikbaar', 'Outside {t}': 'Buiten {t}', 'Average of {n} rooms': 'Gemiddelde van {n} kamers', '{n} devices': '{n} apparaten', '1 device': '1 apparaat', 'Room {t}': 'Kamer {t}', 'to {t}': 'naar {t}', 'Indoor': 'Binnen',
-      'Turn on': 'Aanzetten', 'Turn off': 'Uitzetten', 'Run': 'Start'
+      'Turn on': 'Aanzetten', 'Turn off': 'Uitzetten', 'Run': 'Start',
+      'House average': 'Gemiddeld in huis', 'Tap to control all {n} air conditioners at once': 'Tik om alle {n} airco’s tegelijk te regelen', 'Per room': 'Per kamer', 'Heating': 'Verwarming', 'All air conditioners': 'Alle airco’s', 'House {t}': 'Huis {t}', 'Room temperature': 'Kamertemperatuur', 'Info': 'Info', 'Search everything': 'Zoek alles', 'Nothing found.': 'Niets gevonden.', 'Show more': 'Meer tonen', 'History': 'Geschiedenis', 'General': 'Algemeen', 'All information': 'Alle informatie', 'Device': 'Apparaat', 'Also on this device': 'Ook op dit apparaat', 'Open in Home Assistant': 'Openen in Home Assistant', 'Min': 'Min', 'Average': 'Gemiddeld', 'Max': 'Max', 'Now': 'Nu', 'No history in this period.': 'Geen geschiedenis in deze periode.', 'This entity does not exist (anymore).': 'Dit bestaat niet (meer).', 'Entity ID': 'Entiteit-ID', 'State': 'Status', 'Room': 'Kamer', 'Last changed': 'Laatst veranderd', 'Last updated': 'Laatst bijgewerkt', 'Integration': 'Integratie', 'Manufacturer': 'Merk', 'Model': 'Model', 'Firmware': 'Firmware', 'Hardware': 'Hardware', 'Yes': 'Ja', 'No': 'Nee', 'Dashboard': 'Dashboard', 'Comfort stays your start screen. Come back any time via the Comfort item in the Home Assistant menu.': 'Comfort blijft je startscherm. Je komt altijd terug via “Comfort” in het Home Assistant-menu.', 'Sensors': 'Sensoren', 'Status sensors': 'Statussensoren', 'Lights': 'Lampen', 'Switches': 'Schakelaars', 'Automations': 'Automatiseringen', 'People': 'Personen', 'Trackers': 'Trackers', 'Weather': 'Weer', 'Sun': 'Zon', 'Updates': 'Updates', 'Buttons': 'Knoppen', 'Numbers': 'Getallen', 'Selects': 'Keuzes', 'Fans': 'Ventilatoren', 'Blinds': 'Zonwering', 'Locks': 'Sloten', 'Scenes': 'Scènes', 'Scripts': 'Scripts', 'Helpers': 'Helpers', 'Cameras': 'Camera’s', 'Media': 'Media', 'Water heater': 'Warm water', 'To-do lists': 'Takenlijsten', 'Calendar': 'Agenda', 'Controls': 'Bediening', 'Set time': 'Tijden', 'Next': 'Volgende', 'New timer': 'Nieuwe tijd', 'Edit timer': 'Tijd aanpassen', 'Name': 'Naam', 'Time': 'Tijd', 'Days': 'Dagen', 'Save': 'Opslaan', 'Delete': 'Verwijderen', 'Every day': 'Elke dag', 'Weekdays': 'Werkdagen', 'Weekend': 'Weekend', 'Timers': 'Tijden', 'Other automations': 'Andere automatiseringen', 'Edit in Home Assistant': 'Bewerken in Home Assistant', 'Run now': 'Nu uitvoeren', 'No timers yet. Tap + to make one.': 'Nog geen tijden. Tik op + om er een te maken.', 'Choose devices': 'Kies apparaten', 'in {x}': 'over {x}', 'Sunrise': 'Zonsopkomst', 'Sunset': 'Zonsondergang', 'Home Assistant pages': 'Home Assistant-pagina’s', 'Overview': 'Overzicht', 'Energy': 'Energie', 'Map': 'Kaart', 'Logbook': 'Logboek', 'History': 'Geschiedenis', 'Profile': 'Profiel', 'Choose another default dashboard here': 'Kies hier een ander standaarddashboard', 'Saved': 'Opgeslagen', 'Deleted': 'Verwijderd', 'Only administrators can change timers.': 'Alleen beheerders kunnen tijden aanpassen.', 'Made in Home Assistant: you can switch it on or off here.': 'Gemaakt in Home Assistant: hier kun je hem aan- of uitzetten.', 'Search': 'Zoeken', 'Back to the normal Home Assistant screens': 'Terug naar de normale Home Assistant-schermen', 'Switch': 'Wissel', 'All': 'Alles',
+      'mon': 'ma', 'tue': 'di', 'wed': 'wo', 'thu': 'do', 'fri': 'vr', 'sat': 'za', 'sun': 'zo'
     },
     mc: {
       'Home': 'Base', 'Climate': 'Biome', 'Rooms': 'Chunks', 'Devices': 'Redstone', 'Disco': 'Party', 'Settings': 'Crafting',
@@ -53,11 +55,13 @@
       'Brightness': 'Light level', 'Warmth': 'Glow', 'Colour': 'Dye', 'Moods': 'Moods', 'Relax': 'Chill', 'Read': 'Read', 'Focus': 'Build mode', 'Night light': 'Night torch', 'Effects': 'Effects', 'Speed': 'Speed', 'Oscillate': 'Wobble',
       'All lights off': 'All torches out', 'Lights on': 'Torches on', 'Lights off': 'Torches out', 'Main': 'Main', 'Set as main': 'Make main', 'Swipe for your other air conditioners': 'Swipe for your other weather machines',
       '{n} on': '{n} powered', 'All off': 'All unpowered', '{n} unavailable': '{n} missing', 'Outside {t}': 'Overworld {t}', 'Average of {n} rooms': 'Average of {n} chunks', '{n} devices': '{n} redstone', '1 device': '1 redstone', 'Room {t}': 'Chunk {t}', 'to {t}': 'to {t}', 'Indoor': 'Inside the base',
-      'Turn on': 'Power on', 'Turn off': 'Power off', 'Run': 'Activate'
+      'Turn on': 'Power on', 'Turn off': 'Power off', 'Run': 'Activate',
+      'House average': 'Base average', 'Per room': 'Per chamber', 'All air conditioners': 'All ice machines', 'Info': 'F3 Debug', 'Search everything': 'Search all blocks', 'Heating': 'Furnaces', 'History': 'Logs', 'Device': 'Block', 'Set time': 'Clock', 'Next': 'Next tick', 'New timer': 'New redstone clock', 'Edit timer': 'Edit clock', 'Timers': 'Redstone clocks', 'Other automations': 'Other contraptions', 'Save': 'Craft', 'Delete': 'Break', 'Choose devices': 'Pick blocks', 'Home Assistant pages': 'Other worlds', 'Saved': 'Crafted!', 'Deleted': 'Broken', 'No timers yet. Tap + to make one.': 'No clocks yet. Tap + to build one.', 'Sunrise': 'Sunrise', 'Sunset': 'Sunset'
     }
   };
   const t = (s, vars) => { let r = (I18N[settings.lang] && I18N[settings.lang][s]) || s; if (vars) Object.keys(vars).forEach((k) => { r = r.split('{' + k + '}').join(vars[k]); }); return r; };
   const loc = () => (settings.lang === 'nl' ? 'nl-NL' : undefined);
+  const dayShort = (d) => (settings.lang === 'nl' ? t(d) : cap(d)).slice(0, 2);
 
   function loadAuth() { return store.get('ch.auth', null) || store.get('ch.auth', null, true); }
   function saveAuth(a) { store.del('ch.auth'); if (a) store.set('ch.auth', a, !a.remember); }
@@ -256,6 +260,7 @@
         .forEach((t) => c.subscribe(t, () => reloadRegistriesSoon()).catch(() => { /* non-admin users may not subscribe */ }));
       loadHistory(c);
       if (S.route.name === 'room') loadSpark(S.route.id);
+    if (S.route.name === 'info' && S.route.id) loadIHist(S.route.id);
       saveCacheSoon();
     } catch (e) {
       if (c !== C) return;
@@ -269,9 +274,9 @@
       c.send({ type: 'config/entity_registry/list' }), c.send({ type: 'config/floor_registry/list' })
     ]);
     S.areas = r[0].status === 'fulfilled' ? r[0].value : [];
-    S.devices = {}; if (r[1].status === 'fulfilled') r[1].value.forEach((d) => { S.devices[d.id] = { id: d.id, area_id: d.area_id, name: d.name_by_user || d.name, manufacturer: d.manufacturer, model: d.model }; });
+    S.devices = {}; if (r[1].status === 'fulfilled') r[1].value.forEach((d) => { S.devices[d.id] = { id: d.id, area_id: d.area_id, name: d.name_by_user || d.name, manufacturer: d.manufacturer, model: d.model, sw: d.sw_version, hw: d.hw_version }; });
     S.ents = {};
-    if (r[2].status === 'fulfilled') r[2].value.forEach((e) => { S.ents[e.entity_id] = { device_id: e.device_id, area_id: e.area_id, entity_category: e.entity_category, hidden: !!e.hidden_by, disabled: !!e.disabled_by }; });
+    if (r[2].status === 'fulfilled') r[2].value.forEach((e) => { S.ents[e.entity_id] = { device_id: e.device_id, area_id: e.area_id, entity_category: e.entity_category, hidden: !!e.hidden_by, disabled: !!e.disabled_by, platform: e.platform }; });
     else {
       try { // fallback for restricted users: compact display registry
         const d = await c.send({ type: 'config/entity_registry/list_for_display' });
@@ -301,6 +306,7 @@
     const r = model().roomById[roomId]; if (!r || !C || !C.authed) return;
     const eid = mainTemp(r); if (!eid || !eid.startsWith('sensor.')) return;
     const cached = S.spark[eid]; if (cached && Date.now() - cached.at < 5 * 60e3) return;
+    S.spark[eid] = Object.assign({ pts: [] }, cached, { at: Date.now() });
     try {
       const res = await C.send({ type: 'history/history_during_period', start_time: new Date(Date.now() - 24 * 3600e3).toISOString(), entity_ids: [eid], minimal_response: true, no_attributes: true }, 20000);
       const pts = ((res || {})[eid] || []).map((p) => ({ t: p.lu != null ? p.lu * 1000 : Date.parse(p.last_updated || p.last_changed), v: parseFloat(p.s != null ? p.s : p.state) })).filter((p) => isFinite(p.v) && isFinite(p.t));
@@ -320,6 +326,7 @@
     if (ns && S.hist[eid]) { const v = parseFloat(ns.state); if (isFinite(v)) { const h = S.hist[eid]; h.push({ t: Date.now(), v }); pruneHist(h); } }
     if (ns && eid.startsWith('climate.') && ns.state !== 'off' && settings.lastMode[eid] !== ns.state) { settings.lastMode[eid] = ns.state; saveSettings(); }
     changed.add(eid);
+    if (eid.startsWith('automation.') && S.route.name === 'timers' && (!ns || !S.autoCfg[String(ns.attributes.id)])) setTimeout(() => loadAutos(false), 300);
     if (modelDirty) schedule(true); else schedule(false);
     saveCacheSoon();
   }
@@ -422,12 +429,28 @@
   const roomNameOf = (eid) => { const a = model().areaOf[eid]; const r = a && model().roomById[a]; return r ? r.name : ''; };
   const roomOfEid = (eid) => { const a = model().areaOf[eid]; return (a && model().roomById[a]) || null; };
   const unit = () => (S.config && S.config.unit_system && S.config.unit_system.temperature) || '°C';
+  /* Which sensor tells the real room temperature: a separate room sensor (e.g. 19.78°) beats the air conditioner's own
+     sensor (whole degrees, 17 / 17.5 / 18). Outside sensors and boiler/water values are never a room temperature. */
+  const OUT_T = /outside|outdoor|buiten|exterior|exterieur/i;
+  const JUNK_T = /water|flow|boiler|dhw|setpoint|override|exhaust|exchanger|collector|storage|target|curve|pid|error|margin|delta|tset|cpu|battery|chip|processor/i;
+  const fname = (e) => e + ' ' + (((S.states[e] || {}).attributes || {}).friendly_name || '');
+  const isOutside = (e) => OUT_T.test(fname(e));
+  const isJunkT = (e) => JUNK_T.test(fname(e));
+  function climDevs() { const m = model(); if (!m._cd) { m._cd = new Set(); m.climates.forEach((e) => { const d = (S.ents[e] || {}).device_id; if (d) m._cd.add(d); }); } return m._cd; }
+  const isACsensor = (e) => climDevs().has((S.ents[e] || {}).device_id);
+  const fine = (e) => (/\.\d*[1-9]/.test((S.states[e] || {}).state || '') ? 1 : 0);
+  const isAC = (e) => (((S.states[e] || {}).attributes || {}).hvac_modes || []).some((x) => ['cool', 'dry', 'fan_only'].includes(x));
+  const acList = (m) => m.climates.filter(isAC);
+  const tColor = (v) => (v == null ? 'var(--muted)' : `hsl(${Math.round(clamp(v <= 20 ? 210 - (v - 16) * 10 : 170 - (v - 20) * 45, 8, 215))} 72% 48%)`);
+  const shortRoom = (n) => { const s = String(n || '').replace(/\bkamer\b/ig, '').replace(/\s+\d+$/, '').trim(); return cap(s || n); };
   function mainTemp(r) {
     const pick = settings.roomMain[r.id];
     if (pick && r.temps.includes(pick) && numOf(pick) != null) return pick;
-    for (const e of r.temps) if (numOf(e) != null) return e;
+    const c = r.temps.filter((e) => !isOutside(e) && !isJunkT(e)).filter((e) => { const v = numOf(e); return v != null && v > -20 && v < 40; });
+    c.sort((x, y) => (isACsensor(x) - isACsensor(y)) || (fine(y) - fine(x)));
+    if (c.length) return c[0];
     for (const e of r.devs) { const s = st(e); if (e.startsWith('climate.') && s && s.attributes.current_temperature != null) return e; }
-    return r.temps[0] || null;
+    return r.temps.find((e) => !isOutside(e) && !isJunkT(e)) || null;
   }
   function tempOf(eid) { if (!eid) return null; if (eid.startsWith('climate.')) { const s = st(eid); return s && avail(s) && s.attributes.current_temperature != null ? +s.attributes.current_temperature : null; } return numOf(eid); }
   function roomHum(r) {
@@ -445,9 +468,20 @@
   function houseTemp() {
     const m = model(); const src = settings.houseSource;
     if (src !== 'auto' && S.states[src]) { const v = tempOf(src); return { v, label: nameOf(src) }; }
-    const vals = m.rooms.map((r) => tempOf(mainTemp(r))).filter((v) => v != null);
+    const acRooms = [...new Set(acList(m).map((e) => roomOfEid(e)).filter(Boolean))];
+    const vals = (acRooms.length >= 2 ? acRooms : m.rooms).map((r) => tempOf(mainTemp(r))).filter((v) => v != null);
     if (!vals.length) return { v: null, label: m.temps.length ? 'Sensors unavailable' : 'No temperature sensors' };
     return { v: vals.reduce((a, b) => a + b, 0) / vals.length, label: vals.length === 1 ? t('Indoor') : t('Average of {n} rooms', { n: vals.length }) };
+  }
+  function outsideTemp() {
+    const m = model(); const pick = settings.outsideSrc;
+    if (pick && S.states[pick]) return { v: tempOf(pick), e: pick };
+    const outs = Object.keys(S.states).filter((e) => e.startsWith('sensor.') && isOutside(e) && (S.states[e].attributes.device_class === 'temperature' || /°/.test(S.states[e].attributes.unit_of_measurement || '')) && numOf(e) != null);
+    const rank = (e) => { const r = roomOfEid(e); const n = ((r && r.name) || '').toLowerCase(); return /woonkamer|living|lounge/.test(n) ? 0 : m.climates.length && r === roomOfEid(selectedClimate(m)) ? 1 : 2; };
+    outs.sort((x, y) => (rank(x) - rank(y)) || ((numOf(x) === 0) - (numOf(y) === 0)));
+    if (outs.length) return { v: numOf(outs[0]), e: outs[0] };
+    const w = m.weather && st(m.weather);
+    return { v: w && avail(w) && w.attributes.temperature != null ? +w.attributes.temperature : null, e: m.weather };
   }
   function isOn(eid, s) {
     s = s || st(eid); if (!avail(s)) return false;
@@ -554,6 +588,7 @@
     if (!mode) return toast('This climate device has no mode to turn on', 'bad');
     return command(eid, 'climate', 'set_hvac_mode', { hvac_mode: mode }, (ns) => ns.state !== 'off');
   }
+  function grpSet(acs, v) { S.grpV = Math.round(v * 2) / 2; S.grpAt = Date.now(); acs.forEach((e) => { if (avail(S.states[e])) setTarget(e, S.grpV); }); schedule(true); }
   function climStep(eid, which) { const a = S.states[eid].attributes; return +a.target_temp_step || (unit() === '°F' ? 1 : 0.5); }
   function setTarget(eid, v, which) {
     const s = S.states[eid]; if (!s || !avail(s)) return;
@@ -593,11 +628,13 @@
   if (mql && mql.addEventListener) mql.addEventListener('change', applyTheme);
 
   /* ---------------- router ---------------- */
-  const TABS = [['home', 'Home', 'home'], ['climate', 'Climate', 'climate'], ['rooms', 'Rooms', 'rooms'], ['devices', 'Devices', 'devices'], ['disco', 'Disco', 'auto'], ['settings', 'Settings', 'settings']];
+  const TABS = [['home', 'Home', 'home'], ['climate', 'Climate', 'climate'], ['devices', 'Devices', 'devices'], ['info', 'Info', 'info'], ['timers', 'Set time', 'clock'], ['disco', 'Disco', 'auto'], ['settings', 'Settings', 'settings']];
   const scrollPos = {};
   function parseRoute() {
     const h = decodeURIComponent(location.hash.replace(/^#\/?/, '')); const [name, id] = h.split('/');
     if (name === 'room' && id) return { name: 'room', id, key: 'room/' + id };
+    if ((name === 'climate' || name === 'info') && id) return { name, id, key: name + '/' + id };
+    if (name === 'rooms') return { name: 'rooms', key: 'rooms' };
     const n = TABS.some((t) => t[0] === name) ? name : 'home'; return { name: n, key: n };
   }
   function onRoute() {
@@ -627,11 +664,11 @@
     let html;
     try {
       const r = S.route.name;
-      html = r === 'disco' ? pDisco() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
+      html = r === 'info' ? (S.route.id ? pInfoEnt(S.route.id) : pInfo()) : r === 'timers' ? pTimers() : r === 'disco' ? pDisco() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
     } catch (e) { console.error(e); html = `<div class="page" data-k="err"><div class="msg bad">${ic('alert')}<div>Something went wrong showing this page. ${esc(e.message)}</div></div></div>`; }
     morphInto($('#view'), html);
     morphInto($('#nav'), navHTML());
-    morphInto($('#sheet'), S.sheet ? sheetHTML(S.sheet) : '');
+    morphInto($('#sheet'), S.sheet ? (S.sheet.startsWith('__') ? specialSheet(S.sheet) : sheetHTML(S.sheet)) : '');
   }
 
   /* tiny DOM morph: keeps elements alive so transitions play and scroll/focus survive live updates */
@@ -666,7 +703,7 @@
 
   /* ---------------- shared components ---------------- */
   function navHTML() {
-    const cur = S.route.name === 'room' ? 'rooms' : S.route.name;
+    const cur = S.route.name === 'room' || S.route.name === 'rooms' ? 'home' : S.route.name;
     return `<nav class="bn" aria-label="Main"><div class="in">${TABS.map(([id, label, icon]) => `<a href="#/${id}" class="${cur === id ? 'sel' : ''}" ${cur === id ? 'aria-current="page"' : ''} data-k="n-${id}"><span class="ic">${ic(icon)}</span>${t(label)}</a>`).join('')}</div></nav>`;
   }
   function pill() {
@@ -734,10 +771,10 @@ ${toggleHTML(eid, s)}</div>`;
     const time = now.toLocaleTimeString(loc(), { hour: '2-digit', minute: '2-digit' });
     const loading = (S.conn === 'connecting' || S.conn === 'reconnecting') && !Object.keys(S.states).length;
     let out = `<div class="page" data-k="p-home">`;
-    out += `<div class="hero" data-k="hero"><div class="hero-top"><div><h1 class="greet">${greeting(now.getHours())}</h1><div class="when num">${esc(date)} · ${esc(time)}</div></div>${pill()}</div>`;
+    out += `<div class="hero" data-k="hero"><div class="hero-top"><div><h1 class="greet">${greeting(now.getHours())}</h1><div class="when num">${esc(date)} · ${esc(time)}</div></div><div class="hero-r">${pill()}${EMBED || (loadAuth() || {}).url ? `<button class="habtn" data-act="ha-menu" aria-label="${t('Open Home Assistant')}">${ic('grid')}<span>HA</span></button>` : ''}</div></div>`;
     if (!configured()) { out += `<div class="hero-temp"><span class="bigt">—</span></div></div><div class="sec" data-k="w">${installHint()}${welcomeHTML()}</div></div>`; return out; }
     const ht = houseTemp();
-    const w = m.weather && st(m.weather); const wt = w && avail(w) && w.attributes.temperature != null ? +w.attributes.temperature : null;
+    const wt = outsideTemp().v;
     out += `<div class="hero-temp">${bigT(ht.v)}<div class="hero-meta"><b>${esc(ht.label)}</b>${wt != null ? `<span>${t('Outside {t}', { t: fmtT(wt) })}</span>` : ''}</div></div>`;
     const onNow = m.controls.filter((e) => isOn(e) && !['scene', 'script', 'lock'].includes(m.kind[e]));
     const unav = m.controls.concat(m.temps).filter((e) => !avail(st(e))).length;
@@ -750,6 +787,7 @@ ${toggleHTML(eid, s)}</div>`;
     if (unav) out += `<span class="stat bad">${ic('alert')}${t('{n} unavailable', { n: unav })}</span>`;
     out += `</div></div>`;
     out += `<div class="sec" data-k="bnr">${installHint()}${banner()}</div>`;
+    if (acList(m).length && !loading) out += `<div class="sec" data-k="s-clim"><div class="sec-h"><h2>${t('Climate')}</h2><a href="#/climate">${t('Controls')}</a></div>${climStrip(m)}</div>`;
 
     // rooms
     out += `<div class="sec" data-k="s-rooms"><div class="sec-h"><h2>${t('Rooms')}</h2><a href="#/rooms">${t('All rooms')}</a></div>`;
@@ -764,7 +802,7 @@ ${toggleHTML(eid, s)}</div>`;
     out += `<div class="sec" data-k="s-quick"><div class="sec-h"><h2>${t(favs.length ? 'Favorites' : 'Quick switches')}</h2><a href="#/devices">${t('All devices')}</a></div>`;
     if (loading) out += `<div class="tiles">${'<div class="skel" style="min-height:104px"></div>'.repeat(4)}</div>`;
     else if (!auto.length) out += emptyHTML('devices', 'No switchable devices found.');
-    else out += `<div class="tiles">${auto.map((e) => tileHTML(e)).join('')}</div>${favs.length ? '' : `<p class="hint">Tip: tap ${ic('star')} on the Devices page to pin your own favorites here.</p>`}`;
+    else out += `<div class="tiles">${auto.map((e) => tileHTML(e)).join('')}</div>`;
     out += `</div>`;
 
     // on now
@@ -773,8 +811,8 @@ ${toggleHTML(eid, s)}</div>`;
       out += onNow.length ? `<div class="chips">${onNow.map((e) => `<button class="chip${m.kind[e] === 'light' ? ' on-light' : ''}" data-k="c-${esc(e)}" data-act="sheet" data-eid="${esc(e)}">${ic(devIcon(e, st(e)))}${esc(nameOf(e))}</button>`).join('')}</div>` : emptyHTML('ok', t('Everything is off.'), 'e-on');
       out += `</div>`;
     }
-    // climate mini
-    if (m.climates.length) {
+    // climate mini (only when there are no air conditioners shown above)
+    if (m.climates.length && !acList(m).length) {
       const e = selectedClimate(m); const s = st(e); const a = (s && s.attributes) || {}; const on = isOn(e, s);
       out += `<div class="sec" data-k="s-clim"><div class="sec-h"><h2>${t('Climate')}</h2><a href="#/climate">${t('Controls')}</a></div>
 <a class="card climini${on ? ' on' : ''}" href="#/climate" style="text-decoration:none;color:inherit"><span class="dico">${ic('climate')}</span><div><div style="font-weight:650">${esc(nameOf(e))}</div><div style="font-size:12.5px;color:var(--muted);font-weight:500">${esc(stateText(e, s))}</div></div><span class="t num">${a.current_temperature != null && avail(s) ? smallT(+a.current_temperature) : '—'}</span></a></div>`;
@@ -783,7 +821,102 @@ ${toggleHTML(eid, s)}</div>`;
   }
 
   /* ---------------- CLIMATE ---------------- */
+  function climStrip(m) {
+    const acs = acList(m);
+    return `<a class="cstrip" href="#/climate" data-k="cstrip">${acs.map((e) => { const r = roomOfEid(e); const v = r ? tempOf(mainTemp(r)) : tempOf(e); const on = isOn(e, st(e));
+      return `<span class="csi${on ? ' on' : ''}" style="--tc:${tColor(v)}" data-k="csi-${esc(e)}"><b>${esc(shortRoom(r ? r.name : nameOf(e)))}</b><span class="num">${smallT(v)}</span>${on ? `<i>${ic(st(e).state === 'heat' ? 'flame' : st(e).state === 'cool' ? 'snow' : 'climate')}</i>` : ''}</span>`; }).join('')}</a>`;
+  }
+  function groupTarget(acs) {
+    if (S.grpV != null && Date.now() - S.grpAt < 8000) return S.grpV;
+    const ts = acs.map((e) => (S.draft[e] ? S.draft[e].v : +(st(e) || { attributes: {} }).attributes.temperature)).filter((v) => isFinite(v));
+    if (!ts.length) return null; const cnt = {}; ts.forEach((v) => { cnt[v] = (cnt[v] || 0) + 1; });
+    return +Object.keys(cnt).sort((x, y) => cnt[y] - cnt[x])[0];
+  }
+  function dialSVG(id, p, hot, hasTarget) {
+    const R = 100, CX = 120, CY = 120, L = 2 * Math.PI * R * 0.75, CIRC = 2 * Math.PI * R;
+    const ang = (135 + 270 * p) * Math.PI / 180; const kx = CX + R * Math.cos(ang), ky = CY + R * Math.sin(ang);
+    return `<svg viewBox="0 0 240 240" aria-hidden="true"><defs><linearGradient id="dg-${id}" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#7cc2f0"/><stop offset="1" stop-color="${hot ? '#ef8d4b' : '#2f86d6'}"/></linearGradient></defs>
+<circle class="trk" cx="120" cy="120" r="${R}" stroke-dasharray="${L.toFixed(1)} ${CIRC.toFixed(1)}" transform="rotate(135 120 120)"/>
+${hasTarget ? `<circle class="arc" style="stroke:url(#dg-${id})" cx="120" cy="120" r="${R}" stroke-dasharray="${(L * p).toFixed(1)} ${CIRC.toFixed(1)}" transform="rotate(135 120 120)"/><circle class="knob" cx="${kx.toFixed(1)}" cy="${ky.toFixed(1)}" r="11"/>` : ''}</svg>`;
+  }
   function pClimate() {
+    const m = model(); const id = S.route.id;
+    if (id === 'all') return pClimGroup(m);
+    if (id) return pClimOne(m, id);
+    let out = `<div class="page" data-k="p-climate"><div class="topbar"><h1>${t('Climate')}</h1>${pill()}</div>${banner()}`;
+    if (!configured()) return out + welcomeHTML() + '</div>';
+    const acs = acList(m);
+    if (acs.length) {
+      setTimeout(() => acs.forEach((e) => { const r = roomOfEid(e); if (r) loadSpark(r.id); }), 0);
+      const ht = houseTemp(); const out2 = outsideTemp().v; const on = acs.filter((e) => isOn(e, st(e))); const gt = groupTarget(acs);
+      out += `<a class="chome" href="#/climate/all" data-k="chome" style="--tc:${tColor(ht.v)}"><div class="ch-top"><span class="ch-l">${ic('home')}${t('House average')}</span><span class="ch-on">${on.length ? t('{n} on', { n: on.length }) : t('All off')}</span></div>
+<div class="ch-mid">${bigT(ht.v)}<div class="ch-meta">${out2 != null ? `<span>${ic('sun')}${t('Outside {t}', { t: fmtT(out2) })}</span>` : ''}${gt != null ? `<span>${ic('thermo')}${t('Target')} ${fmtT(gt)}</span>` : ''}</div></div>
+<div class="ch-rooms">${acs.map((e) => { const r = roomOfEid(e); const v = r ? tempOf(mainTemp(r)) : tempOf(e); return `<span class="chr${isOn(e, st(e)) ? ' on' : ''}" style="--tc:${tColor(v)}"><b>${esc(shortRoom(r ? r.name : nameOf(e)))}</b><span class="num">${smallT(v)}</span></span>`; }).join('')}</div>
+<div class="ch-foot"><span>${t('Tap to control all {n} air conditioners at once', { n: acs.length })}</span>${ic('chev')}</div></a>`;
+      out += `<div class="sec" data-k="cc-sec"><div class="sec-h"><h2>${t('Per room')}</h2></div><div class="ccards">${acs.map((e) => climCard(e)).join('')}</div></div>`;
+    }
+    const others = m.climates.filter((e) => !acs.includes(e));
+    if (others.length) out += `<div class="sec" data-k="heat-sec"><div class="sec-h"><h2>${t(acs.length ? 'Heating' : 'Climate')}</h2></div><div class="list">${others.map((e) => { const s = st(e); return `<div class="row${isOn(e, s) ? ' on' : ''}${avail(s) ? '' : ' na'}" data-k="hc-${esc(e)}"><span class="dico">${ic(s && s.state === 'heat' ? 'flame' : 'climate')}</span><button class="rb" data-act="go-clim" data-eid="${esc(e)}"><div class="rn">${esc(nameOf(e))}</div><div class="rs">${esc(stateText(e, s))}</div></button><span class="rvalue num">${s && s.attributes.current_temperature != null ? smallT(+s.attributes.current_temperature) : ''}</span><span class="chev" style="color:var(--muted)">${ic('chev')}</span></div>`; }).join('')}</div></div>`;
+    if (!m.climates.length) out += emptyHTML('climate', S.conn === 'connected' ? 'No climate devices found in Home Assistant.' : 'Climate devices appear once connected.');
+    return out + '</div>';
+  }
+  function climCard(e) {
+    const s = st(e); const r = roomOfEid(e); const te = r ? mainTemp(r) : e; const v = tempOf(te); const on = isOn(e, s); const a = (s && s.attributes) || {};
+    const sp = te && S.spark[te]; const ok = avail(s) && C && C.authed;
+    const sub = !avail(s) ? t('Unavailable') : on ? `${ACTION[a.hvac_action] && a.hvac_action !== 'idle' ? ACTION[a.hvac_action] : HVAC[s.state] || cap(s.state)}${a.temperature != null ? ' · ' + fmtT(+a.temperature) : ''}` : `${t('Off')}${a.temperature != null ? ' · ' + fmtT(+a.temperature) : ''}`;
+    return `<div class="ccard${on ? ' on m-' + esc(s.state) : ''}${avail(s) ? '' : ' na'}" data-k="cc-${esc(e)}" data-act="go-clim" data-eid="${esc(e)}" role="button" tabindex="0" style="--tc:${tColor(v)}">
+<div class="cc-h"><b>${esc(shortRoom(r ? r.name : nameOf(e)))}</b><button class="pwr sm${on ? ' on' : ''}${S.pending[e] ? ' pending' : ''}" data-act="clim-power" data-eid="${esc(e)}" aria-label="${esc(nameOf(e))} power" aria-pressed="${on}" ${ok ? '' : 'disabled'}>${ic('power')}</button></div>
+<div class="cc-t num">${smallT(v)}</div><div class="cc-s">${esc(sub)}</div>${sp && sp.pts.length > 2 ? miniSpark(sp.pts) : '<div class="mspark-e"></div>'}</div>`;
+  }
+  function miniSpark(pts) {
+    const W = 120, H = 34; const t0 = pts[0].t, t1 = Date.now(); let lo = Infinity, hi = -Infinity;
+    pts.forEach((p) => { lo = Math.min(lo, p.v); hi = Math.max(hi, p.v); }); if (hi - lo < 1) { const c = (hi + lo) / 2; lo = c - 0.5; hi = c + 0.5; }
+    const xy = pts.concat([{ t: t1, v: pts[pts.length - 1].v }]).map((p) => [((p.t - t0) / (t1 - t0 || 1)) * W, H - 3 - ((p.v - lo) / (hi - lo)) * (H - 6)]);
+    const d = xy.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('');
+    return `<svg class="mspark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="${d}L${W} ${H}L0 ${H}Z"/><path class="l" d="${d}" vector-effect="non-scaling-stroke"/></svg>`;
+  }
+  function pClimGroup(m) {
+    const acs = acList(m);
+    let out = `<div class="page sub" data-k="p-clim-all"><div class="topbar"><button class="iconbtn" data-act="back-to" data-h="#/climate" aria-label="Back">${ic('back')}</button><h1>${t('All air conditioners')}</h1>${pill()}</div>${banner()}`;
+    if (!acs.length) return out + emptyHTML('climate', 'No air conditioners found.') + '</div>';
+    const ok = C && C.authed && acs.some((e) => avail(st(e)));
+    const on = acs.filter((e) => isOn(e, st(e)));
+    const mins = acs.map((e) => +(st(e).attributes.min_temp != null ? st(e).attributes.min_temp : 16)); const maxs = acs.map((e) => +(st(e).attributes.max_temp != null ? st(e).attributes.max_temp : 30));
+    const min = Math.max.apply(null, mins), max = Math.min.apply(null, maxs);
+    const gt = groupTarget(acs); const p = gt != null ? clamp((gt - min) / (max - min || 1), 0, 1) : 0;
+    const pend = acs.some((e) => S.pending[e] || S.draft[e]);
+    const hot = on.length && on.every((e) => st(e).state === 'heat');
+    out += `<div class="card clim" data-k="grp"><div class="clim-head"><div><div class="cn">${t('All air conditioners')}</div><div class="cs">${on.length ? t('{n} on', { n: on.length }) : t('All off')} · ${acs.length}</div></div><button class="pwr${on.length ? ' on' : ''}" data-act="grp-power" aria-label="Power all" aria-pressed="${!!on.length}" ${ok ? '' : 'disabled'}>${ic('power')}</button></div>
+<div class="dial${on.length ? '' : ' off'}">${dialSVG('grp', p, hot, gt != null)}<div class="mid"><span class="lbl">${t('Target')}</span><span class="tt num">${gt != null ? smallT(gt) : '—'}</span><span class="ct">${ic('home')}${t('House {t}', { t: fmtT(houseTemp().v) })}</span><span class="sending">${pend ? t('Sending…') : ''}</span></div></div>
+<div class="steppers"><button class="step" data-act="grp-step" data-d="-1" aria-label="Lower all" ${ok && gt > min ? '' : 'disabled'}>${ic('minus')}</button><button class="step" data-act="grp-step" data-d="1" aria-label="Raise all" ${ok && gt < max ? '' : 'disabled'}>${ic('plus')}</button></div>
+<input class="range" type="range" min="${min}" max="${max}" step="0.5" value="${gt != null ? gt : min}" style="--p:${(p * 100).toFixed(1)}%" data-in="grp-range" aria-label="Target temperature for all" ${ok ? '' : 'disabled'}><div class="rlab num"><span>${fmtT(min)}</span><span>${fmtT(max)}</span></div>
+<div class="gmembers">${acs.map((e) => { const s = st(e); const r = roomOfEid(e); return `<button class="gm${isOn(e, s) ? ' on' : ''}" data-act="go-clim" data-eid="${esc(e)}" data-k="gm-${esc(e)}"><b>${esc(shortRoom(r ? r.name : nameOf(e)))}</b><span class="num">${S.draft[e] ? fmtT(S.draft[e].v) : s.attributes.temperature != null ? fmtT(+s.attributes.temperature) : '—'}</span><small>${esc(isOn(e, s) ? HVAC[s.state] || cap(s.state) : t('Off'))}</small></button>`; }).join('')}</div></div>`;
+    const inter = (k) => acs.map((e) => st(e).attributes[k] || []).reduce((x, y) => x.filter((v) => y.includes(v)));
+    const MI = { auto: 'auto', heat_cool: 'heatcool', cool: 'snow', heat: 'flame', dry: 'droplet', fan_only: 'fan' };
+    const order = ['auto', 'heat_cool', 'cool', 'heat', 'dry', 'fan_only'];
+    const modes = inter('hvac_modes').filter((x) => x !== 'off').sort((x, y) => (order.indexOf(x) + 1 || 99) - (order.indexOf(y) + 1 || 99));
+    const same = (k) => { const v = acs.filter((e) => isOn(e, st(e))).map((e) => (k === 'state' ? st(e).state : st(e).attributes[k])); return v.length && v.every((x) => x === v[0]) ? v[0] : null; };
+    if (modes.length) { const cur = same('state'); out += `<div class="sec card ctl-card" data-k="gmode"><h3>${ic('sunmoon')}${t('Mode')}</h3><div class="modes">${modes.map((md) => `<button class="mode m-${esc(md)}${cur === md ? ' sel' : ''}" data-act="grp-mode" data-v="${esc(md)}" ${ok ? '' : 'disabled'}>${ic(MI[md] || 'climate')}${esc(HVAC[md] || cap(md))}</button>`).join('')}</div></div>`; }
+    const fans = inter('fan_modes');
+    if (fans.length) { const cur = same('fan_mode'); out += `<div class="sec card ctl-card" data-k="gfan"><h3>${ic('fan')}${t('Fan speed')}</h3><div class="fan">${fans.map((v) => `<button class="${cur === v ? 'sel' : ''}" data-act="grp-fan" data-v="${esc(v)}" ${ok ? '' : 'disabled'}>${esc(prettyMode(v))}</button>`).join('')}</div></div>`; }
+    const sw = inter('swing_modes');
+    if (sw.length) { const cur = same('swing_mode'); out += `<div class="sec card ctl-card" data-k="gswing"><h3>${ic('wind')}${t('Air direction')}</h3><div class="fan">${sw.map((v) => `<button class="${cur === v ? 'sel' : ''}" data-act="grp-swing" data-v="${esc(v)}" ${ok ? '' : 'disabled'}>${esc(prettyMode(v))}</button>`).join('')}</div></div>`; }
+    return out + '</div>';
+  }
+  function pClimOne(m, eid) {
+    const s = st(eid); const r = roomOfEid(eid);
+    let out = `<div class="page sub" data-k="p-clim-${esc(eid)}"><div class="topbar"><button class="iconbtn" data-act="back-to" data-h="#/climate" aria-label="Back">${ic('back')}</button><h1>${esc(r ? shortRoom(r.name) : s ? nameOf(eid) : t('Climate'))}</h1>${pill()}</div>${banner()}`;
+    if (!s) return out + emptyHTML('alert', Object.keys(S.states).length ? 'This climate device no longer exists.' : 'Loading…') + '</div>';
+    const te = r ? mainTemp(r) : null;
+    if (te && te !== eid) {
+      setTimeout(() => loadSpark(r.id), 0);
+      const v = tempOf(te); const sp = S.spark[te]; const h = roomHum(r);
+      out += `<div class="rtemp" data-k="rtemp" style="--tc:${tColor(v)}"><div><span class="lbl">${t('Room temperature')}</span><span class="v num">${smallT(v)}</span><span class="src">${esc(nameOf(te))}${h != null ? ' · ' + pct(h) : ''}</span></div>${sp && sp.pts.length > 2 ? miniSpark(sp.pts) : ''}</div>`;
+    }
+    out += `<div class="cslide" data-k="sl-${esc(eid)}" data-eid="${esc(eid)}">${climateHTML(eid, eid === selectedClimate(m))}</div>`;
+    return out + '</div>';
+  }
+  function pClimateOld() {
     const m = model();
     let out = `<div class="page" data-k="p-climate"><div class="topbar"><h1>${t('Climate')}</h1>${pill()}</div>${banner()}`;
     if (!configured()) return out + welcomeHTML() + '</div>';
@@ -917,16 +1050,110 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     out += `<div class="chips" style="margin-top:10px">${[{ id: 'all', label: 'All', icon: 'grid', n: all.length }].concat(favs.length ? [{ id: 'fav', label: 'Favorites', icon: 'star', n: favs.length }] : [], cats.map((c) => Object.assign({ n: counts[c.id] }, c)))
       .map((c) => `<button class="chip${S.cat === c.id ? ' sel' : ''}" data-k="cat-${c.id}" data-act="cat" data-v="${c.id}" aria-pressed="${S.cat === c.id}">${ic(c.icon)}${t(c.label)}<span class="cnt">${c.n}</span></button>`).join('')}</div>`;
     out += `<div class="seg" style="margin-top:6px" role="group" aria-label="Group by"><button class="${settings.devGroup === 'type' ? 'sel' : ''}" data-act="group" data-v="type">${ic('list')}${t('By type')}</button><button class="${settings.devGroup === 'room' ? 'sel' : ''}" data-act="group" data-v="room">${ic('rooms')}${t('By room')}</button></div>`;
+    if (!q) { const tr = m.rooms.filter((r) => tempOf(mainTemp(r)) != null); if (tr.length) out += `<div class="tstrip" data-k="tstrip">${tr.map((r) => { const v = tempOf(mainTemp(r)); const h = roomHum(r); return `<button class="tsi" data-act="room" data-id="${esc(r.id)}" style="--tc:${tColor(v)}" data-k="tsi-${esc(r.id)}"><span class="tsn">${esc(shortRoom(r.name))}</span><span class="tsv num">${smallT(v)}</span>${h != null ? `<span class="tsh">${ic('drop')}${pct(h)}</span>` : ''}</button>`; }).join('')}</div>`; }
     let list = S.cat === 'all' ? all : S.cat === 'fav' ? favs : all.filter((e) => catOf(m.kind[e]) === S.cat);
     if (!m.controls.length) return out + `<div class="sec">${emptyHTML('devices', S.conn === 'connected' ? 'No devices found in Home Assistant.' : 'Devices appear once connected.')}</div></div>`;
     if (!list.length) return out + `<div class="sec">${emptyHTML('search', `No devices match “${esc(S.q)}”.`)}</div></div>`;
     const groups = [];
     if (settings.devGroup === 'room') {
-      m.rooms.concat(m.unassigned ? [m.unassigned] : []).forEach((r) => { const g = list.filter((e) => (m.areaOf[e] || '_none') === r.id); if (g.length) groups.push([r.id, r.name, g]); });
+      m.rooms.concat(m.unassigned ? [m.unassigned] : []).forEach((r) => { const g = list.filter((e) => (m.areaOf[e] || '_none') === r.id); if (g.length) groups.push([r.id, r.name, g, r.id !== '_none' ? tempOf(mainTemp(r)) : null]); });
     } else {
       CATS.forEach((c) => { const g = list.filter((e) => catOf(m.kind[e]) === c.id); if (g.length) groups.push([c.id, c.label, g]); });
     }
-    out += groups.map(([id, label, g]) => `<div data-k="g-${esc(id)}"><div class="grp-h">${esc(t(label))} · ${g.length}</div><div class="list">${g.map((e) => rowHTML(e, { room: settings.devGroup !== 'room' })).join('')}</div></div>`).join('');
+    out += groups.map(([id, label, g, tv]) => `<div data-k="g-${esc(id)}"><div class="grp-h"><span>${esc(t(label))} · ${g.length}</span>${tv != null ? `<span class="grp-t num" style="color:${tColor(tv)}">${ic('thermo')}${fmtT(tv)}</span>` : ''}</div><div class="list">${g.map((e) => rowHTML(e, { room: settings.devGroup !== 'room' })).join('')}</div></div>`).join('');
+    return out + '</div>';
+  }
+
+  /* ---------------- INFO ---------------- */
+  const DOMAIN_LBL = { sensor: 'Sensors', binary_sensor: 'Status sensors', light: 'Lights', switch: 'Switches', climate: 'Climate', media_player: 'Media', automation: 'Automations', person: 'People', device_tracker: 'Trackers', weather: 'Weather', sun: 'Sun', update: 'Updates', button: 'Buttons', number: 'Numbers', select: 'Selects', fan: 'Fans', cover: 'Blinds', lock: 'Locks', scene: 'Scenes', script: 'Scripts', zone: 'Zones', input_boolean: 'Helpers', camera: 'Cameras', water_heater: 'Water heater' };
+  const domOf = (e) => e.slice(0, e.indexOf('.'));
+  function infoIcon(e) { const s = S.states[e]; const d = domOf(e); const dc = s && s.attributes.device_class;
+    if (model().kind[e]) return devIcon(e, s);
+    return d === 'sensor' ? (dc === 'temperature' ? 'thermo' : dc === 'humidity' ? 'drop' : dc === 'power' || dc === 'energy' ? 'bolt' : dc === 'battery' ? 'battery' : 'info') : d === 'binary_sensor' ? (dc === 'motion' || dc === 'occupancy' ? 'motion' : dc === 'door' || dc === 'window' ? 'window' : 'shield') : d === 'automation' ? 'auto' : d === 'person' || d === 'device_tracker' ? 'smartphone' : d === 'sun' ? 'sun' : d === 'weather' ? 'sunmoon' : d === 'update' ? 'refresh' : 'info'; }
+  function valText(e) { const s = S.states[e]; if (!s) return ''; const u = s.attributes.unit_of_measurement; if (model().kind[e] || domOf(e) === 'binary_sensor') return stateText(e, s); if (!avail(s)) return t(s.state === 'unknown' ? 'Unknown' : 'Unavailable'); const n = parseFloat(s.state); if (isFinite(n) && /^-?[\d.]+$/.test(s.state)) return (Math.round(n * 100) / 100) + (u ? ' ' + u : ''); if (/^\d{4}-\d\d-\d\dT/.test(s.state)) return new Date(s.state).toLocaleString(loc()); return cap(String(s.state).replace(/_/g, ' ')) + (u ? ' ' + u : ''); }
+  function pInfo() {
+    let out = `<div class="page" data-k="p-info"><div class="sticky"><div class="topbar"><h1>${t('Info')}</h1>${pill()}</div>`;
+    if (!configured()) return out + `</div>${welcomeHTML()}</div>`;
+    out += `<label class="search" data-static>${ic('search')}<input type="search" placeholder="${t('Search everything')}" value="${esc(S.iq || '')}" data-in="isearch" aria-label="Search" autocomplete="off"></label></div>${banner()}`;
+    const q = (S.iq || '').trim().toLowerCase();
+    const ids = Object.keys(S.states).filter((e) => { const r = S.ents[e] || {}; return !r.disabled && !['zone', 'tts', 'stt', 'conversation', 'event', 'todo', 'wake_word', 'assist_satellite', 'image', 'tag'].includes(domOf(e)); });
+    const counts = {}; ids.forEach((e) => { const d = domOf(e); counts[d] = (counts[d] || 0) + 1; });
+    const doms = Object.keys(counts).sort((x, y) => counts[y] - counts[x]);
+    const unav = ids.filter((e) => !avail(S.states[e])).length;
+    if (S.idom && S.idom !== 'unav' && !counts[S.idom]) S.idom = null;
+    out += `<div class="chips" style="margin-top:10px">${[['', 'All', ids.length]].concat(doms.map((d) => [d, DOMAIN_LBL[d] || cap(d.replace(/_/g, ' ')), counts[d]]), unav ? [['unav', 'Unavailable', unav]] : []).map(([d, l, n]) => `<button class="chip${(S.idom || '') === d ? ' sel' : ''}" data-act="idom" data-v="${d}" data-k="id-${d || 'all'}">${t(l)}<span class="cnt">${n}</span></button>`).join('')}</div>`;
+    let list = ids.filter((e) => (!S.idom ? true : S.idom === 'unav' ? !avail(S.states[e]) : domOf(e) === S.idom));
+    if (q) list = list.filter((e) => fname(e).toLowerCase().includes(q) || roomNameOf(e).toLowerCase().includes(q));
+    list.sort((x, y) => (avail(S.states[y]) - avail(S.states[x])) || nameOf(x).localeCompare(nameOf(y)));
+    const total = list.length; list = list.slice(0, S.ishow || 150);
+    if (!total) return out + `<div class="sec">${emptyHTML('search', t('Nothing found.'))}</div></div>`;
+    out += `<div class="list ilist">${list.map((e) => { const s = S.states[e]; const rn = roomNameOf(e); return `<a class="row irow${avail(s) ? '' : ' na'}" href="#/info/${encodeURIComponent(e)}" data-k="ir-${esc(e)}"><span class="dico">${ic(infoIcon(e))}</span><span class="rb"><span class="rn">${esc(nameOf(e))}</span><span class="rs">${esc([rn, e].filter(Boolean).join(' · '))}</span></span><span class="rvalue num">${esc(valText(e))}</span></a>`; }).join('')}</div>`;
+    if (total > list.length) out += `<button class="btn" style="width:100%;margin-top:12px" data-act="imore">${t('Show more')} (${total - list.length})</button>`;
+    return out + '</div>';
+  }
+  S.ihist = {}; S.irange = 24;
+  async function loadIHist(eid, force) {
+    const key = eid + '|' + S.irange; const c = S.ihist[key];
+    if (!C || !C.authed || (!force && c && Date.now() - c.at < 120e3)) return;
+    S.ihist[key] = Object.assign({ pts: null }, c, { at: Date.now(), loading: true }); schedule(true);
+    const withAttr = ['climate', 'water_heater', 'weather'].includes(domOf(eid));
+    try {
+      const res = await C.send({ type: 'history/history_during_period', start_time: new Date(Date.now() - S.irange * 3600e3).toISOString(), entity_ids: [eid], minimal_response: !withAttr, no_attributes: !withAttr, significant_changes_only: false }, 30000);
+      const raw = (res || {})[eid] || [];
+      let pts = []; let lastA = {};
+      raw.forEach((p) => { const tt = p.lu != null ? p.lu * 1000 : Date.parse(p.last_updated || p.last_changed); if (p.a) lastA = p.a; const a = p.a || p.attributes || lastA; const sv = p.s != null ? p.s : p.state; pts.push({ t: tt, s: sv, v: withAttr ? parseFloat(a.current_temperature != null ? a.current_temperature : a.temperature) : parseFloat(sv) }); });
+      pts = pts.filter((p) => isFinite(p.t));
+      S.ihist[key] = { at: Date.now(), pts };
+    } catch (e) { S.ihist[key] = { at: Date.now(), pts: [], err: e.message || 'History unavailable' }; }
+    schedule(true);
+  }
+  function lineChart(pts, u) {
+    const W = 320, H = 150, P = 6; const now = Date.now(); const t0 = now - S.irange * 3600e3;
+    const ps = pts.filter((p) => isFinite(p.v)); if (ps.length < 2) return '';
+    const all = ps.concat([{ t: now, v: ps[ps.length - 1].v }]);
+    let lo = Infinity, hi = -Infinity; all.forEach((p) => { lo = Math.min(lo, p.v); hi = Math.max(hi, p.v); }); if (hi - lo < 1e-9) { lo -= 1; hi += 1; } const pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
+    const X = (tt) => (clamp((tt - t0) / (now - t0), 0, 1)) * W; const Y = (v) => P + (1 - (v - lo) / (hi - lo)) * (H - 2 * P);
+    let d = ''; all.forEach((p, i) => { const x = X(p.t).toFixed(1), y = Y(p.v).toFixed(1); d += i ? `H${x}V${y}` : `M${x} ${y}`; });
+    const mn = Math.min.apply(null, ps.map((p) => p.v)), mx = Math.max.apply(null, ps.map((p) => p.v)); const avg = ps.reduce((s2, p) => s2 + p.v, 0) / ps.length;
+    const f = (v) => (Math.round(v * 10) / 10) + (u ? ' ' + u : '');
+    const ticks = [0, 0.25, 0.5, 0.75, 1].map((k) => { const tt = new Date(t0 + k * (now - t0)); return `<span>${k === 1 ? t('Now') : S.irange > 48 ? tt.toLocaleDateString(loc(), { weekday: 'short' }) : tt.toLocaleTimeString(loc(), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}</span>`; }).join('');
+    return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Graph"><g class="grid">${[0.25, 0.5, 0.75].map((k) => `<line x1="0" x2="${W}" y1="${(H * k).toFixed(0)}" y2="${(H * k).toFixed(0)}"/>`).join('')}</g><path class="a" d="${d}V${H}H0Z"/><path class="l" d="${d}" vector-effect="non-scaling-stroke"/></svg><div class="ylab num"><span>${f(hi - pad)}</span><span>${f(lo + pad)}</span></div></div><div class="xlab">${ticks}</div>
+<div class="cstats num"><span><small>${t('Min')}</small>${f(mn)}</span><span><small>${t('Average')}</small>${f(avg)}</span><span><small>${t('Max')}</small>${f(mx)}</span></div>`;
+  }
+  function stateChart(pts, eid) {
+    const now = Date.now(); const t0 = now - S.irange * 3600e3; if (!pts.length) return '';
+    const segs = pts.map((p, i) => ({ s: p.s, a: Math.max(p.t, t0), b: i + 1 < pts.length ? pts[i + 1].t : now })).filter((x) => x.b > x.a);
+    const vals = [...new Set(segs.map((x) => x.s))]; const pal = ['var(--accent)', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4', '#64748b'];
+    const col = (s2) => (['off', 'unavailable', 'unknown', 'closed', 'idle', 'not_home', 'below_horizon'].includes(s2) ? 'var(--bg2)' : pal[vals.indexOf(s2) % pal.length]);
+    const dur = {}; segs.forEach((x) => { dur[x.s] = (dur[x.s] || 0) + (x.b - x.a); }); const tot = now - t0;
+    const nm = (s2) => valText(eid) && s2 === S.states[eid].state ? valText(eid) : t(cap(String(s2).replace(/_/g, ' ')));
+    return `<div class="tline">${segs.map((x) => `<i style="left:${((x.a - t0) / tot * 100).toFixed(2)}%;width:${Math.max(0.3, (x.b - x.a) / tot * 100).toFixed(2)}%;background:${col(x.s)}" title="${esc(x.s)}"></i>`).join('')}</div>
+<div class="xlab"><span>${S.irange} h</span><span>${t('Now')}</span></div><div class="tleg">${vals.sort((x, y) => dur[y] - dur[x]).map((v) => { const ms = dur[v]; const h = Math.floor(ms / 3600e3), mi = Math.round((ms % 3600e3) / 60e3); return `<span><i style="background:${col(v)}"></i>${esc(nm(v))} <b>${h ? h + ' h ' : ''}${mi} min</b></span>`; }).join('')}</div>`;
+  }
+  function attrVal(v) { if (v == null) return '—'; if (Array.isArray(v)) return v.map((x) => (typeof x === 'object' ? JSON.stringify(x) : String(x))).join(', '); if (typeof v === 'object') return JSON.stringify(v); if (typeof v === 'boolean') return t(v ? 'Yes' : 'No'); return String(v); }
+  function pInfoEnt(eid) {
+    const s = st(eid);
+    let out = `<div class="page sub" data-k="p-info-${esc(eid)}"><div class="topbar"><button class="iconbtn" data-act="back-to" data-h="#/info" aria-label="Back">${ic('back')}</button><h1>${esc(s ? nameOf(eid) : eid)}</h1>${pill()}</div>${banner()}`;
+    if (!s) return out + emptyHTML('alert', Object.keys(S.states).length ? t('This entity does not exist (anymore).') : 'Loading…') + '</div>';
+    const reg = S.ents[eid] || {}; const dev = reg.device_id && S.devices[reg.device_id]; const rn = roomNameOf(eid); const a = s.attributes;
+    const num = isFinite(parseFloat(s.state)) && /^-?[\d.]+$/.test(s.state);
+    out += `<div class="ihero${avail(s) ? '' : ' na'}" data-k="ihero"><span class="dico">${ic(infoIcon(eid))}</span><div class="ih-b"><div class="ih-v num">${esc(valText(eid))}</div><div class="ih-s">${esc([rn, ago(s)].filter(Boolean).join(' · '))}</div></div>${model().kind[eid] && model().kind[eid] !== 'temp' && model().kind[eid] !== 'hum' ? `<button class="btn" data-act="sheet" data-eid="${esc(eid)}">${ic('settings')}${t('Controls')}</button>` : ''}</div>`;
+    const h = S.ihist[eid + '|' + S.irange];
+    if (!h && C && C.authed) setTimeout(() => loadIHist(eid), 0);
+    const numeric = ['climate', 'water_heater', 'weather'].includes(domOf(eid)) || num;
+    out += `<div class="card icard" data-k="igraph"><div class="ic-h"><h3>${ic('list')}${t('History')}</h3><div class="seg sm">${[[6, '6 h'], [24, '24 h'], [168, '7 d']].map(([v, l]) => `<button class="${S.irange === v ? 'sel' : ''}" data-act="irange" data-v="${v}">${l}</button>`).join('')}</div></div>
+${!h || (h.loading && !h.pts) ? '<div class="skel" style="min-height:150px"></div>' : h.err ? `<p class="hint">${esc(h.err)}</p>` : !h.pts.length ? `<p class="hint">${t('No history in this period.')}</p>` : numeric ? lineChart(h.pts, ['climate', 'water_heater'].includes(domOf(eid)) ? '°' : a.unit_of_measurement) || stateChart(h.pts, eid) : stateChart(h.pts, eid)}</div>`;
+    const rows = [['Entity ID', eid], ['State', s.state + (a.unit_of_measurement ? ' ' + a.unit_of_measurement : '')], ['Room', rn || '—'], ['Last changed', new Date(s.last_changed).toLocaleString(loc())], ['Last updated', new Date(s.last_updated).toLocaleString(loc())]];
+    if (reg.platform) rows.push(['Integration', reg.platform]);
+    out += `<div class="card icard" data-k="igen"><h3>${ic('info')}${t('General')}</h3><dl class="kv">${rows.map(([k, v]) => `<dt>${t(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>`;
+    const ak = Object.keys(a).filter((k) => !['friendly_name', 'icon', 'entity_picture', 'supported_features'].includes(k));
+    if (ak.length) out += `<div class="card icard" data-k="iattr"><h3>${ic('list')}${t('All information')} <span class="aux">${ak.length}</span></h3><dl class="kv">${ak.map((k) => `<dt>${esc(cap(k.replace(/_/g, ' ')))}</dt><dd>${esc(attrVal(a[k]))}</dd>`).join('')}</dl></div>`;
+    if (dev) {
+      const sibs = Object.keys(S.ents).filter((e) => e !== eid && S.ents[e].device_id === reg.device_id && S.states[e]).sort((x, y) => nameOf(x).localeCompare(nameOf(y)));
+      out += `<div class="card icard" data-k="idev"><h3>${ic('devices')}${t('Device')}</h3><dl class="kv">${[['Name', dev.name], ['Manufacturer', dev.manufacturer], ['Model', dev.model], ['Firmware', dev.sw], ['Hardware', dev.hw]].filter((x) => x[1]).map(([k, v]) => `<dt>${t(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+${sibs.length ? `<div class="ic-sub">${t('Also on this device')} · ${sibs.length}</div><div class="list">${sibs.map((e) => `<a class="row irow${avail(S.states[e]) ? '' : ' na'}" href="#/info/${encodeURIComponent(e)}" data-k="is-${esc(e)}"><span class="dico">${ic(infoIcon(e))}</span><span class="rb"><span class="rn">${esc(nameOf(e))}</span><span class="rs">${esc(e)}</span></span><span class="rvalue num">${esc(valText(e))}</span></a>`).join('')}</div>` : ''}
+${EMBED ? `<button class="btn" style="width:100%;margin-top:12px" data-act="go-panel" data-p="config/devices/device/${esc(reg.device_id)}">${ic('grid')}${t('Open in Home Assistant')}</button>` : ''}</div>`;
+    }
     return out + '</div>';
   }
 
@@ -999,6 +1226,164 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     return out + '</div>';
   }
 
+  /* ---------------- SET TIME (automations) ---------------- */
+  const MARK = 'Made with Comfort Home';
+  const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+  async function api(method, path, body) {
+    try {
+      if (EMBED) return await EMBED.getHass().callApi(method, path, body);
+      if (S.demo && window.__demoHA) { const r = window.__demoHA.api(method, path, body); if (r.status >= 400) throw Object.assign(new Error(r.body.message || 'Error'), { status: r.status }); return r.body; }
+      const au = loadAuth(); const tok = await getToken(au);
+      const r = await fetch(au.url + '/api/' + path, { method, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+      const j = await r.json().catch(() => ({})); if (!r.ok) throw Object.assign(new Error(j.message || 'HTTP ' + r.status), { status: r.status }); return j;
+    } catch (e) { const st = e.status || e.status_code; const err = new Error(st === 401 || st === 403 ? t('Only administrators can change timers.') : (e.message || (e.body && e.body.message) || 'Request failed')); err.status = st; throw err; }
+  }
+  S.autoCfg = {};
+  const autoEnts = () => Object.keys(S.states).filter((e) => e.startsWith('automation.') && S.states[e].attributes.id != null);
+  let autoBusy = false;
+  async function loadAutos(force) {
+    if (autoBusy || !C || !C.authed) return; autoBusy = true;
+    const ids = autoEnts().map((e) => String(S.states[e].attributes.id)).filter((id) => force || !S.autoCfg[id]);
+    await Promise.all(ids.map((id) => api('GET', 'config/automation/config/' + id).then((c) => { S.autoCfg[id] = c; }).catch((e) => { S.autoCfg[id] = { __err: e.message }; })));
+    autoBusy = false; schedule(true);
+  }
+  function autoInfo(cfg) {
+    const out = { times: [], days: DAYS.slice(), verb: null, ents: [], simple: true };
+    if (!cfg || cfg.__err) return out;
+    [].concat(cfg.triggers || cfg.trigger || []).forEach((tr) => {
+      const pf = tr.trigger || tr.platform;
+      if (pf === 'time') [].concat(tr.at || []).forEach((at) => { if (typeof at !== 'string') return; const m = /(\d{1,2}):(\d{2})/.exec(/^\d/.test(at) ? at : (S.states[at] || {}).state || ''); if (m) out.times.push(m[1].padStart(2, '0') + ':' + m[2]); });
+      else if (pf === 'sun') out.times.push(tr.event === 'sunset' ? 'sunset' : 'sunrise');
+      if (tr.weekday) out.days = [].concat(tr.weekday);
+    });
+    [].concat(cfg.conditions || cfg.condition || []).forEach((c) => { if (c && c.condition === 'time' && c.weekday) out.days = [].concat(c.weekday); });
+    const acts = [].concat(cfg.actions || cfg.action || []);
+    acts.forEach((ac) => {
+      const sv = ac.action || ac.service; if (!sv) { out.simple = false; return; }
+      const verb = /turn_on|open|media_play$/.test(sv) ? 'on' : /turn_off|close/.test(sv) ? 'off' : /toggle/.test(sv) ? 'toggle' : 'run';
+      out.verb = out.verb && out.verb !== verb ? 'mixed' : verb;
+      const ids = (ac.target && ac.target.entity_id) || ac.entity_id || (ac.data && ac.data.entity_id) || [];
+      out.ents = out.ents.concat([].concat(ids));
+    });
+    out.simple = out.simple && acts.length === 1 && out.times.length === 1 && /^\d/.test(out.times[0] || '');
+    return out;
+  }
+  function nextRun(info) {
+    const now = new Date(); let best = null;
+    info.times.filter((x) => /^\d/.test(x)).forEach((tm) => {
+      const [h, mi] = tm.split(':').map(Number);
+      for (let k = 0; k < 8; k++) { const d = new Date(now); d.setDate(now.getDate() + k); d.setHours(h, mi, 0, 0); if (d <= now) continue; const dn = DAYS[(d.getDay() + 6) % 7]; if (info.days.includes(dn)) { if (!best || d < best) best = d; break; } }
+    });
+    return best;
+  }
+  function inText(d) { const m = Math.round((d - Date.now()) / 60000); const h = Math.floor(m / 60); return t('in {x}', { x: h ? `${h} h ${m % 60} min` : `${m} min` }); }
+  function entsLabel(ids) { if (ids.includes('all')) return t('All'); const names = ids.map((e) => (S.states[e] ? nameOf(e) : e.split('.')[1])); return names.length > 3 ? names.slice(0, 3).join(', ') + ' +' + (names.length - 3) : names.join(', '); }
+  function pTimers() {
+    let out = `<div class="page tpage" data-k="p-timers"><div class="topbar"><h1>${t('Set time')}</h1>${pill()}</div>${banner()}`;
+    if (!configured()) return out + welcomeHTML() + '</div>';
+    const ents = autoEnts(); ents.forEach((e) => used.add(e));
+    if (ents.some((e) => !S.autoCfg[String(S.states[e].attributes.id)])) setTimeout(() => loadAutos(false), 0);
+    const rows = ents.map((e) => { const s = S.states[e]; const id = String(s.attributes.id); const cfg = S.autoCfg[id]; return { e, s, id, cfg, info: autoInfo(cfg) }; });
+    const timed = rows.filter((r) => r.info.times.length).sort((x, y) => (x.info.times[0] || '').localeCompare(y.info.times[0] || ''));
+    const other = rows.filter((r) => r.cfg && !r.info.times.length);
+    const err = rows.map((r) => r.cfg && r.cfg.__err).find(Boolean);
+    if (err) out += `<div class="msg warn" data-k="terr">${ic('alert')}<div>${esc(err)}</div></div>`;
+    let nxt = null; timed.forEach((r) => { if (r.s.state !== 'on') return; const d = nextRun(r.info); if (d && (!nxt || d < nxt.d)) nxt = { d, r }; });
+    if (nxt) out += `<div class="tnext" data-k="tnext"><span class="tl">${t('Next')}</span><span class="tt num">${nxt.d.toLocaleTimeString(loc(), { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })}</span><span class="tn">${esc(nxt.r.s.attributes.friendly_name || '')}</span><span class="ti">${inText(nxt.d)}</span></div>`;
+    const loading = !rows.length ? false : rows.every((r) => !r.cfg);
+    out += `<div class="sec" data-k="tlist"><div class="sec-h"><h2>${t('Timers')}</h2></div>`;
+    if (loading) out += '<div class="skel" style="min-height:90px"></div>';
+    else if (!timed.length) out += emptyHTML('clock', t('No timers yet. Tap + to make one.'), 'tempty');
+    else out += `<div class="list">${timed.map(timerRow).join('')}</div>`;
+    out += `</div>`;
+    if (other.length) out += `<div class="sec" data-k="tother"><div class="sec-h"><h2>${t('Other automations')}</h2></div><div class="list">${other.map((r) => `<div class="row${r.s.state === 'on' ? '' : ' na'}" data-k="ao-${esc(r.id)}"><span class="dico">${ic('auto')}</span><button class="rb" data-act="timer-open" data-eid="${esc(r.e)}"><div class="rn">${esc(r.s.attributes.friendly_name || r.e)}</div><div class="rs">${esc(entsLabel(r.info.ents) || ago(r.s))}</div></button>${autoToggle(r.e, r.s)}</div>`).join('')}</div></div>`;
+    out += `<button class="fab" data-act="timer-new" aria-label="${t('New timer')}" ${C && C.authed ? '' : 'disabled'}>${ic('plus')}</button>`;
+    return out + '</div>';
+  }
+  function autoToggle(e, s) { return `<button class="tg${S.pending[e] ? ' pending' : ''}" role="switch" aria-checked="${s.state === 'on'}" aria-label="${esc(s.attributes.friendly_name || e)}" data-act="auto-toggle" data-eid="${esc(e)}" ${C && C.authed ? '' : 'disabled'}><span class="kn"></span></button>`; }
+  function timerRow(r) {
+    const i = r.info; const time = i.times[0]; const tl = /^\d/.test(time) ? time : t(time === 'sunset' ? 'Sunset' : 'Sunrise');
+    return `<div class="trow${r.s.state === 'on' ? '' : ' off'}" data-k="au-${esc(r.id)}"><button class="tmainb" data-act="timer-open" data-eid="${esc(r.e)}"><span class="ttime num">${esc(tl)}${i.times.length > 1 ? `<small>+${i.times.length - 1}</small>` : ''}</span>
+<span class="tmain"><span class="tname">${esc(r.s.attributes.friendly_name || r.e)}</span><span class="tdays">${DAYS.map((d) => `<i class="${i.days.includes(d) ? 'on' : ''}">${dayShort(d)}</i>`).join('')}</span>
+<span class="tact">${i.verb ? `<span class="apill ${i.verb}">${t(i.verb === 'on' ? 'On' : i.verb === 'off' ? 'Off' : i.verb === 'toggle' ? 'Switch' : 'Run')}</span>` : ''}<span class="tents">${esc(entsLabel(i.ents))}</span></span></span></button>${autoToggle(r.e, r.s)}</div>`;
+  }
+  function openTimerEditor(e) {
+    if (!e) { S.form = { id: null, alias: '', time: '07:00', verb: 'on', days: DAYS.slice(), ents: [], q: '' }; return openSheet('__timer'); }
+    const s = S.states[e]; const id = String(s.attributes.id); const cfg = S.autoCfg[id]; const i = autoInfo(cfg);
+    if (cfg && !cfg.__err && cfg.description === MARK && i.simple && ['on', 'off'].includes(i.verb)) { S.form = { id, alias: cfg.alias || '', time: i.times[0], verb: i.verb, days: i.days.slice(), ents: i.ents.slice(), q: '' }; return openSheet('__timer'); }
+    openSheet('__auto:' + e);
+  }
+  function verNum(v) { const m = /^(\d+)\.(\d+)/.exec(v || ''); return m ? +m[1] * 100 + +m[2] : 9999; }
+  async function saveTimer() {
+    const f = S.form; f.alias = ($('#tf-name') || {}).value || f.alias; f.time = ($('#tf-time') || {}).value || f.time;
+    if (!f.ents.length) return toast(t('Choose devices'), 'bad');
+    if (!/^\d{2}:\d{2}$/.test(f.time)) return toast(t('Time'), 'bad');
+    if (!f.days.length) return toast(t('Days'), 'bad');
+    const alias = f.alias.trim() || `${f.time} · ${t(f.verb === 'on' ? 'On' : 'Off')} · ${entsLabel(f.ents)}`;
+    const newKeys = verNum(S.haVersion) >= 202410;
+    const days = DAYS.filter((d) => f.days.includes(d));
+    const cfg = { alias, description: MARK, mode: 'single' };
+    cfg[newKeys ? 'triggers' : 'trigger'] = [Object.assign(newKeys ? { trigger: 'time' } : { platform: 'time' }, { at: f.time + ':00' })];
+    cfg[newKeys ? 'conditions' : 'condition'] = days.length === 7 ? [] : [{ condition: 'time', weekday: days }];
+    cfg[newKeys ? 'actions' : 'action'] = [Object.assign(newKeys ? { action: 'homeassistant.turn_' + f.verb } : { service: 'homeassistant.turn_' + f.verb }, { target: { entity_id: f.ents.slice() } })];
+    const id = f.id || String(Date.now());
+    S.saving = true; schedule(true);
+    try { await api('POST', 'config/automation/config/' + id, cfg); S.autoCfg[id] = Object.assign({ id }, cfg); toast(t('Saved'), 'ok'); closeSheet(); setTimeout(() => loadAutos(true), 1500); }
+    catch (e) { toast(e.message, 'bad', 6000); }
+    S.saving = false; schedule(true);
+  }
+  async function deleteTimer() {
+    const f = S.form; if (!f || !f.id || !confirm(t('Delete') + '?')) return;
+    try { await api('DELETE', 'config/automation/config/' + f.id); delete S.autoCfg[f.id]; toast(t('Deleted'), 'ok'); closeSheet(); }
+    catch (e) { toast(e.message, 'bad', 6000); }
+  }
+  function specialSheet(name) {
+    const head = (icon, title, sub) => `<div class="scrim" data-act="close-sheet" data-k="scrim"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}" data-k="sheet-${esc(name)}"><div class="grab"></div><div class="sh"><span class="dico" style="background:var(--accent-soft);color:var(--accent)">${ic(icon)}</span><div class="t"><b>${esc(title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div><button class="star" data-act="close-sheet" aria-label="Close">${ic('x')}</button></div>`;
+    if (name === '__ha') {
+      const panels = EMBED ? Object.values((EMBED.getHass() || {}).panels || {}) : [];
+      const NAMES = { lovelace: 'Overview', energy: 'Energy', map: 'Map', logbook: 'Logbook', history: 'History', config: 'Settings', profile: 'Profile', 'media-browser': 'Media', todo: 'To-do lists', calendar: 'Calendar' };
+      const list = panels.filter((x) => x.url_path && x.url_path !== 'comfort-home' && !['profile', 'notfound', 'developer-tools', 'hassio', 'my', 'app'].includes(x.url_path))
+        .map((x) => ({ p: x.url_path, n: x.component_name === 'lovelace' && x.title ? x.title : t(NAMES[x.url_path] || cap(x.title || x.url_path)) }));
+      let b = head('grid', t('Home Assistant pages'), t('Back to the normal Home Assistant screens'));
+      const PI = (x) => { const s2 = (x.p + ' ' + ((panels.find((y) => y.url_path === x.p) || {}).icon || '')).toLowerCase(); return /config|cog/.test(s2) ? 'settings' : /energy|lightning|flash/.test(s2) ? 'bolt' : /map/.test(s2) ? 'motion' : /logbook|format-list/.test(s2) ? 'list' : /history|chart/.test(s2) ? 'clock' : /flower|tree|garden|tuin/.test(s2) ? 'garden' : /calendar/.test(s2) ? 'clock' : /media|music|play/.test(s2) ? 'play' : /camera|cctv/.test(s2) ? 'eye' : /todo|check|clipboard/.test(s2) ? 'ok' : 'home'; };
+      const dash = list.filter((x) => (panels.find((y) => y.url_path === x.p) || {}).component_name === 'lovelace');
+      const tools = list.filter((x) => !dash.includes(x));
+      if (EMBED) {
+        b += `<div class="hagrid">${dash.map((x, i) => `<button class="hat c${i % 5}" data-act="go-panel" data-p="${esc(x.p)}" data-k="gp-${esc(x.p)}"><span class="hi">${ic(PI(x))}</span><b>${esc(x.n)}</b><small>${t('Dashboard')}</small></button>`).join('')}</div>`;
+        b += `<div class="card set">${tools.map((x) => `<button class="it" data-act="go-panel" data-p="${esc(x.p)}" data-k="gp-${esc(x.p)}"><span class="ic">${ic(PI(x))}</span><span class="lb"><b>${esc(x.n)}</b></span><span class="chev" style="color:var(--muted)">${ic('chev')}</span></button>`).join('')}
+<button class="it" data-act="go-panel" data-p="profile/general"><span class="ic">${ic('smartphone')}</span><span class="lb"><b>${t('Profile')}</b><span>${t('Choose another default dashboard here')}</span></span><span class="chev" style="color:var(--muted)">${ic('chev')}</span></button></div>
+<p class="meta-sm" style="margin-top:10px">${t('Comfort stays your start screen. Come back any time via the Comfort item in the Home Assistant menu.')}</p>`;
+      }
+      else b += `<button class="btn pri" style="width:100%" data-act="open-ha">${ic('home')}${t('Open Home Assistant')}</button>`;
+      return b + '</div>';
+    }
+    if (name.startsWith('__auto:')) {
+      const e = name.slice(7); const s = st(e); if (!s) return '';
+      const id = String(s.attributes.id); const i = autoInfo(S.autoCfg[id]);
+      let b = head('auto', s.attributes.friendly_name || e, i.times.length ? i.times.join(', ') : ago(s));
+      b += `<div class="bigtg"><b>${t(s.state === 'on' ? 'On' : 'Off')}</b>${autoToggle(e, s)}</div>`;
+      if (i.ents.length) b += `<div class="ctl"><div class="hd"><span>${t('Devices')}</span></div><div style="margin-top:4px;font-weight:600">${esc(entsLabel(i.ents))}</div></div>`;
+      b += `<p class="meta-sm" style="margin-bottom:12px">${t('Made in Home Assistant: you can switch it on or off here.')}</p><div class="btnrow"><button class="btn" data-act="auto-run" data-eid="${esc(e)}">${ic('play')}${t('Run now')}</button>${EMBED ? `<button class="btn" data-act="go-panel" data-p="config/automation/edit/${esc(id)}">${ic('settings')}${t('Edit in Home Assistant')}</button>` : ''}</div>`;
+      return b + '</div>';
+    }
+    if (name === '__timer') {
+      const f = S.form || {}; const m = model();
+      const cands = m.controls.filter((e) => ['light', 'plug', 'switch', 'fan', 'cover', 'media', 'climate'].includes(m.kind[e]));
+      const q = (f.q || '').toLowerCase(); const shown = cands.filter((e) => !q || nameOf(e).toLowerCase().includes(q) || roomNameOf(e).toLowerCase().includes(q));
+      let b = head('clock', t(f.id ? 'Edit timer' : 'New timer'));
+      b += `<div class="tform"><input id="tf-time" class="tbig num" type="time" value="${esc(f.time)}" aria-label="${t('Time')}" data-in="tf-time">
+<div class="seg" role="group" style="margin:12px 0"><button class="${f.verb === 'on' ? 'sel' : ''}" data-act="tf-verb" data-v="on">${ic('power')}${t('Turn on')}</button><button class="${f.verb === 'off' ? 'sel' : ''}" data-act="tf-verb" data-v="off">${ic('moon')}${t('Turn off')}</button></div>
+<div class="ctl"><div class="hd"><span>${t('Days')}</span></div><div class="dsel">${DAYS.map((d) => `<button class="${f.days.includes(d) ? 'on' : ''}" data-act="tf-day" data-v="${d}" aria-pressed="${f.days.includes(d)}">${dayShort(d)}</button>`).join('')}</div>
+<div class="dpre"><button data-act="tf-days" data-v="all">${t('Every day')}</button><button data-act="tf-days" data-v="week">${t('Weekdays')}</button><button data-act="tf-days" data-v="weekend">${t('Weekend')}</button></div></div>
+<div class="ctl"><div class="hd"><span>${t('Choose devices')}</span><b>${f.ents.length || ''}</b></div><label class="search" data-static style="margin-top:8px;box-shadow:none;background:var(--card)">${ic('search')}<input type="search" placeholder="${t('Search')}" data-in="tf-q" value="${esc(f.q || '')}"></label>
+<div class="tents-list">${shown.map((e) => { const on = f.ents.includes(e); return `<button class="it${on ? ' sel' : ''}" data-act="tf-ent" data-eid="${esc(e)}" data-k="te-${esc(e)}"><span class="ic">${ic(devIcon(e, st(e)))}</span><span class="lb"><b>${esc(nameOf(e))}</b><span>${esc(roomNameOf(e))}</span></span><span class="chk${on ? ' on' : ''}">${on ? ic('ok') : ''}</span></button>`; }).join('')}</div></div>
+<div class="field"><label for="tf-name">${t('Name')}</label><div class="inp"><input id="tf-name" type="text" value="${esc(f.alias || '')}" placeholder="${esc(f.time + ' · ' + t(f.verb === 'on' ? 'On' : 'Off'))}"></div></div>
+<div class="btns"><button class="btn pri" data-act="tf-save" ${S.saving ? 'disabled' : ''}>${S.saving ? ic('refresh', 'spin') : ic('ok')}${t('Save')}</button>${f.id ? `<button class="btn danger" data-act="tf-del">${ic('x')}${t('Delete')}</button>` : ''}</div></div>`;
+      return b + '</div>';
+    }
+    return '';
+  }
+
   /* ---------------- SETTINGS ---------------- */
   function pSettings() {
     const auth = loadAuth() || {}; const m = model();
@@ -1009,7 +1394,7 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     if (EMBED) {
       out += S.conn === 'connected' ? `<div class="msg ok">${ic('ok')}<div>Logged in to <b>${esc((S.config && S.config.location_name) || 'Home Assistant')}</b>${S.userName ? ' as ' + esc(S.userName) : ''}<br>${m.controls.length} devices · ${m.temps.length} temperature sensors · ${m.rooms.length} rooms</div></div>`
         : S.conn === 'error' ? `<div class="msg bad">${ic('alert')}<div>${esc(S.err)}</div></div>` : `<div class="msg warn">${ic('refresh', 'spin')}<div>Connecting…</div></div>`;
-      out += `<p style="font-size:13px;color:var(--muted);margin:0 2px 12px">Your login is handled by Home Assistant itself. The app stays logged in and reconnects automatically.</p><div class="btns" style="flex-direction:column"><button class="btn pri" data-act="open-ha">${ic('home')}${t('Open Home Assistant')}</button><button class="btn danger" data-act="embed-logout">${ic('logout')}${t('Log out')}</button></div><p style="font-size:12.5px;color:var(--muted);margin:10px 2px 0">${t('Back to the normal Home Assistant screens')}</p></div></div>`;
+      out += `<p style="font-size:13px;color:var(--muted);margin:0 2px 12px">Your login is handled by Home Assistant itself. The app stays logged in and reconnects automatically.</p><div class="btns" style="flex-direction:column"><button class="btn pri" data-act="ha-menu">${ic('home')}${t('Open Home Assistant')}</button><button class="btn danger" data-act="embed-logout">${ic('logout')}${t('Log out')}</button></div><p style="font-size:12.5px;color:var(--muted);margin:10px 2px 0">${t('Back to the normal Home Assistant screens')}</p></div></div>`;
     } else {
     if (S.demo) out += `<div class="msg info">${ic('eye')}<div>You're previewing with sample data. Enter your Home Assistant details below to use your real home.</div></div>`;
     else if (S.conn === 'connected') out += `<div class="msg ok">${ic('ok')}<div>Connected to <b>${esc((S.config && S.config.location_name) || 'Home Assistant')}</b>${S.userName ? ' as ' + esc(S.userName) : ''}${S.haVersion ? ' · Home Assistant ' + esc(S.haVersion) : ''}<br>${m.controls.length} devices · ${m.temps.length} temperature sensors · ${m.rooms.length} rooms</div></div>`;
@@ -1056,7 +1441,7 @@ ${S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-a
   }
 
   /* ---------------- device sheet ---------------- */
-  function openSheet(eid) { if (!S.states[eid]) return; S.sheet = eid; history.pushState({ sheet: 1 }, ''); schedule(true); }
+  function openSheet(eid) { if (!S.states[eid] && !String(eid).startsWith('__')) return; S.sheet = eid; history.pushState({ sheet: 1 }, ''); schedule(true); }
   function closeSheet(fromPop) { if (!S.sheet) return; S.sheet = null; schedule(true); if (!fromPop && history.state && history.state.sheet) history.back(); }
   window.addEventListener('popstate', () => { if (S.sheet) closeSheet(true); });
   function sheetHTML(eid) {
@@ -1165,6 +1550,27 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
       case 'exit-demo': { if (C) C.close(); C = null; S.demo = false; clearData(); const a = loadAuth(); if (a) { loadCache(); startConnection(a); } else setStatus('idle'); break; }
       case 'go-settings': location.hash = '#/settings'; break;
       case 'disco-start': startDisco(); break;
+      case 'ha-menu': openSheet('__ha'); break;
+      case 'go-clim': location.hash = '#/climate/' + encodeURIComponent(eid); break;
+      case 'back-to': if (window.__navCount > 0) history.back(); else location.hash = el.dataset.h; break;
+      case 'grp-step': { const acs = acList(model()); const g = groupTarget(acs); if (g == null) break; grpSet(acs, g + 0.5 * +el.dataset.d); break; }
+      case 'grp-power': { const acs = acList(model()); const on = acs.filter((x) => isOn(x, S.states[x])); (on.length ? on : acs.filter((x) => avail(S.states[x]))).forEach((x) => climatePower(x)); break; }
+      case 'grp-mode': { const v = el.dataset.v; acList(model()).forEach((x) => { const s = S.states[x]; if (avail(s) && s.state !== v && (s.attributes.hvac_modes || []).includes(v)) command(x, 'climate', 'set_hvac_mode', { hvac_mode: v }, (ns) => ns.state === v); }); break; }
+      case 'grp-fan': case 'grp-swing': { const attr = act.slice(4) + '_mode'; const v = el.dataset.v; acList(model()).forEach((x) => { const s = S.states[x]; if (avail(s) && s.attributes[attr] !== v && (s.attributes[attr + 's'] || []).includes(v)) command(x, 'climate', 'set_' + attr, { [attr]: v }, (ns) => ns.attributes[attr] === v); }); break; }
+      case 'idom': S.idom = el.dataset.v || null; S.ishow = 150; schedule(true); break;
+      case 'imore': S.ishow = (S.ishow || 150) + 300; schedule(true); break;
+      case 'irange': S.irange = +el.dataset.v; schedule(true); if (S.route.id) loadIHist(S.route.id); break;
+      case 'go-panel': try { sessionStorage.setItem('comfortLeave', '1'); } catch (x) { /* */ } location.href = '/' + el.dataset.p; break;
+      case 'timer-new': openTimerEditor(null); break;
+      case 'timer-open': openTimerEditor(eid); break;
+      case 'auto-toggle': { const s = S.states[eid]; if (!s) break; const was = s.state === 'on'; command(eid, 'automation', was ? 'turn_off' : 'turn_on', null, (ns) => (ns.state === 'on') !== was); break; }
+      case 'auto-run': command(eid, 'automation', 'trigger', null, null, { noState: true, okMsg: nameOf(eid) + ' ✓' }); break;
+      case 'tf-verb': S.form.verb = el.dataset.v; schedule(true); break;
+      case 'tf-day': { const d = el.dataset.v; const i = S.form.days.indexOf(d); if (i >= 0) S.form.days.splice(i, 1); else S.form.days.push(d); schedule(true); break; }
+      case 'tf-days': S.form.days = el.dataset.v === 'all' ? DAYS.slice() : el.dataset.v === 'week' ? DAYS.slice(0, 5) : DAYS.slice(5); schedule(true); break;
+      case 'tf-ent': { const i = S.form.ents.indexOf(eid); if (i >= 0) S.form.ents.splice(i, 1); else S.form.ents.push(eid); schedule(true); break; }
+      case 'tf-save': saveTimer(); break;
+      case 'tf-del': deleteTimer(); break;
       case 'open-ha': try { sessionStorage.setItem('comfortLeave', '1'); } catch (x) { /* */ } if (EMBED) location.href = '/'; else { const au = loadAuth(); if (au && au.url) window.open(au.url, '_blank'); } break;
       case 'all-lights-off': { const ids = model().controls.filter((x) => model().kind[x] === 'light' && isOn(x)); if (ids.length && canSend()) { svc('light', 'turn_off', { entity_id: ids }); toast(t('Lights off'), 'ok'); } break; }
       case 'room-lights': { const r = model().roomById[el.dataset.id]; if (!r || !canSend()) break; const ids = r.devs.filter((x) => model().kind[x] === 'light' && avail(S.states[x])); const anyOn = ids.some((x) => isOn(x)); if (ids.length) svc('light', anyOn ? 'turn_off' : 'turn_on', { entity_id: ids }); break; }
@@ -1202,11 +1608,15 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
   document.addEventListener('input', (e) => {
     const el = e.target; const k = el.dataset && el.dataset.in; if (!k) return;
     if (k === 'search') { S.q = el.value; schedule(true); return; }
+    if (k === 'tf-q') { S.form.q = el.value; schedule(true); return; }
+    if (k === 'isearch') { S.iq = el.value; S.ishow = 150; schedule(true); return; }
+    if (k === 'tf-time') { S.form.time = el.value; return; }
     if (el.type === 'range') {
       const p = ((el.value - el.min) / (el.max - el.min)) * 100; el.style.setProperty('--p', p.toFixed(1) + '%');
       const out = el.parentElement.querySelector(`[data-out="${k}"]`); const v = +el.value;
       if (out) out.textContent = k === 'ct' ? v + ' K' : k === 'pos' ? v + '% open' : v + '%';
       if (k === 'clim-range') setTarget(el.dataset.eid, v);
+      if (k === 'grp-range') grpSet(acList(model()), v);
     }
   });
   document.addEventListener('change', (e) => {

@@ -116,6 +116,11 @@
     d = dev('d_ac2', 'Bedroom AC', 'bedroom', 'Panasonic', 'CS-Z20');
     ent('climate.bedroom_ac', 'off', acAttrs('Bedroom AC', 19.3, 20, 'Low', 'Mid'), d);
     this.states['climate.bedroom_ac'].attributes.hvac_action = 'off';
+    ent('sensor.bedroom_ac_inside_temperature', 19, T('Bedroom AC Inside Temperature'), d);
+    ent('sensor.bedroom_ac_outside_temperature', 0, T('Bedroom AC Outside Temperature'), d);
+    d = 'd_ac1';
+    ent('sensor.living_room_ac_inside_temperature', 21, T('Living room AC Inside Temperature'), d);
+    ent('sensor.living_room_ac_outside_temperature', 7, T('Living room AC Outside Temperature'), d);
 
     // misc
     d = dev('d_lock', 'Front door lock', null, 'Nuki');
@@ -138,6 +143,12 @@
       this.ignoreServices.add('light.hallway');
     }
     this.lastMode = { 'climate.living_room_ac': 'cool', 'climate.bedroom_ac': 'heat' };
+    this.autos = {};
+    const auto = (id, alias, cfg, state) => { this.autos[id] = Object.assign({ id, alias, description: '', mode: 'single' }, cfg); ent('automation.' + alias.toLowerCase().replace(/[^a-z0-9]+/g, '_'), state || 'on', { id, friendly_name: alias, last_triggered: null, mode: 'single' }, null); };
+    auto('1700000001', 'Morning lights', { triggers: [{ trigger: 'time', at: '07:00:00' }], conditions: [{ condition: 'time', weekday: ['mon', 'tue', 'wed', 'thu', 'fri'] }], actions: [{ action: 'light.turn_on', target: { entity_id: ['light.living_room_ceiling', 'light.kitchen_spots'] } }] });
+    auto('1700000002', 'Lights out at night', { triggers: [{ platform: 'time', at: '23:30:00' }], action: [{ service: 'light.turn_off', target: { entity_id: 'all' } }] });
+    auto('1700000003', 'Coffee on weekend', { triggers: [{ trigger: 'time', at: '09:15:00' }], conditions: [{ condition: 'time', weekday: ['sat', 'sun'] }], actions: [{ action: 'switch.turn_on', target: { entity_id: 'switch.coffee_machine' } }] }, 'off');
+    auto('1700000004', 'Hall light on motion', { triggers: [{ trigger: 'state', entity_id: 'binary_sensor.kitchen_motion', to: 'on' }], actions: [{ action: 'light.turn_on', target: { entity_id: 'light.kitchen_spots' } }] });
   };
 
   DemoHA.prototype.setState = function (eid, state, attrPatch) {
@@ -252,6 +263,7 @@
         else if (service === 'volume_set') on(s.state, { volume_level: data.volume_level });
         break;
       case 'lock': on(service === 'lock' ? 'locked' : 'unlocked'); break;
+      case 'automation': on(service === 'turn_off' ? 'off' : 'on'); break;
       case 'scene': on(iso(Date.now())); break;
       case 'script': on('on'); setTimeout(() => on('off'), 1500); break;
       case 'climate': {
@@ -268,6 +280,23 @@
         on(mode, p);
         break; }
     }
+  };
+
+  /* REST config API for automations (what Home Assistant offers at /api/config/automation/config/<id>) */
+  DemoHA.prototype.api = function (method, path, body) {
+    const m = /^config\/automation\/config\/([^/]+)$/.exec(path);
+    if (!m) return { status: 404, body: { message: 'Not found' } };
+    const id = m[1]; const slug = (c) => 'automation.' + String(c.alias || id).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (method === 'GET') return this.autos[id] ? { status: 200, body: clone(this.autos[id]) } : { status: 404, body: { message: 'Resource not found' } };
+    if (method === 'POST') {
+      const old = this.autos[id]; const cfg = Object.assign({}, body, { id });
+      if (old && slug(old) !== slug(cfg)) this.setState(slug(old), null);
+      this.autos[id] = cfg;
+      this.setState(slug(cfg), old && this.states[slug(cfg)] ? this.states[slug(cfg)].state : 'on', { id, friendly_name: cfg.alias, mode: cfg.mode || 'single' });
+      return { status: 200, body: { result: 'ok' } };
+    }
+    if (method === 'DELETE') { const old = this.autos[id]; if (!old) return { status: 404, body: {} }; delete this.autos[id]; this.setState(slug(old), null); return { status: 200, body: { result: 'ok' } }; }
+    return { status: 405, body: {} };
   };
 
   /* A session = one WebSocket connection. send(text) delivers a message to the client. */
