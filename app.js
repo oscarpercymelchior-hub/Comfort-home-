@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.4.0';
+  const VERSION = '1.5.0';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -16,9 +16,49 @@
     del(k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) { /* ignore */ } }
   };
   const DEFAULTS = { theme: 'auto', autoSource: 'time', dayStart: '07:00', nightStart: '20:00', houseSource: 'auto', showHum: true,
-    favorites: [], roomMain: {}, devGroup: 'type', climate: null, lastMode: {}, discoSwitches: [] };
+    favorites: [], roomMain: {}, devGroup: 'type', climate: null, lastMode: {}, discoSwitches: [], lang: 'en' };
   const settings = Object.assign({}, DEFAULTS, store.get('ch.settings', {}));
   const saveSettings = () => store.set('ch.settings', settings);
+  /* ---------------- languages ---------------- */
+  const I18N = {
+    nl: {
+      'Home': 'Thuis', 'Climate': 'Klimaat', 'Rooms': 'Kamers', 'Devices': 'Apparaten', 'Disco': 'Disco', 'Settings': 'Instellingen',
+      'Good morning': 'Goedemorgen', 'Good afternoon': 'Goedemiddag', 'Good evening': 'Goedenavond', 'Good night': 'Goedenacht',
+      'Preview': 'Voorbeeld', 'Not set up': 'Niet ingesteld', 'Connecting': 'Verbinden', 'Reconnecting': 'Opnieuw verbinden', 'Connected': 'Verbonden', 'Disconnected': 'Verbroken', 'Error': 'Fout', 'Token rejected': 'Token geweigerd',
+      'All rooms': 'Alle kamers', 'Favorites': 'Favorieten', 'Quick switches': 'Snelle schakelaars', 'All devices': 'Alle apparaten', 'On now': 'Nu aan', 'Controls': 'Bediening', 'Everything is off.': 'Alles staat uit.',
+      'Status': 'Status', 'Sensors': 'Sensoren', 'Mode': 'Stand', 'Fan speed': 'Ventilator', 'Air direction': 'Luchtrichting', 'Preset': 'Voorinstelling', 'Target': 'Doel', 'Current': 'Nu', 'Sending…': 'Versturen…',
+      'Appearance': 'Weergave', 'Home screen': 'Startscherm', 'App': 'App', 'Language': 'Taal', 'Automatic': 'Automatisch', 'Day': 'Dag', 'Night': 'Nacht', 'Switch automatically by': 'Automatisch wisselen op', 'Time of day': 'Tijd van de dag', 'Phone setting': 'Telefoon', 'Day starts': 'Dag begint', 'Night starts': 'Nacht begint',
+      'House temperature': 'Huistemperatuur', 'Show humidity on room cards': 'Luchtvochtigheid op kamerkaarten', 'Reload from Home Assistant': 'Opnieuw laden uit Home Assistant', 'Refresh rooms and devices': 'Kamers en apparaten verversen', 'Privacy': 'Privacy', 'Log out': 'Uitloggen', 'Open Home Assistant': 'Home Assistant openen', 'Back to the normal Home Assistant screens': 'Terug naar de normale schermen van Home Assistant',
+      'Start disco': 'Start disco', 'Tap to stop': 'Tik om te stoppen', 'Restoring…': 'Terugzetten…', 'All on!': 'Alles aan!', 'Also switch these on and off': 'Deze ook aan en uit zetten',
+      'On': 'Aan', 'Off': 'Uit', 'Unavailable': 'Niet beschikbaar', 'Unknown': 'Onbekend', 'Open': 'Open', 'Closed': 'Dicht', 'Opening…': 'Gaat open…', 'Closing…': 'Gaat dicht…', 'Playing': 'Speelt', 'Paused': 'Gepauzeerd', 'Idle': 'Rust', 'Standby': 'Stand-by', 'Locked': 'Op slot', 'Unlocked': 'Van het slot', 'Clear': 'Vrij', 'Motion': 'Beweging', 'Occupied': 'Bezet', 'Away': 'Weg', 'Wet': 'Nat', 'Dry': 'Drogen', 'Scene': 'Scène', 'Running…': 'Bezig…', 'Low': 'Laag', 'Normal': 'Normaal',
+      'Auto': 'Auto', 'Heat/Cool': 'Warm/Koel', 'Cool': 'Koelen', 'Heat': 'Verwarmen', 'Fan': 'Ventilator', 'Cooling': 'Koelt', 'Heating': 'Verwarmt', 'Drying': 'Droogt', 'Fan running': 'Ventilator draait',
+      'Lights': 'Lampen', 'Plugs': 'Stekkers', 'Switches': 'Schakelaars', 'Media': 'Media', 'Fans': 'Ventilatoren', 'Blinds': 'Zonwering', 'Locks': 'Sloten', 'Scenes': 'Scènes', 'All': 'Alles', 'By type': 'Per soort', 'By room': 'Per kamer', 'Search devices': 'Apparaten zoeken',
+      'Brightness': 'Helderheid', 'Warmth': 'Warmte', 'Colour': 'Kleur', 'Moods': 'Sfeer', 'Relax': 'Ontspannen', 'Read': 'Lezen', 'Focus': 'Focus', 'Night light': 'Nachtlampje', 'Effects': 'Effecten', 'Speed': 'Snelheid', 'Position': 'Positie', 'Volume': 'Volume', 'Now playing': 'Nu speelt', 'Oscillate': 'Zwenken',
+      'All lights off': 'Alle lampen uit', 'Lights on': 'Lampen aan', 'Lights off': 'Lampen uit', 'Main': 'Hoofd', 'Set as main': 'Maak hoofd', 'Swipe for your other air conditioners': 'Veeg voor je andere airco’s',
+      '{n} on': '{n} aan', 'All off': 'Alles uit', '{n} open': '{n} open', '{n} unavailable': '{n} niet beschikbaar', 'Outside {t}': 'Buiten {t}', 'Average of {n} rooms': 'Gemiddelde van {n} kamers', '{n} devices': '{n} apparaten', '1 device': '1 apparaat', 'Room {t}': 'Kamer {t}', 'to {t}': 'naar {t}', 'Indoor': 'Binnen',
+      'Turn on': 'Aanzetten', 'Turn off': 'Uitzetten', 'Run': 'Start'
+    },
+    mc: {
+      'Home': 'Base', 'Climate': 'Biome', 'Rooms': 'Chunks', 'Devices': 'Redstone', 'Disco': 'Party', 'Settings': 'Crafting',
+      'Good morning': 'Rise and mine!', 'Good afternoon': 'Happy mining!', 'Good evening': 'Mind the creepers', 'Good night': 'Time to sleep in your bed',
+      'Preview': 'Practice world', 'Not set up': 'No world loaded', 'Connecting': 'Loading world', 'Reconnecting': 'Respawning', 'Connected': 'World loaded', 'Disconnected': 'Left the world', 'Error': 'Something exploded', 'Token rejected': 'Wrong key',
+      'All rooms': 'All chunks', 'Favorites': 'Favourite blocks', 'Quick switches': 'Quick levers', 'All devices': 'All redstone', 'On now': 'Powered now', 'Controls': 'Levers', 'Everything is off.': 'All redstone is quiet.',
+      'Status': 'Status', 'Sensors': 'Sensors', 'Mode': 'Biome mode', 'Fan speed': 'Wind power', 'Air direction': 'Wind direction', 'Preset': 'Preset', 'Target': 'Target', 'Current': 'Now', 'Sending…': 'Placing block…',
+      'Appearance': 'Texture pack', 'Home screen': 'Base screen', 'Language': 'Language', 'Automatic': 'Day cycle', 'Day': 'Day', 'Night': 'Night', 'Switch automatically by': 'Follow the', 'Time of day': 'Sun', 'Phone setting': 'Phone', 'Day starts': 'Sunrise', 'Night starts': 'Sunset',
+      'House temperature': 'Base temperature', 'Show humidity on room cards': 'Show water level on chunks', 'Reload from Home Assistant': 'Reload the world', 'Refresh rooms and devices': 'Refresh chunks and redstone', 'Log out': 'Leave world', 'Open Home Assistant': 'Open Home Assistant', 'Back to the normal Home Assistant screens': 'Back to the normal Home Assistant screens',
+      'Start disco': 'Start the party', 'Tap to stop': 'Tap to stop', 'Restoring…': 'Rebuilding…', 'All on!': 'All torches lit!', 'Also switch these on and off': 'Also flip these levers',
+      'On': 'Powered', 'Off': 'Unpowered', 'Unavailable': 'Missing block', 'Unknown': 'Mystery block', 'Closed': 'Shut', 'Playing': 'Jukebox playing', 'Idle': 'AFK', 'Standby': 'Sleeping', 'Locked': 'Iron door shut', 'Unlocked': 'Iron door open', 'Motion': 'Mob nearby', 'Clear': 'No mobs', 'Away': 'Exploring', 'Running…': 'Running…',
+      'Heat/Cool': 'Nether & snow', 'Cool': 'Snow biome', 'Heat': 'Nether', 'Dry': 'Desert', 'Fan': 'Wind', 'Cooling': 'Freezing', 'Heating': 'Smelting', 'Drying': 'Drying out', 'Fan running': 'Wind blowing',
+      'Lights': 'Torches', 'Plugs': 'Power blocks', 'Switches': 'Levers', 'Media': 'Jukebox', 'Fans': 'Wind blocks', 'Blinds': 'Trapdoors', 'Locks': 'Iron doors', 'Scenes': 'Scenes', 'By type': 'By block type', 'By room': 'By chunk', 'Search devices': 'Search redstone',
+      'Brightness': 'Light level', 'Warmth': 'Glow', 'Colour': 'Dye', 'Moods': 'Moods', 'Relax': 'Chill', 'Read': 'Read', 'Focus': 'Build mode', 'Night light': 'Night torch', 'Effects': 'Effects', 'Speed': 'Speed', 'Oscillate': 'Wobble',
+      'All lights off': 'All torches out', 'Lights on': 'Torches on', 'Lights off': 'Torches out', 'Main': 'Main', 'Set as main': 'Make main', 'Swipe for your other air conditioners': 'Swipe for your other weather machines',
+      '{n} on': '{n} powered', 'All off': 'All unpowered', '{n} unavailable': '{n} missing', 'Outside {t}': 'Overworld {t}', 'Average of {n} rooms': 'Average of {n} chunks', '{n} devices': '{n} redstone', '1 device': '1 redstone', 'Room {t}': 'Chunk {t}', 'to {t}': 'to {t}', 'Indoor': 'Inside the base',
+      'Turn on': 'Power on', 'Turn off': 'Power off', 'Run': 'Activate'
+    }
+  };
+  const t = (s, vars) => { let r = (I18N[settings.lang] && I18N[settings.lang][s]) || s; if (vars) Object.keys(vars).forEach((k) => { r = r.split('{' + k + '}').join(vars[k]); }); return r; };
+  const loc = () => (settings.lang === 'nl' ? 'nl-NL' : undefined);
+
   function loadAuth() { return store.get('ch.auth', null) || store.get('ch.auth', null, true); }
   function saveAuth(a) { store.del('ch.auth'); if (a) store.set('ch.auth', a, !a.remember); }
   /* ---- "Log in with Home Assistant" (OAuth2 authorization-code flow, the same one the official apps use) ---- */
@@ -407,7 +447,7 @@
     if (src !== 'auto' && S.states[src]) { const v = tempOf(src); return { v, label: nameOf(src) }; }
     const vals = m.rooms.map((r) => tempOf(mainTemp(r))).filter((v) => v != null);
     if (!vals.length) return { v: null, label: m.temps.length ? 'Sensors unavailable' : 'No temperature sensors' };
-    return { v: vals.reduce((a, b) => a + b, 0) / vals.length, label: vals.length === 1 ? 'Indoor' : `Average of ${vals.length} rooms` };
+    return { v: vals.reduce((a, b) => a + b, 0) / vals.length, label: vals.length === 1 ? t('Indoor') : t('Average of {n} rooms', { n: vals.length }) };
   }
   function isOn(eid, s) {
     s = s || st(eid); if (!avail(s)) return false;
@@ -442,9 +482,10 @@
   const fmtT = (v) => (v == null ? '—' : fmtNum(v, 1) + '°');
   function bigT(v, cls) { if (v == null) return `<span class="${cls || 'bigt'} num">—</span>`; const s = fmtNum(v, 1).split('.'); return `<span class="${cls || 'bigt'} num">${s[0]}<small>.${s[1]}°</small></span>`; }
   function smallT(v) { if (v == null) return '—'; const s = fmtNum(v, 1).split('.'); return `${s[0]}<small>.${s[1]}°</small>`; }
-  const HVAC = { off: 'Off', auto: 'Auto', heat_cool: 'Heat/Cool', cool: 'Cool', heat: 'Heat', dry: 'Dry', fan_only: 'Fan' };
-  const ACTION = { cooling: 'Cooling', heating: 'Heating', drying: 'Drying', idle: 'Idle', fan: 'Fan running', off: 'Off', preheating: 'Preheating', defrosting: 'Defrosting' };
-  function stateText(eid, s) {
+  const HVAC = new Proxy({ off: 'Off', auto: 'Auto', heat_cool: 'Heat/Cool', cool: 'Cool', heat: 'Heat', dry: 'Dry', fan_only: 'Fan' }, { get: (o, k) => (o[k] != null ? t(o[k]) : undefined) });
+  const ACTION = new Proxy({ cooling: 'Cooling', heating: 'Heating', drying: 'Drying', idle: 'Idle', fan: 'Fan running', off: 'Off', preheating: 'Preheating', defrosting: 'Defrosting' }, { get: (o, k) => (o[k] != null ? t(o[k]) : undefined) });
+  function stateText(eid, s) { return stateTextRaw(eid, s).split(' · ').map((x) => t(x)).join(' · '); }
+  function stateTextRaw(eid, s) {
     s = s || st(eid);
     if (!s || s.state === 'unavailable') return 'Unavailable';
     if (s.state === 'unknown') return 'Unknown';
@@ -626,23 +667,23 @@
   /* ---------------- shared components ---------------- */
   function navHTML() {
     const cur = S.route.name === 'room' ? 'rooms' : S.route.name;
-    return `<nav class="bn" aria-label="Main"><div class="in">${TABS.map(([id, label, icon]) => `<a href="#/${id}" class="${cur === id ? 'sel' : ''}" ${cur === id ? 'aria-current="page"' : ''} data-k="n-${id}"><span class="ic">${ic(icon)}</span>${label}</a>`).join('')}</div></nav>`;
+    return `<nav class="bn" aria-label="Main"><div class="in">${TABS.map(([id, label, icon]) => `<a href="#/${id}" class="${cur === id ? 'sel' : ''}" ${cur === id ? 'aria-current="page"' : ''} data-k="n-${id}"><span class="ic">${ic(icon)}</span>${t(label)}</a>`).join('')}</div></nav>`;
   }
   function pill() {
-    if (S.demo) return `<span class="pill demo"><span class="dot"></span>Preview</span>`;
-    const t = { idle: 'Not set up', connecting: 'Connecting', reconnecting: 'Reconnecting', connected: 'Connected', disconnected: 'Disconnected', error: 'Error', auth_invalid: 'Token rejected' }[S.conn];
-    return `<span class="pill ${S.conn}"><span class="dot"></span>${t}</span>`;
+    if (S.demo) return `<span class="pill demo"><span class="dot"></span>${t('Preview')}</span>`;
+    const lbl = { idle: 'Not set up', connecting: 'Connecting', reconnecting: 'Reconnecting', connected: 'Connected', disconnected: 'Disconnected', error: 'Error', auth_invalid: 'Token rejected' }[S.conn];
+    return `<span class="pill ${S.conn}"><span class="dot"></span>${t(lbl)}</span>`;
   }
   function banner() {
     if (S.demo) return `<div class="banner demo" data-k="bn-demo">${ic('eye')}<span class="grow">Preview with sample data — not your home</span><button data-act="exit-demo">Exit</button></div>`;
     if (S.conn === 'connected' || S.conn === 'idle') return '';
     if (S.conn === 'connecting' || S.conn === 'reconnecting') return `<div class="banner ${S.conn}" data-k="bn">${ic('refresh', 'spin')}<span class="grow">${S.conn === 'connecting' ? 'Connecting to Home Assistant…' : 'Connection lost. Reconnecting…'}${S.stale ? '<br><span style="font-weight:500">Showing last known values</span>' : ''}</span>${S.conn === 'reconnecting' ? '<button data-act="retry">Retry</button>' : ''}</div>`;
     const msg = S.conn === 'disconnected' ? 'Disconnected from Home Assistant' : S.err || 'Home Assistant is unavailable';
-    return `<div class="banner ${S.conn}" data-k="bn">${ic('wifioff')}<span class="grow">${esc(msg)}</span>${S.conn === 'auth_invalid' ? '<button data-act="go-settings">Settings</button>' : '<button data-act="retry">Retry</button>'}</div>`;
+    return `<div class="banner ${S.conn}" data-k="bn">${ic('wifioff')}<span class="grow">${esc(msg)}</span>${S.conn === 'auth_invalid' ? '<button data-act="go-settings">' + t('Settings') + '</button>' : '<button data-act="retry">Retry</button>'}</div>`;
   }
   function toggleHTML(eid, s, cls) {
     const k = model().kind[eid];
-    if (k === 'scene' || k === 'script') return `<button class="runbtn${S.pending[eid] ? ' pending' : ''}" data-act="run" data-eid="${esc(eid)}" ${avail(s) ? '' : 'disabled'} aria-label="Run ${esc(nameOf(eid))}">Run</button>`;
+    if (k === 'scene' || k === 'script') return `<button class="runbtn${S.pending[eid] ? ' pending' : ''}" data-act="run" data-eid="${esc(eid)}" ${avail(s) ? '' : 'disabled'} aria-label="Run ${esc(nameOf(eid))}">${t('Run')}</button>`;
     if (k === 'lock') return '';
     const on = isOn(eid, s); const dis = !canToggle(eid, s) || !C || !C.authed;
     return `<button class="tg${S.pending[eid] ? ' pending' : ''}${cls ? ' ' + cls : ''}" role="switch" aria-checked="${on}" aria-label="${esc(nameOf(eid))}" data-act="toggle" data-eid="${esc(eid)}"${dis ? ' disabled' : ''}><span class="kn"></span></button>`;
@@ -664,15 +705,15 @@
 ${toggleHTML(eid, s)}</div>`;
   }
   function roomCardHTML(r) {
-    const e = mainTemp(r); const t = tempOf(e); const h = settings.showHum ? roomHum(r) : null; const tr = e && trendOf(e);
+    const e = mainTemp(r); const tv = tempOf(e); const h = settings.showHum ? roomHum(r) : null; const tr = e && trendOf(e);
     const trI = tr ? `<span class="trend" title="${tr.d > 0 ? '+' : ''}${fmtNum(tr.d, 1)}° in the last hour">${ic(tr.dir === 'up' ? 'up' : tr.dir === 'down' ? 'down' : 'flat')}</span>` : '';
-    const body = r.temps.length || t != null ? `<span class="rt num">${smallT(t)}</span>` : `<span class="rt" style="font-size:15px;font-weight:600;margin-top:8px">${devCount(r)}</span>`;
-    return `<button class="room c-${r.color}${t == null && r.temps.length ? ' na' : ''}" data-k="r-${esc(r.id)}" data-act="room" data-id="${esc(r.id)}" aria-label="${esc(r.name)} ${t != null ? fmtT(t) : ''}">
-<span class="ri">${ic(r.icon)}</span>${trI}<span class="rn">${esc(r.name)}</span>${body}${h != null ? `<span class="rh">${ic('drop')}${pct(h)}</span>` : r.temps.length && t == null ? '<span class="rh">Unavailable</span>' : '<span class="rh">&nbsp;</span>'}</button>`;
+    const body = r.temps.length || tv != null ? `<span class="rt num">${smallT(tv)}</span>` : `<span class="rt" style="font-size:15px;font-weight:600;margin-top:8px">${devCount(r)}</span>`;
+    return `<button class="room c-${r.color}${tv == null && r.temps.length ? ' na' : ''}" data-k="r-${esc(r.id)}" data-act="room" data-id="${esc(r.id)}" aria-label="${esc(r.name)} ${tv != null ? fmtT(tv) : ''}">
+<span class="ri">${ic(r.icon)}</span>${trI}<span class="rn">${esc(r.name)}</span>${body}${h != null ? `<span class="rh">${ic('drop')}${pct(h)}</span>` : r.temps.length && tv == null ? '<span class="rh">Unavailable</span>' : '<span class="rh">&nbsp;</span>'}</button>`;
   }
-  function devCount(r) { const on = r.devs.filter((e) => isOn(e)).length; return `${r.devs.length} device${r.devs.length === 1 ? '' : 's'}${on ? ` · ${on} on` : ''}`; }
+  function devCount(r) { const on = r.devs.filter((e) => isOn(e)).length; return (r.devs.length === 1 ? t('1 device') : t('{n} devices', { n: r.devs.length })) + (on ? ' · ' + t('{n} on', { n: on }) : ''); }
   function emptyHTML(icon, text, k) { return `<div class="empty" data-k="${k || 'empty'}">${ic(icon)}<span>${text}</span></div>`; }
-  function greeting(h) { return h >= 5 && h < 12 ? 'Good morning' : h >= 12 && h < 18 ? 'Good afternoon' : h >= 18 && h < 23 ? 'Good evening' : 'Good night'; }
+  function greeting(h) { return t(h >= 5 && h < 12 ? 'Good morning' : h >= 12 && h < 18 ? 'Good afternoon' : h >= 18 && h < 23 ? 'Good evening' : 'Good night'); }
   function welcomeHTML() {
     return `<div class="card welcome" data-k="welcome"><div class="logo">${ic('home')}</div><h2>Welcome to Comfort Home</h2><p>Connect your Home Assistant to see your rooms, temperatures and devices.</p>
 <div class="btns" style="flex-direction:column"><a class="btn pri" href="#/settings" style="text-decoration:none">${ic('link')}Connect Home Assistant</a><button class="btn" data-act="demo">${ic('eye')}Preview with sample data</button></div></div>`;
@@ -689,29 +730,29 @@ ${toggleHTML(eid, s)}</div>`;
   /* ---------------- HOME ---------------- */
   function pHome() {
     const now = new Date(); const m = model();
-    const date = now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
-    const time = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    const date = now.toLocaleDateString(loc(), { weekday: 'long', day: 'numeric', month: 'long' });
+    const time = now.toLocaleTimeString(loc(), { hour: '2-digit', minute: '2-digit' });
     const loading = (S.conn === 'connecting' || S.conn === 'reconnecting') && !Object.keys(S.states).length;
     let out = `<div class="page" data-k="p-home">`;
     out += `<div class="hero" data-k="hero"><div class="hero-top"><div><h1 class="greet">${greeting(now.getHours())}</h1><div class="when num">${esc(date)} · ${esc(time)}</div></div>${pill()}</div>`;
     if (!configured()) { out += `<div class="hero-temp"><span class="bigt">—</span></div></div><div class="sec" data-k="w">${installHint()}${welcomeHTML()}</div></div>`; return out; }
     const ht = houseTemp();
     const w = m.weather && st(m.weather); const wt = w && avail(w) && w.attributes.temperature != null ? +w.attributes.temperature : null;
-    out += `<div class="hero-temp">${bigT(ht.v)}<div class="hero-meta"><b>${esc(ht.label)}</b>${wt != null ? `<span>Outside ${fmtT(wt)}</span>` : ''}</div></div>`;
+    out += `<div class="hero-temp">${bigT(ht.v)}<div class="hero-meta"><b>${esc(ht.label)}</b>${wt != null ? `<span>${t('Outside {t}', { t: fmtT(wt) })}</span>` : ''}</div></div>`;
     const onNow = m.controls.filter((e) => isOn(e) && !['scene', 'script', 'lock'].includes(m.kind[e]));
     const unav = m.controls.concat(m.temps).filter((e) => !avail(st(e))).length;
     const clim = m.climates.map((e) => st(e)).filter((s) => s && avail(s) && s.state !== 'off');
     out += `<div class="status-row">`;
-    out += `<span class="stat">${ic('power')}${onNow.length ? `${onNow.length} on` : 'All off'}</span>`;
-    if (clim.length) { const a = clim[0].attributes; const act = a.hvac_action; out += `<span class="stat">${ic(act === 'heating' || (!act && clim[0].state === 'heat') ? 'flame' : act === 'cooling' || (!act && clim[0].state === 'cool') ? 'snow' : act === 'drying' ? 'droplet' : 'climate')}${esc(ACTION[a.hvac_action] && a.hvac_action !== 'idle' ? ACTION[a.hvac_action] : HVAC[clim[0].state] || 'On')}${a.temperature != null ? ' to ' + fmtT(+a.temperature) : ''}</span>`; }
+    out += `<span class="stat">${ic('power')}${onNow.length ? t('{n} on', { n: onNow.length }) : t('All off')}</span>`;
+    if (clim.length) { const a = clim[0].attributes; const act = a.hvac_action; out += `<span class="stat">${ic(act === 'heating' || (!act && clim[0].state === 'heat') ? 'flame' : act === 'cooling' || (!act && clim[0].state === 'cool') ? 'snow' : act === 'drying' ? 'droplet' : 'climate')}${esc(ACTION[a.hvac_action] && a.hvac_action !== 'idle' ? ACTION[a.hvac_action] : HVAC[clim[0].state] || 'On')}${a.temperature != null ? ' ' + t('to {t}', { t: fmtT(+a.temperature) }) : ''}</span>`; }
     const open = m.rooms.reduce((n, r) => n + r.bins.filter((e) => { const s = st(e); return s && s.state === 'on' && ['door', 'window', 'garage_door', 'opening'].includes(s.attributes.device_class); }).length, 0);
-    if (open) out += `<span class="stat warn">${ic('window')}${open} open</span>`;
-    if (unav) out += `<span class="stat bad">${ic('alert')}${unav} unavailable</span>`;
+    if (open) out += `<span class="stat warn">${ic('window')}${t('{n} open', { n: open })}</span>`;
+    if (unav) out += `<span class="stat bad">${ic('alert')}${t('{n} unavailable', { n: unav })}</span>`;
     out += `</div></div>`;
     out += `<div class="sec" data-k="bnr">${installHint()}${banner()}</div>`;
 
     // rooms
-    out += `<div class="sec" data-k="s-rooms"><div class="sec-h"><h2>Rooms</h2><a href="#/rooms">All rooms</a></div>`;
+    out += `<div class="sec" data-k="s-rooms"><div class="sec-h"><h2>${t('Rooms')}</h2><a href="#/rooms">${t('All rooms')}</a></div>`;
     if (loading) out += `<div class="rooms-grid">${'<div class="skel"></div>'.repeat(4)}</div>`;
     else if (!m.rooms.length) out += emptyHTML('rooms', S.conn === 'connected' || S.stale ? 'No rooms yet. Assign devices to areas in Home Assistant to see them here.' : 'Rooms appear once connected.');
     else out += `<div class="rooms-grid">${m.rooms.map(roomCardHTML).join('')}</div>`;
@@ -720,7 +761,7 @@ ${toggleHTML(eid, s)}</div>`;
     // quick switches
     const favs = settings.favorites.filter((e) => S.states[e] && m.kind[e]);
     const auto = favs.length ? favs : m.controls.filter((e) => ['light', 'plug', 'switch', 'fan', 'cover', 'media'].includes(m.kind[e])).sort((a, b) => (isOn(b) - isOn(a)) || (avail(st(b)) - avail(st(a)))).slice(0, 8);
-    out += `<div class="sec" data-k="s-quick"><div class="sec-h"><h2>${favs.length ? 'Favorites' : 'Quick switches'}</h2><a href="#/devices">All devices</a></div>`;
+    out += `<div class="sec" data-k="s-quick"><div class="sec-h"><h2>${t(favs.length ? 'Favorites' : 'Quick switches')}</h2><a href="#/devices">${t('All devices')}</a></div>`;
     if (loading) out += `<div class="tiles">${'<div class="skel" style="min-height:104px"></div>'.repeat(4)}</div>`;
     else if (!auto.length) out += emptyHTML('devices', 'No switchable devices found.');
     else out += `<div class="tiles">${auto.map((e) => tileHTML(e)).join('')}</div>${favs.length ? '' : `<p class="hint">Tip: tap ${ic('star')} on the Devices page to pin your own favorites here.</p>`}`;
@@ -728,14 +769,14 @@ ${toggleHTML(eid, s)}</div>`;
 
     // on now
     if (!loading && m.controls.length) {
-      out += `<div class="sec" data-k="s-on"><div class="sec-h"><h2>On now</h2><span class="aux">${onNow.length}</span></div>`;
-      out += onNow.length ? `<div class="chips">${onNow.map((e) => `<button class="chip${m.kind[e] === 'light' ? ' on-light' : ''}" data-k="c-${esc(e)}" data-act="sheet" data-eid="${esc(e)}">${ic(devIcon(e, st(e)))}${esc(nameOf(e))}</button>`).join('')}</div>` : emptyHTML('ok', 'Everything is off.', 'e-on');
+      out += `<div class="sec" data-k="s-on"><div class="sec-h"><h2>${t('On now')} <span class="aux">${onNow.length}</span></h2>${onNow.some((x) => m.kind[x] === 'light') ? `<button class="link" data-act="all-lights-off">${t('All lights off')}</button>` : ''}</div>`;
+      out += onNow.length ? `<div class="chips">${onNow.map((e) => `<button class="chip${m.kind[e] === 'light' ? ' on-light' : ''}" data-k="c-${esc(e)}" data-act="sheet" data-eid="${esc(e)}">${ic(devIcon(e, st(e)))}${esc(nameOf(e))}</button>`).join('')}</div>` : emptyHTML('ok', t('Everything is off.'), 'e-on');
       out += `</div>`;
     }
     // climate mini
     if (m.climates.length) {
       const e = selectedClimate(m); const s = st(e); const a = (s && s.attributes) || {}; const on = isOn(e, s);
-      out += `<div class="sec" data-k="s-clim"><div class="sec-h"><h2>Climate</h2><a href="#/climate">Controls</a></div>
+      out += `<div class="sec" data-k="s-clim"><div class="sec-h"><h2>${t('Climate')}</h2><a href="#/climate">${t('Controls')}</a></div>
 <a class="card climini${on ? ' on' : ''}" href="#/climate" style="text-decoration:none;color:inherit"><span class="dico">${ic('climate')}</span><div><div style="font-weight:650">${esc(nameOf(e))}</div><div style="font-size:12.5px;color:var(--muted);font-weight:500">${esc(stateText(e, s))}</div></div><span class="t num">${a.current_temperature != null && avail(s) ? smallT(+a.current_temperature) : '—'}</span></a></div>`;
     }
     return out + `</div>`;
@@ -744,19 +785,23 @@ ${toggleHTML(eid, s)}</div>`;
   /* ---------------- CLIMATE ---------------- */
   function pClimate() {
     const m = model();
-    let out = `<div class="page" data-k="p-climate"><div class="topbar"><h1>Climate</h1>${pill()}</div>${banner()}`;
+    let out = `<div class="page" data-k="p-climate"><div class="topbar"><h1>${t('Climate')}</h1>${pill()}</div>${banner()}`;
     if (!configured()) return out + welcomeHTML() + '</div>';
     if (!m.climates.length) return out + emptyHTML('climate', S.conn === 'connected' ? 'No climate devices found in Home Assistant.' : 'Climate devices appear once connected.') + '</div>';
-    const eid = selectedClimate(m);
-    if (m.climates.length > 1) out += `<div class="chips" style="margin-bottom:12px">${m.climates.map((e) => `<button class="chip${e === eid ? ' sel' : ''}" data-k="cs-${esc(e)}" data-act="clim-sel" data-eid="${esc(e)}">${ic('climate')}${esc(nameOf(e))}</button>`).join('')}</div>`;
-    return out + climateHTML(eid) + '</div>';
+    const main = selectedClimate(m);
+    const list = [main].concat(m.climates.filter((e) => e !== main));
+    const cur = list.includes(S.climCur) ? S.climCur : main;
+    if (list.length > 1) out += `<div class="chips cnames" style="margin-bottom:12px">${list.map((e) => { const s = st(e); return `<button class="chip${e === cur ? ' sel' : ''}" data-k="cs-${esc(e)}" data-act="clim-go" data-eid="${esc(e)}">${ic(isOn(e, s) ? (s.state === 'heat' ? 'flame' : s.state === 'cool' ? 'snow' : 'climate') : 'power')}${esc(nameOf(e))}${e === main ? ` <span class="cnt">★</span>` : ''}</button>`; }).join('')}</div>`;
+    out += `<div class="ccar" data-k="ccar" data-static-scroll>${list.map((e) => `<div class="cslide" data-k="sl-${esc(e)}" data-eid="${esc(e)}">${climateHTML(e, e === main)}</div>`).join('')}</div>`;
+    if (list.length > 1) out += `<div class="cdots" data-k="cdots">${list.map((e) => `<i class="${e === cur ? 'on' : ''}" data-eid="${esc(e)}"></i>`).join('')}</div><p class="hint" style="text-align:center">${t('Swipe for your other air conditioners')}</p>`;
+    return out + '</div>';
   }
   function selectedClimate(m) {
     if (m.climates.includes(settings.climate)) return settings.climate;
     if (!m.climates.includes(S.climSel)) S.climSel = m.climates.find((e) => isOn(e)) || m.climates[0]; // sticky for this session
     return S.climSel;
   }
-  function climateHTML(eid) {
+  function climateHTML(eid, isMain) {
     const s = st(eid);
     if (!s) return emptyHTML('alert', 'This climate device no longer exists.');
     const a = s.attributes; const f = a.supported_features || 0; const ok = avail(s) && C && C.authed; const on = isOn(eid, s);
@@ -766,17 +811,17 @@ ${toggleHTML(eid, s)}</div>`;
     const single = (f & 1) && a.temperature != null;
     const dr = S.draft[eid]; const target = dr ? dr.v : single ? +a.temperature : null;
     const pending = !!S.pending[eid] || !!dr;
-    let out = `<div class="card clim" data-k="clim-${esc(eid)}"><div class="clim-head"><div><div class="cn">${esc(nameOf(eid))}</div><div class="cs">${esc([room && room.name, !avail(s) ? 'Unavailable' : on ? (ACTION[a.hvac_action] || HVAC[s.state] || cap(s.state)) : 'Off'].filter(Boolean).join(' · '))}</div></div>
-<button class="pwr${on ? ' on' : ''}${S.pending[eid] && !dr ? ' pending' : ''}" data-act="clim-power" data-eid="${esc(eid)}" aria-label="Power ${on ? 'off' : 'on'}" aria-pressed="${on}" ${ok ? '' : 'disabled'}>${ic('power')}</button></div>`;
+    let out = `<div class="card clim" data-k="clim-${esc(eid)}"><div class="clim-head"><div><div class="cn">${esc(nameOf(eid))}</div><div class="cs">${esc([room && room.name, !avail(s) ? t('Unavailable') : on ? (ACTION[a.hvac_action] || HVAC[s.state] || cap(s.state)) : t('Off')].filter(Boolean).join(' · '))}</div></div>
+${model().climates.length > 1 ? `<button class="mainstar${isMain ? ' on' : ''}" data-act="clim-main" data-eid="${esc(eid)}" aria-label="${t('Set as main')}" aria-pressed="${!!isMain}" ${isMain ? 'disabled' : ''}>${ic('star')}<span>${t(isMain ? 'Main' : 'Set as main')}</span></button>` : ''}<button class="pwr${on ? ' on' : ''}${S.pending[eid] && !dr ? ' pending' : ''}" data-act="clim-power" data-eid="${esc(eid)}" aria-label="Power ${on ? 'off' : 'on'}" aria-pressed="${on}" ${ok ? '' : 'disabled'}>${ic('power')}</button></div>`;
     if (single || !range) {
       const p = target != null ? clamp((target - min) / (max - min || 1), 0, 1) : 0;
       const R = 100, CX = 120, CY = 120, L = 2 * Math.PI * R * 0.75, CIRC = 2 * Math.PI * R;
       const ang = (135 + 270 * p) * Math.PI / 180; const kx = CX + R * Math.cos(ang), ky = CY + R * Math.sin(ang);
-      out += `<div class="dial${on ? '' : ' off'}"><svg viewBox="0 0 240 240" aria-hidden="true"><defs><linearGradient id="dg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#7cc2f0"/><stop offset="1" stop-color="${s.state === 'heat' ? '#ef8d4b' : '#2f86d6'}"/></linearGradient></defs>
+      out += `<div class="dial${on ? '' : ' off'}"><svg viewBox="0 0 240 240" aria-hidden="true"><defs><linearGradient id="dg-${esc(eid.replace(/\W/g, '_'))}" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#7cc2f0"/><stop offset="1" stop-color="${s.state === 'heat' ? '#ef8d4b' : '#2f86d6'}"/></linearGradient></defs>
 <circle class="trk" cx="120" cy="120" r="${R}" stroke-dasharray="${L.toFixed(1)} ${CIRC.toFixed(1)}" transform="rotate(135 120 120)"/>
-${target != null ? `<circle class="arc" cx="120" cy="120" r="${R}" stroke-dasharray="${(L * p).toFixed(1)} ${CIRC.toFixed(1)}" transform="rotate(135 120 120)"/><circle class="knob" cx="${kx.toFixed(1)}" cy="${ky.toFixed(1)}" r="11"/>` : ''}</svg>
-<div class="mid"><span class="lbl">${target != null ? 'Target' : 'Current'}</span><span class="tt num">${target != null ? smallT(target) : a.current_temperature != null ? smallT(+a.current_temperature) : '—'}</span>
-${target != null ? `<span class="ct">${ic('thermo')}Room ${a.current_temperature != null ? fmtT(+a.current_temperature) : '—'}</span>` : ''}<span class="sending">${pending ? 'Sending…' : ''}</span></div></div>`;
+${target != null ? `<circle class="arc" style="stroke:url(#dg-${esc(eid.replace(/\W/g, '_'))})" cx="120" cy="120" r="${R}" stroke-dasharray="${(L * p).toFixed(1)} ${CIRC.toFixed(1)}" transform="rotate(135 120 120)"/><circle class="knob" cx="${kx.toFixed(1)}" cy="${ky.toFixed(1)}" r="11"/>` : ''}</svg>
+<div class="mid"><span class="lbl">${t(target != null ? 'Target' : 'Current')}</span><span class="tt num">${target != null ? smallT(target) : a.current_temperature != null ? smallT(+a.current_temperature) : '—'}</span>
+${target != null ? `<span class="ct">${ic('thermo')}${t('Room {t}', { t: a.current_temperature != null ? fmtT(+a.current_temperature) : '—' })}</span>` : ''}<span class="sending">${pending ? t('Sending…') : ''}</span></div></div>`;
       if (target != null) {
         out += `<div class="steppers"><button class="step" data-act="clim-step" data-eid="${esc(eid)}" data-d="-1" aria-label="Lower temperature" ${ok && target > min ? '' : 'disabled'}>${ic('minus')}</button><button class="step" data-act="clim-step" data-eid="${esc(eid)}" data-d="1" aria-label="Raise temperature" ${ok && target < max ? '' : 'disabled'}>${ic('plus')}</button></div>
 <input class="range" type="range" min="${min}" max="${max}" step="${step}" value="${target}" style="--p:${(p * 100).toFixed(1)}%" data-in="clim-range" data-eid="${esc(eid)}" aria-label="Target temperature" ${ok ? '' : 'disabled'}><div class="rlab num"><span>${fmtT(min)}</span><span>${fmtT(max)}</span></div>`;
@@ -791,8 +836,8 @@ ${target != null ? `<span class="ct">${ic('thermo')}Room ${a.current_temperature
     const MI = { auto: 'auto', heat_cool: 'heatcool', cool: 'snow', heat: 'flame', dry: 'droplet', fan_only: 'fan' };
     const order = ['auto', 'heat_cool', 'cool', 'heat', 'dry', 'fan_only'];
     modes.sort((x, y) => (order.indexOf(x) + 1 || 99) - (order.indexOf(y) + 1 || 99));
-    if (modes.length) out += `<div class="sec card ctl-card" data-k="cm"><h3>${ic('sunmoon')}Mode</h3><div class="modes">${modes.map((md) => `<button class="mode m-${esc(md)}${s.state === md ? ' sel' : ''}" data-act="clim-mode" data-eid="${esc(eid)}" data-v="${esc(md)}" aria-pressed="${s.state === md}" ${ok ? '' : 'disabled'}>${ic(MI[md] || 'climate')}${esc(HVAC[md] || cap(md.replace(/_/g, ' ')))}</button>`).join('')}</div></div>`;
-    const opt = (title, icon, list, cur, act, bars) => `<div class="sec card ctl-card" data-k="${act}"><h3>${ic(icon)}${title}</h3><div class="fan">${list.map((v, i) => {
+    if (modes.length) out += `<div class="sec card ctl-card" data-k="cm"><h3>${ic('sunmoon')}${t('Mode')}</h3><div class="modes">${modes.map((md) => `<button class="mode m-${esc(md)}${s.state === md ? ' sel' : ''}" data-act="clim-mode" data-eid="${esc(eid)}" data-v="${esc(md)}" aria-pressed="${s.state === md}" ${ok ? '' : 'disabled'}>${ic(MI[md] || 'climate')}${esc(HVAC[md] || cap(md.replace(/_/g, ' ')))}</button>`).join('')}</div></div>`;
+    const opt = (title, icon, list, cur, act, bars) => `<div class="sec card ctl-card" data-k="${act}"><h3>${ic(icon)}${t(title)}</h3><div class="fan">${list.map((v, i) => {
       const lv = bars && !/auto/i.test(v) ? list.filter((x) => !/auto/i.test(x)).indexOf(v) + 1 : 0; const n = list.filter((x) => !/auto/i.test(x)).length;
       return `<button class="${v === cur ? 'sel' : ''}" data-act="${act}" data-eid="${esc(eid)}" data-v="${esc(v)}" aria-pressed="${v === cur}" ${ok ? '' : 'disabled'}>${lv && n > 1 ? `<span class="bars">${Array.from({ length: Math.min(n, 6) }, (_, j) => `<i class="${j < lv ? 'f' : ''}" style="height:${4 + j * 2}px"></i>`).join('')}</span>` : ''}${esc(prettyMode(v))}</button>`; }).join('')}</div></div>`;
     if ((f & 8) && (a.fan_modes || []).length) out += opt('Fan speed', 'fan', a.fan_modes, a.fan_mode, 'clim-fan', true);
@@ -806,7 +851,7 @@ ${target != null ? `<span class="ct">${ic('thermo')}Room ${a.current_temperature
   /* ---------------- ROOMS ---------------- */
   function pRooms() {
     const m = model();
-    let out = `<div class="page" data-k="p-rooms"><div class="topbar"><h1>Rooms</h1>${pill()}</div>${banner()}`;
+    let out = `<div class="page" data-k="p-rooms"><div class="topbar"><h1>${t('Rooms')}</h1>${pill()}</div>${banner()}`;
     if (!configured()) return out + welcomeHTML() + '</div>';
     const list = m.rooms.concat(m.unassigned ? [m.unassigned] : []);
     if (!list.length) return out + emptyHTML('rooms', S.conn === 'connected' ? 'No rooms found. Create areas in Home Assistant and assign your devices to them.' : 'Rooms appear once connected.') + '</div>';
@@ -814,9 +859,9 @@ ${target != null ? `<span class="ct">${ic('thermo')}Room ${a.current_temperature
     list.forEach((r) => {
       if (r.floor && r.floor !== floor && Object.keys(S.floors).length > 1) { floor = r.floor; out += `<div class="grp-h" data-k="f-${esc(r.floor.floor_id)}">${esc(r.floor.name)}</div>`; }
       if (r.id === '_none' && floor) { floor = null; out += `<div class="grp-h" data-k="f-none">No room</div>`; }
-      const e = mainTemp(r); const t = tempOf(e); const h = roomHum(r);
+      const e = mainTemp(r); const tv = tempOf(e); const h = roomHum(r);
       out += `<button class="roomrow c-${r.color}" data-k="rr-${esc(r.id)}" data-act="room" data-id="${esc(r.id)}"><span class="ri">${ic(r.icon)}</span><span class="rb"><div class="rn">${esc(r.name)}</div><div class="rs">${devCount(r)}</div></span>
-<span>${r.temps.length || t != null ? `<div class="rt num">${smallT(t)}</div>` : ''}${h != null ? `<div class="rh">${ic('drop')} ${pct(h)}</div>` : ''}</span><span class="chev">${ic('chev')}</span></button>`;
+<span>${r.temps.length || tv != null ? `<div class="rt num">${smallT(tv)}</div>` : ''}${h != null ? `<div class="rh">${ic('drop')} ${pct(h)}</div>` : ''}</span><span class="chev">${ic('chev')}</span></button>`;
     });
     return out + '</div></div>';
   }
@@ -824,24 +869,24 @@ ${target != null ? `<span class="ct">${ic('thermo')}Room ${a.current_temperature
     const m = model(); const r = m.roomById[id];
     let out = `<div class="page sub" data-k="p-room-${esc(id)}"><div class="topbar"><button class="iconbtn" data-act="back" aria-label="Back">${ic('back')}</button><h1>${esc(r ? r.name : 'Room')}</h1>${pill()}</div>${banner()}`;
     if (!r) return out + emptyHTML('alert', Object.keys(S.states).length ? 'This room was not found. It may have been removed in Home Assistant.' : 'Loading…') + '</div>';
-    const e = mainTemp(r); const t = tempOf(e); const h = roomHum(r); const tr = e && trendOf(e);
+    const e = mainTemp(r); const tv = tempOf(e); const h = roomHum(r); const tr = e && trendOf(e);
     if (r.id !== '_none') {
       const sp = e && S.spark[e];
-      out += `<div class="rhero c-${r.color}" data-k="rh"><span class="ri" style="color:var(--${r.color}-i)">${ic(r.icon)}</span><div style="flex:1;min-width:0">${bigT(t)}
+      out += `<div class="rhero c-${r.color}" data-k="rh"><span class="ri" style="color:var(--${r.color}-i)">${ic(r.icon)}</span><div style="flex:1;min-width:0">${bigT(tv)}
 <div class="meta">${h != null ? `${ic('drop')} ${pct(h)} humidity · ` : ''}${tr ? `${tr.d > 0 ? '+' : ''}${fmtNum(tr.d, 1)}° last hour` : e ? esc(nameOf(e, r)) : 'No temperature sensor'}</div>
 ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     }
     const sensors = r.temps.concat(r.hums);
     if (sensors.length > 1 || (sensors.length && r.temps.length > 1)) {
-      out += `<div class="sec" data-k="rs"><div class="sec-h"><h2>Sensors</h2></div><div class="list">${sensors.map((x) => {
+      out += `<div class="sec" data-k="rs"><div class="sec-h"><h2>${t('Sensors')}</h2></div><div class="list">${sensors.map((x) => {
         const s = st(x); const isMain = x === e; const isT = r.temps.includes(x);
         return `<div class="row${avail(s) ? '' : ' na'}" data-k="sn-${esc(x)}"><span class="dico">${ic(isT ? 'thermo' : 'drop')}</span><button class="rb" ${isT && r.temps.length > 1 ? `data-act="main-sensor" data-room="${esc(r.id)}" data-eid="${esc(x)}"` : `data-act="sheet" data-eid="${esc(x)}"`}><div class="rn">${esc(nameOf(x, r))}</div><div class="rs">${isMain ? 'Room temperature' : isT && r.temps.length > 1 ? 'Tap to use as room temperature' : isT ? 'Temperature sensor' : 'Humidity sensor'}</div></button><span class="rvalue num">${esc(stateText(x, s))}</span></div>`; }).join('')}</div></div>`;
     }
-    out += `<div class="sec" data-k="rc"><div class="sec-h"><h2>Controls</h2><span class="aux">${r.devs.length ? devCount(r) : ''}</span></div>`;
+    out += `<div class="sec" data-k="rc"><div class="sec-h"><h2>${t('Controls')}</h2>${r.devs.some((x) => model().kind[x] === 'light') ? `<button class="link" data-act="room-lights" data-id="${esc(r.id)}">${t(r.devs.some((x) => model().kind[x] === 'light' && isOn(x)) ? 'Lights off' : 'Lights on')}</button>` : `<span class="aux">${r.devs.length ? devCount(r) : ''}</span>`}</div>`;
     out += r.devs.length ? `<div class="tiles">${r.devs.map((x) => tileHTML(x, r)).join('')}</div>` : emptyHTML('devices', 'No controllable devices in this room.');
     out += `</div>`;
     const status = r.bins.concat(r.other);
-    if (status.length) out += `<div class="sec" data-k="rst"><div class="sec-h"><h2>Status</h2></div><div class="list">${status.map((x) => { const s = st(x); return `<div class="row${avail(s) ? '' : ' na'}" data-k="st-${esc(x)}"><span class="dico">${ic(devIcon(x, s))}</span><div class="rb"><div class="rn">${esc(nameOf(x, r))}</div><div class="rs">${esc(ago(s))}</div></div><span class="rvalue num">${esc(stateText(x, s))}</span></div>`; }).join('')}</div></div>`;
+    if (status.length) out += `<div class="sec" data-k="rst"><div class="sec-h"><h2>${t('Status')}</h2></div><div class="list">${status.map((x) => { const s = st(x); return `<div class="row${avail(s) ? '' : ' na'}" data-k="st-${esc(x)}"><span class="dico">${ic(devIcon(x, s))}</span><div class="rb"><div class="rn">${esc(nameOf(x, r))}</div><div class="rs">${esc(ago(s))}</div></div><span class="rvalue num">${esc(stateText(x, s))}</span></div>`; }).join('')}</div></div>`;
     return out + '</div>';
   }
   function sparkHTML(pts, color) {
@@ -860,9 +905,9 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
   /* ---------------- DEVICES ---------------- */
   function pDevices() {
     const m = model();
-    let out = `<div class="page" data-k="p-devices"><div class="sticky"><div class="topbar"><h1>Devices</h1>${pill()}</div>`;
+    let out = `<div class="page" data-k="p-devices"><div class="sticky"><div class="topbar"><h1>${t('Devices')}</h1>${pill()}</div>`;
     if (!configured()) return out + `</div>${welcomeHTML()}</div>`;
-    out += `<label class="search" data-static>${ic('search')}<input type="search" placeholder="Search devices" value="${esc(S.q)}" data-in="search" aria-label="Search devices" autocomplete="off" enterkeyhint="search"></label></div>${banner()}`;
+    out += `<label class="search" data-static>${ic('search')}<input type="search" placeholder="${t('Search devices')}" value="${esc(S.q)}" data-in="search" aria-label="Search devices" autocomplete="off" enterkeyhint="search"></label></div>${banner()}`;
     const q = S.q.trim().toLowerCase();
     const all = m.controls.filter((e) => !q || nameOf(e).toLowerCase().includes(q) || roomNameOf(e).toLowerCase().includes(q) || e.includes(q));
     const favs = settings.favorites.filter((e) => all.includes(e));
@@ -870,8 +915,8 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     const cats = CATS.filter((c) => counts[c.id]);
     if (S.cat !== 'all' && S.cat !== 'fav' && !counts[S.cat]) S.cat = 'all';
     out += `<div class="chips" style="margin-top:10px">${[{ id: 'all', label: 'All', icon: 'grid', n: all.length }].concat(favs.length ? [{ id: 'fav', label: 'Favorites', icon: 'star', n: favs.length }] : [], cats.map((c) => Object.assign({ n: counts[c.id] }, c)))
-      .map((c) => `<button class="chip${S.cat === c.id ? ' sel' : ''}" data-k="cat-${c.id}" data-act="cat" data-v="${c.id}" aria-pressed="${S.cat === c.id}">${ic(c.icon)}${c.label}<span class="cnt">${c.n}</span></button>`).join('')}</div>`;
-    out += `<div class="seg" style="margin-top:6px" role="group" aria-label="Group by"><button class="${settings.devGroup === 'type' ? 'sel' : ''}" data-act="group" data-v="type">${ic('list')}By type</button><button class="${settings.devGroup === 'room' ? 'sel' : ''}" data-act="group" data-v="room">${ic('rooms')}By room</button></div>`;
+      .map((c) => `<button class="chip${S.cat === c.id ? ' sel' : ''}" data-k="cat-${c.id}" data-act="cat" data-v="${c.id}" aria-pressed="${S.cat === c.id}">${ic(c.icon)}${t(c.label)}<span class="cnt">${c.n}</span></button>`).join('')}</div>`;
+    out += `<div class="seg" style="margin-top:6px" role="group" aria-label="Group by"><button class="${settings.devGroup === 'type' ? 'sel' : ''}" data-act="group" data-v="type">${ic('list')}${t('By type')}</button><button class="${settings.devGroup === 'room' ? 'sel' : ''}" data-act="group" data-v="room">${ic('rooms')}${t('By room')}</button></div>`;
     let list = S.cat === 'all' ? all : S.cat === 'fav' ? favs : all.filter((e) => catOf(m.kind[e]) === S.cat);
     if (!m.controls.length) return out + `<div class="sec">${emptyHTML('devices', S.conn === 'connected' ? 'No devices found in Home Assistant.' : 'Devices appear once connected.')}</div></div>`;
     if (!list.length) return out + `<div class="sec">${emptyHTML('search', `No devices match “${esc(S.q)}”.`)}</div></div>`;
@@ -881,7 +926,7 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     } else {
       CATS.forEach((c) => { const g = list.filter((e) => catOf(m.kind[e]) === c.id); if (g.length) groups.push([c.id, c.label, g]); });
     }
-    out += groups.map(([id, label, g]) => `<div data-k="g-${esc(id)}"><div class="grp-h">${esc(label)} · ${g.length}</div><div class="list">${g.map((e) => rowHTML(e, { room: settings.devGroup !== 'room' })).join('')}</div></div>`).join('');
+    out += groups.map(([id, label, g]) => `<div data-k="g-${esc(id)}"><div class="grp-h">${esc(t(label))} · ${g.length}</div><div class="list">${g.map((e) => rowHTML(e, { room: settings.devGroup !== 'room' })).join('')}</div></div>`).join('');
     return out + '</div>';
   }
 
@@ -901,9 +946,12 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     const { lights, sw } = discoTargets();
     if (!lights.length && !sw.length) return toast('No lights found to use for the disco', 'bad');
     const backup = lights.concat(sw).map((e) => { const s = S.states[e]; const a = s.attributes; return { e, on: s.state === 'on', bri: a.brightness, hs: a.color_mode === 'hs' || a.color_mode === 'xy' || a.color_mode === 'rgb' || a.color_mode === 'rgbw' || a.color_mode === 'rgbww' ? a.hs_color : null, ct: a.color_mode === 'color_temp' ? a.color_temp_kelvin : null }; });
-    const d = S.disco = { lights, sw, backup, ends: Date.now() + DISCO_MS, n: 0 };
+    const d = S.disco = { lights, sw, backup, ends: Date.now() + DISCO_MS, warm: Date.now() + 10000, n: 0 };
+    lights.forEach((e) => { const s = S.states[e]; const data = { entity_id: e, brightness: 255 }; if (colorLight(s) && (s.attributes.supported_color_modes || []).includes('color_temp')) data.color_temp_kelvin = 5000; svc('light', 'turn_on', data); });
+    sw.forEach((e) => svc('homeassistant', 'turn_on', { entity_id: e }));
     d.timer = setInterval(() => {
       if (Date.now() >= d.ends) return stopDisco();
+      if (Date.now() < d.warm) { changed.add('__clock'); schedule(false); return; }   // first 10 seconds: everything on
       d.n++;
       const pick = lights.slice().sort(() => Math.random() - 0.5).slice(0, 6);   // a few lamps per beat keeps the network calm
       pick.forEach((e) => {
@@ -937,15 +985,15 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && S.disco) stopDisco(); });
   function pDisco() {
     const m = model(); used.add('__clock');
-    let out = `<div class="page" data-k="p-disco"><div class="topbar"><h1>Disco</h1>${pill()}</div>${banner()}`;
+    let out = `<div class="page" data-k="p-disco"><div class="topbar"><h1>${t('Disco')}</h1>${pill()}</div>${banner()}`;
     if (!configured()) return out + welcomeHTML() + '</div>';
     const { lights, sw } = discoTargets(); const d = S.disco;
     const left = d ? Math.max(0, Math.ceil((d.ends - Date.now()) / 1000)) : 120;
     out += `<div class="card disco" data-k="disco-main"><button class="discobtn${d ? ' on' : ''}" data-act="${d ? 'disco-stop' : 'disco-start'}" ${C && C.authed && (lights.length || sw.length) && !(d && d.stopping) ? '' : 'disabled'} aria-label="${d ? 'Stop disco' : 'Start disco'}">
-<span class="discoin"><span class="dt num">${d ? (d.stopping ? '…' : Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0')) : ic('auto')}</span><span class="dl">${d ? (d.stopping ? 'Restoring…' : 'Tap to stop') : 'Start disco'}</span></span></button>
-<p class="dp">${d ? 'Party time! Keep this screen open. Everything goes back to how it was when the timer ends.' : `For 2 minutes your ${lights.length} light${lights.length === 1 ? '' : 's'} flash in party colours${sw.length ? ` and ${sw.length} switch${sw.length === 1 ? '' : 'es'} turn on and off` : ''}. Afterwards everything goes back exactly as it was.`}</p></div>`;
+<span class="discoin"><span class="dt num">${d ? (d.stopping ? '…' : Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0')) : ic('auto')}</span><span class="dl">${t(d ? (d.stopping ? 'Restoring…' : Date.now() < d.warm ? 'All on!' : 'Tap to stop') : 'Start disco')}</span></span></button>
+<p class="dp">${d ? 'Party time! Keep this screen open. Everything goes back to how it was when the timer ends.' : `First everything turns on for 10 seconds, then for 2 minutes your ${lights.length} light${lights.length === 1 ? '' : 's'} flash in party colours${sw.length ? ` and ${sw.length} switch${sw.length === 1 ? '' : 'es'} turn on and off` : ''}. Afterwards everything goes back exactly as it was.`}</p></div>`;
     const cand = m.controls.filter((e) => ['plug', 'switch'].includes(m.kind[e]));
-    out += `<div class="sec-h" style="margin-top:24px"><h2>Also switch these on and off</h2><span class="aux">${sw.length} chosen</span></div>
+    out += `<div class="sec-h" style="margin-top:24px"><h2>${t('Also switch these on and off')}</h2><span class="aux">${sw.length} chosen</span></div>
 <div class="msg warn" data-k="dwarn">${ic('alert')}<div>Only choose lamps, light strips or decorations. Never choose heating, pumps, a fridge, the TV or computers: switching them on and off quickly can damage them.</div></div>`;
     out += cand.length ? `<div class="card set" data-k="dsw">${cand.map((e) => { const on = settings.discoSwitches.includes(e); return `<button class="it" data-act="disco-sw" data-eid="${esc(e)}" data-k="ds-${esc(e)}" ${d ? 'disabled' : ''}><span class="ic">${ic(devIcon(e, st(e)))}</span><span class="lb"><b>${esc(nameOf(e))}</b><span>${esc(roomNameOf(e) || stateText(e))}</span></span><span class="chk${on ? ' on' : ''}" aria-hidden="true">${on ? ic('ok') : ''}</span></button>`; }).join('')}</div>` : emptyHTML('plug', 'No switches or plugs found.');
     return out + '</div>';
@@ -955,13 +1003,13 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
   function pSettings() {
     const auth = loadAuth() || {}; const m = model();
     const sameOrigin = /^https?:$/.test(location.protocol) && location.pathname.includes('/local/') ? location.origin : '';
-    let out = `<div class="page" data-k="p-settings"><div class="topbar"><h1>Settings</h1>${pill()}</div>`;
+    let out = `<div class="page" data-k="p-settings"><div class="topbar"><h1>${t('Settings')}</h1>${pill()}</div>`;
     // connection
     out += `<div class="sec-h" style="margin-top:8px"><h2>Home Assistant</h2></div><div class="card set" data-k="conn"><div class="blk">`;
     if (EMBED) {
       out += S.conn === 'connected' ? `<div class="msg ok">${ic('ok')}<div>Logged in to <b>${esc((S.config && S.config.location_name) || 'Home Assistant')}</b>${S.userName ? ' as ' + esc(S.userName) : ''}<br>${m.controls.length} devices · ${m.temps.length} temperature sensors · ${m.rooms.length} rooms</div></div>`
         : S.conn === 'error' ? `<div class="msg bad">${ic('alert')}<div>${esc(S.err)}</div></div>` : `<div class="msg warn">${ic('refresh', 'spin')}<div>Connecting…</div></div>`;
-      out += `<p style="font-size:13px;color:var(--muted);margin:0 2px 12px">Your login is handled by Home Assistant itself. The app stays logged in and reconnects automatically.</p><div class="btns"><button class="btn danger" data-act="embed-logout">${ic('logout')}Log out</button></div></div></div>`;
+      out += `<p style="font-size:13px;color:var(--muted);margin:0 2px 12px">Your login is handled by Home Assistant itself. The app stays logged in and reconnects automatically.</p><div class="btns" style="flex-direction:column"><button class="btn pri" data-act="open-ha">${ic('home')}${t('Open Home Assistant')}</button><button class="btn danger" data-act="embed-logout">${ic('logout')}${t('Log out')}</button></div><p style="font-size:12.5px;color:var(--muted);margin:10px 2px 0">${t('Back to the normal Home Assistant screens')}</p></div></div>`;
     } else {
     if (S.demo) out += `<div class="msg info">${ic('eye')}<div>You're previewing with sample data. Enter your Home Assistant details below to use your real home.</div></div>`;
     else if (S.conn === 'connected') out += `<div class="msg ok">${ic('ok')}<div>Connected to <b>${esc((S.config && S.config.location_name) || 'Home Assistant')}</b>${S.userName ? ' as ' + esc(S.userName) : ''}${S.haVersion ? ' · Home Assistant ' + esc(S.haVersion) : ''}<br>${m.controls.length} devices · ${m.temps.length} temperature sensors · ${m.rooms.length} rooms</div></div>`;
@@ -973,7 +1021,7 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     out += `<div class="field"><label for="ha-url">Server address</label><div class="inp">${ic('server')}<input id="ha-url" type="url" inputmode="url" autocomplete="url" spellcheck="false" placeholder="http://homeassistant.local:8123" value="${esc(auth.url || sameOrigin)}"></div><span class="help">Local address (http://192.168.x.x:8123) or your remote https:// address.</span></div>
 ${canOAuth() && !S.showToken && auth.mode !== 'token' ? `<div class="btns"><button class="btn pri" data-act="login">${ic('key')}${auth.mode === 'oauth' ? 'Log in again' : 'Log in with Home Assistant'}</button></div>
 <p class="help" style="font-size:12.5px;color:var(--muted);margin:8px 2px 12px">You'll log in on your own Home Assistant page with your normal username and password. The app then stays logged in.</p>
-${auth.mode === 'oauth' ? `<div class="btns"><button class="btn" data-act="${S.conn === 'disconnected' ? 'retry' : 'disconnect'}">${S.conn === 'disconnected' ? 'Reconnect' : 'Disconnect'}</button><button class="btn danger" data-act="forget">${ic('logout')}Log out</button></div>` : ''}
+${auth.mode === 'oauth' ? `<div class="btns"><button class="btn" data-act="${S.conn === 'disconnected' ? 'retry' : 'disconnect'}">${S.conn === 'disconnected' ? 'Reconnect' : 'Disconnect'}</button><button class="btn danger" data-act="forget">${ic('logout')}${t('Log out')}</button></div>` : ''}
 <div class="btns" style="margin-top:10px"><button class="btn" data-act="show-token" style="font-weight:600;color:var(--text2)">Use an access token instead</button></div>
 ${!auth.token && !S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-act="demo">${ic('eye')}Preview with sample data</button></div>` : ''}
 ${S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-act="exit-demo">Exit preview</button></div>` : ''}</div></div>` : `${canOAuth() ? `<div class="btns" style="margin-bottom:12px"><button class="btn" data-act="hide-token">${ic('back')}Log in with username and password instead</button></div>` : ''}
@@ -986,23 +1034,24 @@ ${S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-a
     }
     // appearance
     const eff = effectiveTheme();
-    out += `<div class="sec-h" style="margin-top:24px"><h2>Appearance</h2><span class="aux">Now: ${eff === 'dark' ? 'Night' : 'Day'}</span></div><div class="card set" data-k="app"><div class="blk"><div class="seg" role="group" aria-label="Theme">${[['auto', 'Automatic', 'sunmoon'], ['light', 'Day', 'sun'], ['dark', 'Night', 'moon']].map(([v, l, i]) => `<button class="${settings.theme === v ? 'sel' : ''}" data-act="theme" data-v="${v}" aria-pressed="${settings.theme === v}">${ic(i)}${l}</button>`).join('')}</div></div>`;
+    out += `<div class="sec-h" style="margin-top:24px"><h2>${t('Appearance')}</h2><span class="aux">Now: ${eff === 'dark' ? 'Night' : 'Day'}</span></div><div class="card set" data-k="app"><div class="blk"><div class="seg" role="group" aria-label="Theme">${[['auto', 'Automatic', 'sunmoon'], ['light', 'Day', 'sun'], ['dark', 'Night', 'moon']].map(([v, l, i]) => `<button class="${settings.theme === v ? 'sel' : ''}" data-act="theme" data-v="${v}" aria-pressed="${settings.theme === v}">${ic(i)}${t(l)}</button>`).join('')}</div></div>`;
+    out += `<div class="it"><span class="ic">${ic('link')}</span><span class="lb"><b>${t('Language')}</b></span><select data-set="lang" aria-label="Language">${[['en', 'English'], ['nl', 'Nederlands'], ['mc', 'Minecraft']].map(([v, l]) => `<option value="${v}" ${settings.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>`;
     if (settings.theme === 'auto') {
-      out += `<div class="it"><span class="ic">${ic('clock')}</span><span class="lb"><b>Switch automatically by</b></span><select data-set="autoSource" aria-label="Automatic mode source"><option value="time" ${settings.autoSource === 'time' ? 'selected' : ''}>Time of day</option><option value="system" ${settings.autoSource === 'system' ? 'selected' : ''}>Phone setting</option></select></div>`;
-      if (settings.autoSource === 'time') out += `<div class="it"><span class="ic">${ic('sun')}</span><span class="lb"><b>Day starts</b></span><input type="time" data-set="dayStart" value="${esc(settings.dayStart)}" aria-label="Day starts"></div><div class="it"><span class="ic">${ic('moon')}</span><span class="lb"><b>Night starts</b></span><input type="time" data-set="nightStart" value="${esc(settings.nightStart)}" aria-label="Night starts"></div>`;
+      out += `<div class="it"><span class="ic">${ic('clock')}</span><span class="lb"><b>${t('Switch automatically by')}</b></span><select data-set="autoSource" aria-label="Automatic mode source"><option value="time" ${settings.autoSource === 'time' ? 'selected' : ''}>${t('Time of day')}</option><option value="system" ${settings.autoSource === 'system' ? 'selected' : ''}>${t('Phone setting')}</option></select></div>`;
+      if (settings.autoSource === 'time') out += `<div class="it"><span class="ic">${ic('sun')}</span><span class="lb"><b>${t('Day starts')}</b></span><input type="time" data-set="dayStart" value="${esc(settings.dayStart)}" aria-label="Day starts"></div><div class="it"><span class="ic">${ic('moon')}</span><span class="lb"><b>${t('Night starts')}</b></span><input type="time" data-set="nightStart" value="${esc(settings.nightStart)}" aria-label="Night starts"></div>`;
     }
     out += `</div>`;
     // home
     const opts = [['auto', 'Average of rooms']].concat(m.temps.map((e) => [e, nameOf(e)]), m.climates.map((e) => [e, nameOf(e) + ' (room temp)']));
-    out += `<div class="sec-h" style="margin-top:24px"><h2>Home screen</h2></div><div class="card set" data-k="homeset">
-<div class="it"><span class="ic">${ic('thermo')}</span><span class="lb"><b>House temperature</b></span><select data-set="houseSource" aria-label="House temperature source">${opts.map(([v, l]) => `<option value="${esc(v)}" ${settings.houseSource === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>
-<label class="it"><span class="ic">${ic('drop')}</span><span class="lb"><b>Show humidity on room cards</b></span><input type="checkbox" data-set="showHum" ${settings.showHum ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)"></label>
+    out += `<div class="sec-h" style="margin-top:24px"><h2>${t('Home screen')}</h2></div><div class="card set" data-k="homeset">
+<div class="it"><span class="ic">${ic('thermo')}</span><span class="lb"><b>${t('House temperature')}</b></span><select data-set="houseSource" aria-label="House temperature source">${opts.map(([v, l]) => `<option value="${esc(v)}" ${settings.houseSource === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>
+<label class="it"><span class="ic">${ic('drop')}</span><span class="lb"><b>${t('Show humidity on room cards')}</b></span><input type="checkbox" data-set="showHum" ${settings.showHum ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--accent)"></label>
 <div class="it"><span class="ic">${ic('star')}</span><span class="lb"><b>Favorites</b><span>${settings.favorites.length ? settings.favorites.length + ' pinned to Home' : 'Star devices on the Devices page'}</span></span>${settings.favorites.length ? '<button class="runbtn" data-act="clear-favs">Clear</button>' : ''}</div></div>`;
     // about
-    out += `<div class="sec-h" style="margin-top:24px"><h2>App</h2></div><div class="card set" data-k="about">
+    out += `<div class="sec-h" style="margin-top:24px"><h2>${t('App')}</h2></div><div class="card set" data-k="about">
 <div class="it"><span class="ic">${ic('smartphone')}</span><span class="lb"><b>Comfort Home</b><span>Version ${VERSION}</span></span></div>
-<button class="it" data-act="reload" ${C && C.authed ? '' : 'disabled'}><span class="ic">${ic('refresh')}</span><span class="lb"><b>Reload from Home Assistant</b><span>Refresh rooms and devices</span></span></button>
-<div class="it"><span class="ic">${ic('shield')}</span><span class="lb"><b>Privacy</b><span>Your token stays on this device and is only sent to your Home Assistant.</span></span></div></div>`;
+<button class="it" data-act="reload" ${C && C.authed ? '' : 'disabled'}><span class="ic">${ic('refresh')}</span><span class="lb"><b>${t('Reload from Home Assistant')}</b><span>${t('Refresh rooms and devices')}</span></span></button>
+<div class="it"><span class="ic">${ic('shield')}</span><span class="lb"><b>${t('Privacy')}</b><span>Your token stays on this device and is only sent to your Home Assistant.</span></span></div></div>`;
     return out + '</div>';
   }
 
@@ -1020,21 +1069,27 @@ ${S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-a
 ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav" data-eid="${esc(eid)}" aria-label="${fav ? 'Remove from' : 'Add to'} favorites" aria-pressed="${fav}">${ic('star')}</button>` : ''}<button class="star" data-act="close-sheet" aria-label="Close">${ic('x')}</button></div>`;
     if (!avail(s)) b += `<div class="msg warn">${ic('alert')}<div>${esc(nameOf(eid))} is ${s.state === 'unknown' ? 'in an unknown state' : 'unavailable'} in Home Assistant. Check that the device is powered and reachable.</div></div>`;
     if (['light', 'plug', 'switch', 'fan'].includes(k) || (k === 'media' && canToggle(eid, s)) || (k === 'media' && !avail(s)))
-      b += `<div class="bigtg"><b>${on ? 'On' : 'Off'}</b>${toggleHTML(eid, s)}</div>`;
+      b += `<div class="bigtg"><b>${t(on ? 'On' : 'Off')}</b>${toggleHTML(eid, s)}</div>`;
     const slider = (label, val, min, max, stepv, act, fmt) => `<div class="ctl"><div class="hd"><span>${label}</span><b class="num" data-out="${act}">${fmt(val)}</b></div><input class="range" type="range" min="${min}" max="${max}" step="${stepv}" value="${val}" style="--p:${((val - min) / (max - min) * 100).toFixed(1)}%" data-in="${act}" data-eid="${esc(eid)}" aria-label="${label}" ${ok ? '' : 'disabled'}></div>`;
     if (k === 'light') {
       const modes = a.supported_color_modes || []; const dim = modes.some((x) => x !== 'onoff');
-      if (dim) b += slider('Brightness', a.brightness != null ? Math.max(1, Math.round(a.brightness / 2.55)) : 0, 1, 100, 1, 'bri', (v) => (s.state === 'on' ? v + '%' : 'Off'));
-      if (modes.includes('color_temp') && a.min_color_temp_kelvin) b += slider('Warmth', a.color_temp_kelvin || a.min_color_temp_kelvin, a.min_color_temp_kelvin, a.max_color_temp_kelvin, 50, 'ct', (v) => v + ' K');
+      if (dim) b += slider(t('Brightness'), a.brightness != null ? Math.max(1, Math.round(a.brightness / 2.55)) : 0, 1, 100, 1, 'bri', (v) => (s.state === 'on' ? v + '%' : 'Off'));
+      if (modes.includes('color_temp') && a.min_color_temp_kelvin) b += slider(t('Warmth'), a.color_temp_kelvin || a.min_color_temp_kelvin, a.min_color_temp_kelvin, a.max_color_temp_kelvin, 50, 'ct', (v) => v + ' K');
+      if (modes.some((x) => ['hs', 'rgb', 'rgbw', 'rgbww', 'xy'].includes(x))) {
+        const cur = a.color_mode !== 'color_temp' && a.hs_color ? a.hs_color[0] : null;
+        b += `<div class="ctl"><div class="hd"><span>${t('Colour')}</span></div><div class="swatches">${[0, 25, 50, 120, 180, 220, 270, 320].map((h) => `<button class="sw${cur != null && Math.abs(cur - h) < 12 ? ' sel' : ''}" style="--h:${h}" data-act="light-hs" data-h="${h}" data-eid="${esc(eid)}" aria-label="Colour ${h}" ${ok ? '' : 'disabled'}></button>`).join('')}<button class="sw white${a.color_mode === 'color_temp' ? ' sel' : ''}" data-act="light-hs" data-white="1" data-eid="${esc(eid)}" aria-label="White" ${ok ? '' : 'disabled'}></button></div></div>`;
+      }
+      if (dim) b += `<div class="ctl"><div class="hd"><span>${t('Moods')}</span></div><div class="moods">${[['relax', 'Relax', 'sofa'], ['read', 'Read', 'list'], ['focus', 'Focus', 'sun'], ['night', 'Night light', 'moon']].map(([v, l, i]) => `<button data-act="light-mood" data-v="${v}" data-eid="${esc(eid)}" ${ok ? '' : 'disabled'}>${ic(i)}${t(l)}</button>`).join('')}</div></div>`;
+      if ((f & 4) && (a.effect_list || []).length) b += `<div class="ctl"><div class="hd"><span>${t('Effects')}</span></div><div class="fan" style="margin-top:8px">${a.effect_list.slice(0, 12).map((v) => `<button class="${a.effect === v ? 'sel' : ''}" data-act="light-fx" data-v="${esc(v)}" data-eid="${esc(eid)}" ${ok ? '' : 'disabled'}>${esc(prettyMode(v))}</button>`).join('')}</div></div>`;
     }
     if (k === 'fan' && (f & 1)) b += slider('Speed', a.percentage || 0, 0, 100, a.percentage_step ? Math.max(1, Math.round(a.percentage_step)) : 1, 'fanpct', (v) => v + '%');
-    if (k === 'fan' && (f & 2)) b += `<div class="bigtg"><b>Oscillate</b><button class="tg${S.pending[eid] ? ' pending' : ''}" role="switch" aria-checked="${!!a.oscillating}" data-act="osc" data-eid="${esc(eid)}" ${ok ? '' : 'disabled'} aria-label="Oscillate"><span class="kn"></span></button></div>`;
+    if (k === 'fan' && (f & 2)) b += `<div class="bigtg"><b>${t('Oscillate')}</b><button class="tg${S.pending[eid] ? ' pending' : ''}" role="switch" aria-checked="${!!a.oscillating}" data-act="osc" data-eid="${esc(eid)}" ${ok ? '' : 'disabled'} aria-label="Oscillate"><span class="kn"></span></button></div>`;
     if (k === 'cover') {
       b += `<div class="btnrow" style="margin-bottom:12px">${(f & 1) || !f ? `<button class="btn" data-act="cover" data-v="open_cover" data-eid="${esc(eid)}" ${ok && s.state !== 'open' || ok && a.current_position < 100 ? '' : 'disabled'}>${ic('open')}Open</button>` : ''}${f & 8 ? `<button class="btn" data-act="cover" data-v="stop_cover" data-eid="${esc(eid)}" ${ok ? '' : 'disabled'}>${ic('stop')}Stop</button>` : ''}${(f & 2) || !f ? `<button class="btn" data-act="cover" data-v="close_cover" data-eid="${esc(eid)}" ${ok && s.state !== 'closed' ? '' : 'disabled'}>${ic('close')}Close</button>` : ''}</div>`;
       if ((f & 4) && a.current_position != null) b += slider('Position', a.current_position, 0, 100, 1, 'pos', (v) => v + '% open');
     }
     if (k === 'media') {
-      if (a.media_title) b += `<div class="ctl"><div class="hd"><span>Now playing</span></div><div style="font-weight:600;margin-top:4px">${esc(a.media_title)}</div>${a.source ? `<div style="font-size:12.5px;color:var(--muted)">${esc(a.source)}</div>` : ''}</div>`;
+      if (a.media_title) b += `<div class="ctl"><div class="hd"><span>${t('Now playing')}</span></div><div style="font-weight:600;margin-top:4px">${esc(a.media_title)}</div>${a.source ? `<div style="font-size:12.5px;color:var(--muted)">${esc(a.source)}</div>` : ''}</div>`;
       if ((f & 1 || f & 16384) && on) b += `<div class="btnrow" style="margin-bottom:12px"><button class="btn" data-act="media" data-v="media_play_pause" data-eid="${esc(eid)}" ${ok ? '' : 'disabled'}>${ic(s.state === 'playing' ? 'pause' : 'play')}${s.state === 'playing' ? 'Pause' : 'Play'}</button></div>`;
       if ((f & 4) && a.volume_level != null && on) b += slider('Volume', Math.round(a.volume_level * 100), 0, 100, 1, 'vol', (v) => v + '%');
     }
@@ -1110,6 +1165,14 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
       case 'exit-demo': { if (C) C.close(); C = null; S.demo = false; clearData(); const a = loadAuth(); if (a) { loadCache(); startConnection(a); } else setStatus('idle'); break; }
       case 'go-settings': location.hash = '#/settings'; break;
       case 'disco-start': startDisco(); break;
+      case 'open-ha': try { sessionStorage.setItem('comfortLeave', '1'); } catch (x) { /* */ } if (EMBED) location.href = '/'; else { const au = loadAuth(); if (au && au.url) window.open(au.url, '_blank'); } break;
+      case 'all-lights-off': { const ids = model().controls.filter((x) => model().kind[x] === 'light' && isOn(x)); if (ids.length && canSend()) { svc('light', 'turn_off', { entity_id: ids }); toast(t('Lights off'), 'ok'); } break; }
+      case 'room-lights': { const r = model().roomById[el.dataset.id]; if (!r || !canSend()) break; const ids = r.devs.filter((x) => model().kind[x] === 'light' && avail(S.states[x])); const anyOn = ids.some((x) => isOn(x)); if (ids.length) svc('light', anyOn ? 'turn_off' : 'turn_on', { entity_id: ids }); break; }
+      case 'clim-main': settings.climate = eid; saveSettings(); S.climSel = eid; schedule(true); toast(nameOf(eid) + ' · ' + t('Main'), 'ok'); break;
+      case 'clim-go': { const sl = document.querySelector(`.cslide[data-eid="${CSS.escape(eid)}"]`); if (sl) sl.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); break; }
+      case 'light-hs': { const h = +el.dataset.h; if (el.dataset.white) command(eid, 'light', 'turn_on', S.states[eid].attributes.supported_color_modes.includes('color_temp') ? { color_temp_kelvin: 4000 } : { hs_color: [0, 0] }, (ns) => ns.state === 'on'); else command(eid, 'light', 'turn_on', { hs_color: [h, 100] }, (ns) => ns.state === 'on' && ns.attributes.hs_color && Math.abs(ns.attributes.hs_color[0] - h) < 8); break; }
+      case 'light-mood': { const P = { relax: [2700, 55], read: [4000, 100], focus: [5500, 100], night: [2200, 8] }[el.dataset.v]; const sa = S.states[eid].attributes; const d = { brightness_pct: P[1] }; if ((sa.supported_color_modes || []).includes('color_temp')) d.color_temp_kelvin = P[0]; command(eid, 'light', 'turn_on', d, (ns) => ns.state === 'on'); break; }
+      case 'light-fx': command(eid, 'light', 'turn_on', { effect: el.dataset.v }, (ns) => ns.attributes.effect === el.dataset.v || ns.state === 'on'); break;
       case 'disco-stop': stopDisco(); break;
       case 'disco-sw': { const i = settings.discoSwitches.indexOf(eid); if (i >= 0) settings.discoSwitches.splice(i, 1); else settings.discoSwitches.push(eid); saveSettings(); schedule(true); break; }
       case 'dismiss-install': store.set('ch.installHintOff', true); schedule(true); break;
@@ -1122,6 +1185,15 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
     e.preventDefault(); e.stopImmediatePropagation();
     if (a.dataset.act === 'clim-open') { settings.climate = a.dataset.eid; saveSettings(); S.sheet = null; }
     const h = a.getAttribute('href'); if (location.hash !== h) location.hash = h; else onRoute();
+  }, true);
+  document.addEventListener('scroll', (e) => {
+    const car = e.target; if (!car.classList || !car.classList.contains('ccar')) return;
+    clearTimeout(car._t); car._t = setTimeout(() => {
+      const i = Math.round(car.scrollLeft / car.clientWidth); const sl = car.children[i]; if (!sl) return;
+      S.climCur = sl.dataset.eid;
+      document.querySelectorAll('.cnames .chip').forEach((c) => c.classList.toggle('sel', c.dataset.eid === S.climCur));
+      document.querySelectorAll('.cdots i').forEach((d) => d.classList.toggle('on', d.dataset.eid === S.climCur));
+    }, 80);
   }, true);
   document.addEventListener('keydown', (e) => {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-act]')) { e.preventDefault(); e.target.click(); }
