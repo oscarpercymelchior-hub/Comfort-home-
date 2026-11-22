@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.8.1';
+  const VERSION = '1.8.2';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -37,7 +37,7 @@
       'All lights off': 'Alle lampen uit', 'Lights on': 'Lampen aan', 'Lights off': 'Lampen uit', 'Main': 'Hoofd', 'Set as main': 'Maak hoofd', 'Swipe for your other air conditioners': 'Veeg voor je andere airco’s',
       '{n} on': '{n} aan', 'All off': 'Alles uit', '{n} open': '{n} open', '{n} unavailable': '{n} niet beschikbaar', 'Outside {t}': 'Buiten {t}', 'Average of {n} rooms': 'Gemiddelde van {n} kamers', '{n} devices': '{n} apparaten', '1 device': '1 apparaat', 'Room {t}': 'Kamer {t}', 'to {t}': 'naar {t}', 'Indoor': 'Binnen',
       'Turn on': 'Aanzetten', 'Turn off': 'Uitzetten', 'Run': 'Start',
-      'Change dashboard': 'Dashboard wisselen', 'Back to Home': 'Terug naar Thuis', 'Changed just now': 'Net veranderd', 'Changed {x} ago': '{x} geleden veranderd', 'Connecting to Home Assistant…': 'Verbinden met Home Assistant…', 'Connection lost. Reconnecting…': 'Verbinding kwijt. Opnieuw verbinden…', 'Showing last known values': 'Laatst bekende waarden', 'Retry': 'Opnieuw', 'House average': 'Gemiddeld in huis', 'Tap to control all {n} air conditioners at once': 'Tik om alle {n} airco’s tegelijk te regelen', 'Per room': 'Per kamer', 'Heating': 'Verwarming', 'All air conditioners': 'Alle airco’s', 'House {t}': 'Huis {t}', 'Room temperature': 'Kamertemperatuur', 'Info': 'Info', 'Search everything': 'Zoek alles', 'Nothing found.': 'Niets gevonden.', 'Show more': 'Meer tonen', 'History': 'Geschiedenis', 'General': 'Algemeen', 'All information': 'Alle informatie', 'Device': 'Apparaat', 'Also on this device': 'Ook op dit apparaat', 'Open in Home Assistant': 'Openen in Home Assistant', 'Min': 'Min', 'Average': 'Gemiddeld', 'Max': 'Max', 'Now': 'Nu', 'No history in this period.': 'Geen geschiedenis in deze periode.', 'This entity does not exist (anymore).': 'Dit bestaat niet (meer).', 'Entity ID': 'Entiteit-ID', 'State': 'Status', 'Room': 'Kamer', 'Last changed': 'Laatst veranderd', 'Last updated': 'Laatst bijgewerkt', 'Integration': 'Integratie', 'Manufacturer': 'Merk', 'Model': 'Model', 'Firmware': 'Firmware', 'Hardware': 'Hardware', 'Yes': 'Ja', 'No': 'Nee', 'Dashboard': 'Dashboard', 'Comfort stays your start screen. Come back any time via the Comfort item in the Home Assistant menu.': 'Comfort blijft je startscherm. Je komt altijd terug via “Comfort” in het Home Assistant-menu.', 'Sensors': 'Sensoren', 'Status sensors': 'Statussensoren', 'Lights': 'Lampen', 'Switches': 'Schakelaars', 'Automations': 'Automatiseringen', 'People': 'Personen', 'Trackers': 'Trackers', 'Weather': 'Weer', 'Sun': 'Zon', 'Updates': 'Updates', 'Buttons': 'Knoppen', 'Numbers': 'Getallen', 'Selects': 'Keuzes', 'Fans': 'Ventilatoren', 'Blinds': 'Zonwering', 'Locks': 'Sloten', 'Scenes': 'Scènes', 'Scripts': 'Scripts', 'Helpers': 'Helpers', 'Cameras': 'Camera’s', 'Media': 'Media', 'Water heater': 'Warm water', 'To-do lists': 'Takenlijsten', 'Calendar': 'Agenda', 'Controls': 'Bediening', 'Set time': 'Tijden', 'Next': 'Volgende', 'New timer': 'Nieuwe tijd', 'Edit timer': 'Tijd aanpassen', 'Name': 'Naam', 'Time': 'Tijd', 'Days': 'Dagen', 'Save': 'Opslaan', 'Delete': 'Verwijderen', 'Every day': 'Elke dag', 'Weekdays': 'Werkdagen', 'Weekend': 'Weekend', 'Timers': 'Tijden', 'Other automations': 'Andere automatiseringen', 'Edit in Home Assistant': 'Bewerken in Home Assistant', 'Run now': 'Nu uitvoeren', 'No timers yet. Tap + to make one.': 'Nog geen tijden. Tik op + om er een te maken.', 'Choose devices': 'Kies apparaten', 'in {x}': 'over {x}', 'Sunrise': 'Zonsopkomst', 'Sunset': 'Zonsondergang', 'Home Assistant pages': 'Home Assistant-pagina’s', 'Overview': 'Overzicht', 'Energy': 'Energie', 'Map': 'Kaart', 'Logbook': 'Logboek', 'History': 'Geschiedenis', 'Profile': 'Profiel', 'Choose another default dashboard here': 'Kies hier een ander standaarddashboard', 'Saved': 'Opgeslagen', 'Deleted': 'Verwijderd', 'Only administrators can change timers.': 'Alleen beheerders kunnen tijden aanpassen.', 'Made in Home Assistant: you can switch it on or off here.': 'Gemaakt in Home Assistant: hier kun je hem aan- of uitzetten.', 'Search': 'Zoeken', 'Back to the normal Home Assistant screens': 'Terug naar de normale Home Assistant-schermen', 'Switch': 'Wissel', 'All': 'Alles',
+      'Change dashboard': 'Dashboard wisselen', 'Back to Home': 'Terug naar Thuis', 'Changed just now': 'Net veranderd', 'Changed {x} ago': '{x} geleden veranderd', 'Connecting to Home Assistant…': 'Verbinden met Home Assistant…', 'Connection lost. Reconnecting…': 'Verbinding kwijt. Opnieuw verbinden…', 'Showing last known values': 'Laatst bekende waarden', 'Retry': 'Opnieuw', 'Air conditioners': 'Airco’s', 'Ticked = shown on the Climate page and controlled together. Heating is shown as a separate button.': 'Aangevinkt = staat op de Klimaat-pagina en wordt samen bediend. Verwarming staat als aparte knop onderaan.', 'House average': 'Gemiddeld in huis', 'Tap to control all {n} air conditioners at once': 'Tik om alle {n} airco’s tegelijk te regelen', 'Per room': 'Per kamer', 'Heating': 'Verwarming', 'All air conditioners': 'Alle airco’s', 'House {t}': 'Huis {t}', 'Room temperature': 'Kamertemperatuur', 'Info': 'Info', 'Search everything': 'Zoek alles', 'Nothing found.': 'Niets gevonden.', 'Show more': 'Meer tonen', 'History': 'Geschiedenis', 'General': 'Algemeen', 'All information': 'Alle informatie', 'Device': 'Apparaat', 'Also on this device': 'Ook op dit apparaat', 'Open in Home Assistant': 'Openen in Home Assistant', 'Min': 'Min', 'Average': 'Gemiddeld', 'Max': 'Max', 'Now': 'Nu', 'No history in this period.': 'Geen geschiedenis in deze periode.', 'This entity does not exist (anymore).': 'Dit bestaat niet (meer).', 'Entity ID': 'Entiteit-ID', 'State': 'Status', 'Room': 'Kamer', 'Last changed': 'Laatst veranderd', 'Last updated': 'Laatst bijgewerkt', 'Integration': 'Integratie', 'Manufacturer': 'Merk', 'Model': 'Model', 'Firmware': 'Firmware', 'Hardware': 'Hardware', 'Yes': 'Ja', 'No': 'Nee', 'Dashboard': 'Dashboard', 'Comfort stays your start screen. Come back any time via the Comfort item in the Home Assistant menu.': 'Comfort blijft je startscherm. Je komt altijd terug via “Comfort” in het Home Assistant-menu.', 'Sensors': 'Sensoren', 'Status sensors': 'Statussensoren', 'Lights': 'Lampen', 'Switches': 'Schakelaars', 'Automations': 'Automatiseringen', 'People': 'Personen', 'Trackers': 'Trackers', 'Weather': 'Weer', 'Sun': 'Zon', 'Updates': 'Updates', 'Buttons': 'Knoppen', 'Numbers': 'Getallen', 'Selects': 'Keuzes', 'Fans': 'Ventilatoren', 'Blinds': 'Zonwering', 'Locks': 'Sloten', 'Scenes': 'Scènes', 'Scripts': 'Scripts', 'Helpers': 'Helpers', 'Cameras': 'Camera’s', 'Media': 'Media', 'Water heater': 'Warm water', 'To-do lists': 'Takenlijsten', 'Calendar': 'Agenda', 'Controls': 'Bediening', 'Set time': 'Tijden', 'Next': 'Volgende', 'New timer': 'Nieuwe tijd', 'Edit timer': 'Tijd aanpassen', 'Name': 'Naam', 'Time': 'Tijd', 'Days': 'Dagen', 'Save': 'Opslaan', 'Delete': 'Verwijderen', 'Every day': 'Elke dag', 'Weekdays': 'Werkdagen', 'Weekend': 'Weekend', 'Timers': 'Tijden', 'Other automations': 'Andere automatiseringen', 'Edit in Home Assistant': 'Bewerken in Home Assistant', 'Run now': 'Nu uitvoeren', 'No timers yet. Tap + to make one.': 'Nog geen tijden. Tik op + om er een te maken.', 'Choose devices': 'Kies apparaten', 'in {x}': 'over {x}', 'Sunrise': 'Zonsopkomst', 'Sunset': 'Zonsondergang', 'Home Assistant pages': 'Home Assistant-pagina’s', 'Overview': 'Overzicht', 'Energy': 'Energie', 'Map': 'Kaart', 'Logbook': 'Logboek', 'History': 'Geschiedenis', 'Profile': 'Profiel', 'Choose another default dashboard here': 'Kies hier een ander standaarddashboard', 'Saved': 'Opgeslagen', 'Deleted': 'Verwijderd', 'Only administrators can change timers.': 'Alleen beheerders kunnen tijden aanpassen.', 'Made in Home Assistant: you can switch it on or off here.': 'Gemaakt in Home Assistant: hier kun je hem aan- of uitzetten.', 'Search': 'Zoeken', 'Back to the normal Home Assistant screens': 'Terug naar de normale Home Assistant-schermen', 'Switch': 'Wissel', 'All': 'Alles',
       'mon': 'ma', 'tue': 'di', 'wed': 'wo', 'thu': 'do', 'fri': 'vr', 'sat': 'za', 'sun': 'zo'
     },
     mc: {
@@ -439,7 +439,16 @@
   function climDevs() { const m = model(); if (!m._cd) { m._cd = new Set(); m.climates.forEach((e) => { const d = (S.ents[e] || {}).device_id; if (d) m._cd.add(d); }); } return m._cd; }
   const isACsensor = (e) => climDevs().has((S.ents[e] || {}).device_id);
   const fine = (e) => (/\.\d*[1-9]/.test((S.states[e] || {}).state || '') ? 1 : 0);
-  const isAC = (e) => (((S.states[e] || {}).attributes || {}).hvac_modes || []).some((x) => ['cool', 'dry', 'fan_only'].includes(x));
+  /* An air conditioner has a fan (fan speeds, fan-only or dry mode). Boilers/thermostats (OpenTherm etc.) can list "cool" too, so that is not enough. */
+  const HEAT_RE = /opentherm|otgw|thermosta|boiler|ketel|dhw|hot.?water|warm.?water|verwarming|heating|vloer|floor|radiator|cv[-_ ]?ketel/i;
+  function isAC(e) {
+    const s = S.states[e]; if (!s || !e.startsWith('climate.')) return false; const a2 = s.attributes || {}; const reg = S.ents[e] || {};
+    if (Array.isArray(settings.acList) && settings.acList.length) return settings.acList.includes(e);
+    if (/opentherm|generic_thermostat|better_thermostat|tado|nest|evohome|plugwise|netatmo|honeywell|ecobee/.test(reg.platform || '')) return false;
+    const r = roomOfEid(e); if (HEAT_RE.test(fname(e)) || (r && HEAT_RE.test(r.name))) return false;
+    const modes = a2.hvac_modes || [];
+    return (a2.fan_modes || []).length > 0 || modes.includes('fan_only') || modes.includes('dry');
+  }
   const acList = (m) => m.climates.filter(isAC);
   const tColor = (v) => (v == null ? 'var(--muted)' : `hsl(${Math.round(clamp(v <= 20 ? 210 - (v - 16) * 10 : 170 - (v - 20) * 45, 8, 215))} 72% 48%)`);
   const shortRoom = (n) => { const s = String(n || '').replace(/\bkamer\b/ig, '').replace(/\s+\d+$/, '').trim(); return cap(s || n); };
@@ -541,6 +550,19 @@
 
   /* ---------------- commands (state only changes when Home Assistant confirms) ---------------- */
   function canSend() { if (C && C.authed) return true; toast(S.conn === 'idle' ? 'Connect to Home Assistant in Settings first' : 'Not connected to Home Assistant', 'bad'); return false; }
+  /* After every change: fetch all states again from Home Assistant so the page always shows the real situation */
+  let refreshT1, refreshT2;
+  function refreshSoon() {
+    clearTimeout(refreshT1); clearTimeout(refreshT2);
+    const go = () => { if (!C || !C.authed) return; C.send({ type: 'get_states' }, 20000).then((states) => {
+      const seen = new Set();
+      (states || []).forEach((x) => { seen.add(x.entity_id); const o = S.states[x.entity_id]; if (!o || o.last_updated !== x.last_updated || o.state !== x.state) onStateChanged({ entity_id: x.entity_id, new_state: x }); });
+      Object.keys(S.states).forEach((e) => { if (!seen.has(e)) onStateChanged({ entity_id: e, new_state: null }); });
+      if (S.route.name === 'timers') loadAutos(true);
+      schedule(true);
+    }).catch(() => { /* live updates still run */ }); };
+    refreshT1 = setTimeout(go, 1200); refreshT2 = setTimeout(go, 4500);
+  }
   async function command(eid, domain, service, data, check, opts) {
     opts = opts || {};
     if (!canSend()) return false;
@@ -553,6 +575,7 @@
     S.pending[eid] = p; schedule(true);
     try {
       await C.send({ type: 'call_service', domain, service, service_data: Object.assign({ entity_id: eid }, data || {}) });
+      refreshSoon();
       if (opts.noState) { clearTimeout(p.timer); delete S.pending[eid]; schedule(true); if (opts.okMsg) toast(opts.okMsg, 'ok'); }
       return true;
     } catch (e) {
@@ -827,7 +850,7 @@ ${toggleHTML(eid, s)}</div>`;
       return `<span class="csi${on ? ' on' : ''}" style="--tc:${tColor(v)}" data-k="csi-${esc(e)}"><b>${esc(shortRoom(r ? r.name : nameOf(e)))}</b><span class="num">${smallT(v)}</span>${on ? `<i>${ic(st(e).state === 'heat' ? 'flame' : st(e).state === 'cool' ? 'snow' : 'climate')}</i>` : ''}</span>`; }).join('')}</a>`;
   }
   function groupTarget(acs) {
-    if (S.grpV != null && Date.now() - S.grpAt < 8000) return S.grpV;
+    if (S.grpV != null && Date.now() - S.grpAt < 8000 && (Date.now() - S.grpAt < 1500 || acs.some((e) => S.pending[e] || S.draft[e]))) return S.grpV;
     const ts = acs.map((e) => (S.draft[e] ? S.draft[e].v : +(st(e) || { attributes: {} }).attributes.temperature)).filter((v) => isFinite(v));
     if (!ts.length) return null; const cnt = {}; ts.forEach((v) => { cnt[v] = (cnt[v] || 0) + 1; });
     return +Object.keys(cnt).sort((x, y) => cnt[y] - cnt[x])[0];
@@ -1167,7 +1190,7 @@ ${EMBED ? `<button class="btn" style="width:100%;margin-top:12px" data-act="go-p
     return out + '</div>';
   }
 
-  function svc(domain, service, data) { return C && C.authed ? C.send({ type: 'call_service', domain, service, service_data: data }).catch(() => { /* ignore */ }) : Promise.resolve(); }
+  function svc(domain, service, data) { if (C && C.authed) refreshSoon(); return C && C.authed ? C.send({ type: 'call_service', domain, service, service_data: data }).catch(() => { /* ignore */ }) : Promise.resolve(); }
   const colorLight = (s) => (s.attributes.supported_color_modes || []).some((m) => ['hs', 'rgb', 'rgbw', 'rgbww', 'xy'].includes(m));
   const dimLight = (s) => (s.attributes.supported_color_modes || []).some((m) => m !== 'onoff');
   /* ---------------- SET TIME (automations) ---------------- */
@@ -1272,7 +1295,7 @@ ${EMBED ? `<button class="btn" style="width:100%;margin-top:12px" data-act="go-p
     cfg[newKeys ? 'actions' : 'action'] = [Object.assign(newKeys ? { action: 'homeassistant.turn_' + f.verb } : { service: 'homeassistant.turn_' + f.verb }, { target: { entity_id: f.ents.slice() } })];
     const id = f.id || String(Date.now());
     S.saving = true; schedule(true);
-    try { await api('POST', 'config/automation/config/' + id, cfg); S.autoCfg[id] = Object.assign({ id }, cfg); toast(t('Saved'), 'ok'); closeSheet(); setTimeout(() => loadAutos(true), 1500); }
+    try { await api('POST', 'config/automation/config/' + id, cfg); refreshSoon(); S.autoCfg[id] = Object.assign({ id }, cfg); toast(t('Saved'), 'ok'); closeSheet(); setTimeout(() => loadAutos(true), 1500); }
     catch (e) { toast(e.message, 'bad', 6000); }
     S.saving = false; schedule(true);
   }
@@ -1370,6 +1393,12 @@ ${S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-a
       if (settings.autoSource === 'time') out += `<div class="it"><span class="ic">${ic('sun')}</span><span class="lb"><b>${t('Day starts')}</b></span><input type="time" data-set="dayStart" value="${esc(settings.dayStart)}" aria-label="Day starts"></div><div class="it"><span class="ic">${ic('moon')}</span><span class="lb"><b>${t('Night starts')}</b></span><input type="time" data-set="nightStart" value="${esc(settings.nightStart)}" aria-label="Night starts"></div>`;
     }
     out += `</div>`;
+    // air conditioners
+    if (m.climates.length) {
+      const sel = acList(m);
+      out += `<div class="sec-h" style="margin-top:24px"><h2>${t('Air conditioners')}</h2><span class="aux">${sel.length}</span></div><div class="card set" data-k="acset">${m.climates.map((e) => { const on = sel.includes(e); return `<button class="it" data-act="ac-pick" data-eid="${esc(e)}" data-k="acp-${esc(e)}"><span class="ic">${ic(on ? 'snow' : 'flame')}</span><span class="lb"><b>${esc(nameOf(e))}</b><span>${esc(roomNameOf(e) || e)}</span></span><span class="chk${on ? ' on' : ''}">${on ? ic('ok') : ''}</span></button>`; }).join('')}
+<div class="blk"><p class="meta-sm" style="margin:0">${t('Ticked = shown on the Climate page and controlled together. Heating is shown as a separate button.')}</p></div></div>`;
+    }
     // home
     const opts = [['auto', 'Average of rooms']].concat(m.temps.map((e) => [e, nameOf(e)]), m.climates.map((e) => [e, nameOf(e) + ' (room temp)']));
     out += `<div class="sec-h" style="margin-top:24px"><h2>${t('Home screen')}</h2></div><div class="card set" data-k="homeset">
@@ -1494,6 +1523,7 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
       case 'exit-demo': { if (C) C.close(); C = null; S.demo = false; clearData(); const a = loadAuth(); if (a) { loadCache(); startConnection(a); } else setStatus('idle'); break; }
       case 'go-settings': location.hash = '#/settings'; break;
       case 'ha-menu': openSheet('__ha'); break;
+      case 'ac-pick': { const cur = acList(model()); const i = cur.indexOf(eid); if (i >= 0) cur.splice(i, 1); else cur.push(eid); settings.acList = cur; saveSettings(); schedule(true); break; }
       case 'go-info': location.hash = '#/info/' + encodeURIComponent(eid); break;
       case 'grp-preset': grpSet(acList(model()), +el.dataset.v); break;
       case 'go-clim': location.hash = '#/climate/' + encodeURIComponent(eid); break;

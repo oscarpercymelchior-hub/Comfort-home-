@@ -117,7 +117,8 @@
     ent('climate.bedroom_ac', 'off', acAttrs('Bedroom AC', 19.3, 20, 'Low', 'Mid'), d);
     this.states['climate.bedroom_ac'].attributes.hvac_action = 'off';
     d = dev('d_th', 'Boiler', null, 'OpenTherm', 'OTGW');
-    ent('climate.thermostat', 'heat', { friendly_name: 'Thermostat', hvac_modes: ['heat', 'off'], min_temp: 5, max_temp: 30, target_temp_step: 0.5, current_temperature: 19.5, temperature: 19.5, hvac_action: 'idle', supported_features: 1 }, d);
+    ent('climate.opentherm_gateway_otgw_dhw_control', 'auto', { friendly_name: 'OpenTherm Gateway (OTGW) DHW Control', hvac_modes: ['auto', 'heat', 'cool', 'off'], min_temp: 30, max_temp: 70, temperature: 60, supported_features: 1 }, d);
+    ent('climate.thermostat', 'heat', { friendly_name: 'Thermostaat', hvac_modes: ['heat', 'cool', 'off'], min_temp: 5, max_temp: 30, target_temp_step: 0.5, current_temperature: 19.5, temperature: 19.5, hvac_action: 'idle', supported_features: 1 }, d);
     d = 'd_ac2';
     ent('sensor.bedroom_ac_inside_temperature', 19, T('Bedroom AC Inside Temperature'), d);
     ent('sensor.bedroom_ac_outside_temperature', 0, T('Bedroom AC Outside Temperature'), d);
