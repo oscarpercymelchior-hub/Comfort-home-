@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.1';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
