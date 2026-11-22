@@ -116,6 +116,9 @@
     d = dev('d_ac2', 'Bedroom AC', 'bedroom', 'Panasonic', 'CS-Z20');
     ent('climate.bedroom_ac', 'off', acAttrs('Bedroom AC', 19.3, 20, 'Low', 'Mid'), d);
     this.states['climate.bedroom_ac'].attributes.hvac_action = 'off';
+    d = dev('d_th', 'Boiler', null, 'OpenTherm', 'OTGW');
+    ent('climate.thermostat', 'heat', { friendly_name: 'Thermostat', hvac_modes: ['heat', 'off'], min_temp: 5, max_temp: 30, target_temp_step: 0.5, current_temperature: 19.5, temperature: 19.5, hvac_action: 'idle', supported_features: 1 }, d);
+    d = 'd_ac2';
     ent('sensor.bedroom_ac_inside_temperature', 19, T('Bedroom AC Inside Temperature'), d);
     ent('sensor.bedroom_ac_outside_temperature', 0, T('Bedroom AC Outside Temperature'), d);
     d = 'd_ac1';
