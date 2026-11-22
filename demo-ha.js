@@ -74,7 +74,7 @@
     d = dev('d_l2', 'Floor lamp', 'living_room', 'IKEA', 'TRADFRI');
     ent('light.living_room_floor_lamp', 'off', { friendly_name: 'Living room Floor lamp', supported_color_modes: ['brightness'], supported_features: 32 }, d);
     d = dev('d_l3', 'Kitchen spots', 'kitchen');
-    ent('light.kitchen_spots', 'on', { friendly_name: 'Kitchen Spots', brightness: 255, color_mode: 'brightness', supported_color_modes: ['brightness'] }, d);
+    ent('light.kitchen_spots', 'on', { friendly_name: 'Kitchen Spots', brightness: 255, color_mode: 'hs', hs_color: [30, 60], supported_color_modes: ['hs', 'color_temp'] }, d);
     d = dev('d_l4', 'Bedside lamp', 'bedroom');
     ent('light.bedroom_bedside', 'off', { friendly_name: 'Bedroom Bedside lamp', supported_color_modes: ['brightness'] }, d);
     d = dev('d_l5', 'Attic light', 'attic');
@@ -224,7 +224,8 @@
       case 'light':
         if (service === 'turn_on') { const p = { brightness: data.brightness != null ? data.brightness : (a.brightness || 255) };
           if (data.brightness_pct != null) p.brightness = Math.round(data.brightness_pct * 2.55);
-          if (data.color_temp_kelvin) p.color_temp_kelvin = data.color_temp_kelvin;
+          if (data.color_temp_kelvin) { p.color_temp_kelvin = data.color_temp_kelvin; p.color_mode = 'color_temp'; }
+          if (data.hs_color) { p.hs_color = data.hs_color; p.color_mode = 'hs'; }
           if (a.supported_color_modes && a.supported_color_modes[0] === 'onoff') delete p.brightness;
           on('on', p); }
         else on('off', { brightness: null });

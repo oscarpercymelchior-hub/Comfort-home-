@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -16,7 +16,7 @@
     del(k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) { /* ignore */ } }
   };
   const DEFAULTS = { theme: 'auto', autoSource: 'time', dayStart: '07:00', nightStart: '20:00', houseSource: 'auto', showHum: true,
-    favorites: [], roomMain: {}, devGroup: 'type', climate: null, lastMode: {} };
+    favorites: [], roomMain: {}, devGroup: 'type', climate: null, lastMode: {}, discoSwitches: [] };
   const settings = Object.assign({}, DEFAULTS, store.get('ch.settings', {}));
   const saveSettings = () => store.set('ch.settings', settings);
   function loadAuth() { return store.get('ch.auth', null) || store.get('ch.auth', null, true); }
@@ -552,7 +552,7 @@
   if (mql && mql.addEventListener) mql.addEventListener('change', applyTheme);
 
   /* ---------------- router ---------------- */
-  const TABS = [['home', 'Home', 'home'], ['climate', 'Climate', 'climate'], ['rooms', 'Rooms', 'rooms'], ['devices', 'Devices', 'devices'], ['settings', 'Settings', 'settings']];
+  const TABS = [['home', 'Home', 'home'], ['climate', 'Climate', 'climate'], ['rooms', 'Rooms', 'rooms'], ['devices', 'Devices', 'devices'], ['disco', 'Disco', 'auto'], ['settings', 'Settings', 'settings']];
   const scrollPos = {};
   function parseRoute() {
     const h = decodeURIComponent(location.hash.replace(/^#\/?/, '')); const [name, id] = h.split('/');
@@ -586,7 +586,7 @@
     let html;
     try {
       const r = S.route.name;
-      html = r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
+      html = r === 'disco' ? pDisco() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
     } catch (e) { console.error(e); html = `<div class="page" data-k="err"><div class="msg bad">${ic('alert')}<div>Something went wrong showing this page. ${esc(e.message)}</div></div></div>`; }
     morphInto($('#view'), html);
     morphInto($('#nav'), navHTML());
@@ -885,6 +885,72 @@ ${sp && sp.pts.length > 2 ? sparkHTML(sp.pts, r.color) : ''}</div></div>`;
     return out + '</div>';
   }
 
+  /* ---------------- DISCO ---------------- */
+  const DISCO_MS = 120000;
+  const colorLight = (s) => (s.attributes.supported_color_modes || []).some((m) => ['hs', 'rgb', 'rgbw', 'rgbww', 'xy'].includes(m));
+  const dimLight = (s) => (s.attributes.supported_color_modes || []).some((m) => m !== 'onoff');
+  function discoTargets() {
+    const m = model();
+    const lights = m.controls.filter((e) => m.kind[e] === 'light' && avail(S.states[e]));
+    const sw = settings.discoSwitches.filter((e) => S.states[e] && avail(S.states[e]) && ['plug', 'switch'].includes(m.kind[e]));
+    return { lights, sw };
+  }
+  function svc(domain, service, data) { return C && C.authed ? C.send({ type: 'call_service', domain, service, service_data: data }).catch(() => { /* keep dancing */ }) : Promise.resolve(); }
+  function startDisco() {
+    if (!canSend() || S.disco) return;
+    const { lights, sw } = discoTargets();
+    if (!lights.length && !sw.length) return toast('No lights found to use for the disco', 'bad');
+    const backup = lights.concat(sw).map((e) => { const s = S.states[e]; const a = s.attributes; return { e, on: s.state === 'on', bri: a.brightness, hs: a.color_mode === 'hs' || a.color_mode === 'xy' || a.color_mode === 'rgb' || a.color_mode === 'rgbw' || a.color_mode === 'rgbww' ? a.hs_color : null, ct: a.color_mode === 'color_temp' ? a.color_temp_kelvin : null }; });
+    const d = S.disco = { lights, sw, backup, ends: Date.now() + DISCO_MS, n: 0 };
+    d.timer = setInterval(() => {
+      if (Date.now() >= d.ends) return stopDisco();
+      d.n++;
+      const pick = lights.slice().sort(() => Math.random() - 0.5).slice(0, 6);   // a few lamps per beat keeps the network calm
+      pick.forEach((e) => {
+        const s = S.states[e]; if (!s) return;
+        if (Math.random() < 0.18) return svc('light', 'turn_off', { entity_id: e, transition: 0.2 });
+        const data = { entity_id: e, transition: 0.3 };
+        if (colorLight(s)) { data.hs_color = [Math.floor(Math.random() * 360), 100]; data.brightness = 255; }
+        else if (dimLight(s)) data.brightness = 40 + Math.floor(Math.random() * 215);
+        svc('light', 'turn_on', data);
+      });
+      if (sw.length && d.n % 4 === 0) sw.forEach((e) => svc('homeassistant', 'toggle', { entity_id: e }));   // at most every ~4 s
+      changed.add('__clock'); schedule(false);
+    }, 900);
+    schedule(true);
+  }
+  async function stopDisco() {
+    const d = S.disco; if (!d || d.stopping) return;
+    d.stopping = true; clearInterval(d.timer); schedule(true);
+    await new Promise((r) => setTimeout(r, 600));   // let the last beat land first
+    for (const b of d.backup) {
+      const dom = b.e.split('.')[0];
+      if (!b.on) { await svc(dom === 'light' ? 'light' : 'homeassistant', 'turn_off', { entity_id: b.e }); continue; }
+      if (dom !== 'light') { await svc('homeassistant', 'turn_on', { entity_id: b.e }); continue; }
+      const data = { entity_id: b.e };
+      if (b.bri != null) data.brightness = b.bri;
+      if (b.hs) data.hs_color = b.hs; else if (b.ct) data.color_temp_kelvin = b.ct;
+      await svc('light', 'turn_on', data);
+    }
+    S.disco = null; toast('Disco is over. Everything is back to normal.', 'ok'); schedule(true);
+  }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && S.disco) stopDisco(); });
+  function pDisco() {
+    const m = model(); used.add('__clock');
+    let out = `<div class="page" data-k="p-disco"><div class="topbar"><h1>Disco</h1>${pill()}</div>${banner()}`;
+    if (!configured()) return out + welcomeHTML() + '</div>';
+    const { lights, sw } = discoTargets(); const d = S.disco;
+    const left = d ? Math.max(0, Math.ceil((d.ends - Date.now()) / 1000)) : 120;
+    out += `<div class="card disco" data-k="disco-main"><button class="discobtn${d ? ' on' : ''}" data-act="${d ? 'disco-stop' : 'disco-start'}" ${C && C.authed && (lights.length || sw.length) && !(d && d.stopping) ? '' : 'disabled'} aria-label="${d ? 'Stop disco' : 'Start disco'}">
+<span class="discoin"><span class="dt num">${d ? (d.stopping ? '…' : Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0')) : ic('auto')}</span><span class="dl">${d ? (d.stopping ? 'Restoring…' : 'Tap to stop') : 'Start disco'}</span></span></button>
+<p class="dp">${d ? 'Party time! Keep this screen open. Everything goes back to how it was when the timer ends.' : `For 2 minutes your ${lights.length} light${lights.length === 1 ? '' : 's'} flash in party colours${sw.length ? ` and ${sw.length} switch${sw.length === 1 ? '' : 'es'} turn on and off` : ''}. Afterwards everything goes back exactly as it was.`}</p></div>`;
+    const cand = m.controls.filter((e) => ['plug', 'switch'].includes(m.kind[e]));
+    out += `<div class="sec-h" style="margin-top:24px"><h2>Also switch these on and off</h2><span class="aux">${sw.length} chosen</span></div>
+<div class="msg warn" data-k="dwarn">${ic('alert')}<div>Only choose lamps, light strips or decorations. Never choose heating, pumps, a fridge, the TV or computers: switching them on and off quickly can damage them.</div></div>`;
+    out += cand.length ? `<div class="card set" data-k="dsw">${cand.map((e) => { const on = settings.discoSwitches.includes(e); return `<button class="it" data-act="disco-sw" data-eid="${esc(e)}" data-k="ds-${esc(e)}" ${d ? 'disabled' : ''}><span class="ic">${ic(devIcon(e, st(e)))}</span><span class="lb"><b>${esc(nameOf(e))}</b><span>${esc(roomNameOf(e) || stateText(e))}</span></span><span class="chk${on ? ' on' : ''}" aria-hidden="true">${on ? ic('ok') : ''}</span></button>`; }).join('')}</div>` : emptyHTML('plug', 'No switches or plugs found.');
+    return out + '</div>';
+  }
+
   /* ---------------- SETTINGS ---------------- */
   function pSettings() {
     const auth = loadAuth() || {}; const m = model();
@@ -1043,10 +1109,20 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
       case 'demo': startDemo(); location.hash = '#/home'; break;
       case 'exit-demo': { if (C) C.close(); C = null; S.demo = false; clearData(); const a = loadAuth(); if (a) { loadCache(); startConnection(a); } else setStatus('idle'); break; }
       case 'go-settings': location.hash = '#/settings'; break;
+      case 'disco-start': startDisco(); break;
+      case 'disco-stop': stopDisco(); break;
+      case 'disco-sw': { const i = settings.discoSwitches.indexOf(eid); if (i >= 0) settings.discoSwitches.splice(i, 1); else settings.discoSwitches.push(eid); saveSettings(); schedule(true); break; }
       case 'dismiss-install': store.set('ch.installHintOff', true); schedule(true); break;
       case 'reload': if (C && C.authed) { loadRegistries(C).then(() => C.send({ type: 'get_states' })).then((states) => { S.states = {}; states.forEach((x) => { S.states[x.entity_id] = x; }); modelDirty = true; schedule(true); toast('Reloaded from Home Assistant', 'ok'); }).catch((er) => toast('Reload failed: ' + er.message, 'bad')); } break;
     }
   });
+  window.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a || !a.closest('#app')) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (a.dataset.act === 'clim-open') { settings.climate = a.dataset.eid; saveSettings(); S.sheet = null; }
+    const h = a.getAttribute('href'); if (location.hash !== h) location.hash = h; else onRoute();
+  }, true);
   document.addEventListener('keydown', (e) => {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button][data-act]')) { e.preventDefault(); e.target.click(); }
     if (e.key === 'Escape' && S.sheet) closeSheet();
