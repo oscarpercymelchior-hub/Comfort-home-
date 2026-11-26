@@ -218,6 +218,14 @@
   };
 
   DemoHA.prototype._service = function (domain, service, data, cb) {
+    this.calls = this.calls || []; this.calls.push({ domain, service, data: JSON.parse(JSON.stringify(data)), at: Date.now() });
+    this.logbook = this.logbook || []; this.scenes = this.scenes || {};
+    if (domain === 'logbook' && service === 'log') { this.logbook.push({ when: Date.now() / 1000, name: data.name, message: data.message, entity_id: data.entity_id }); return cb(null); }
+    if (domain === 'scene' && service === 'create') { const snap = {}; [].concat(data.snapshot_entities || []).forEach((e) => { if (this.states[e]) snap[e] = JSON.parse(JSON.stringify(this.states[e])); }); this.scenes[data.scene_id] = snap; this.setState('scene.' + data.scene_id, 'unknown', { friendly_name: data.scene_id, entity_id: Object.keys(snap) }); return cb(null); }
+    if (domain === 'scene' && service === 'turn_on' && [].concat(data.entity_id || []).some((e) => this.scenes[e.replace('scene.', '')])) {
+      [].concat(data.entity_id).forEach((sid) => { const snap = this.scenes[sid.replace('scene.', '')] || {}; Object.keys(snap).forEach((e) => setTimeout(() => this.setState(e, snap[e].state, snap[e].attributes), this.delay)); });
+      return cb(null);
+    }
     const ids = [].concat(data.entity_id || []);
     for (const eid of ids) {
       if (!this.states[eid]) return cb({ code: 'not_found', message: 'Entity ' + eid + ' not found' });
@@ -330,6 +338,7 @@
           case 'subscribe_events': subs.set(id, m.event_type || '*'); return ok(id);
           case 'unsubscribe_events': subs.delete(m.subscription); return ok(id);
           case 'history/history_during_period': return ok(id, ha._history(m));
+          case 'logbook/get_events': { const st0 = Date.parse(m.start_time) / 1000 || 0; const ids = m.entity_ids || null; return ok(id, (ha.logbook || []).filter((x) => x.when >= st0 && (!ids || ids.includes(x.entity_id)))); }
           case 'call_service': return ha._service(m.domain, m.service, Object.assign({}, m.service_data || {}, m.target || {}), (e) => e ? err(id, e.code, e.message) : ok(id, { context: { id: 'x' } }));
           default: return err(id, 'unknown_command', 'Unknown command.');
         }

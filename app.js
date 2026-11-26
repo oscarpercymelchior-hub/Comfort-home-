@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.8.2';
+  const VERSION = '1.9.0';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -56,7 +56,7 @@
       'All lights off': 'All torches out', 'Lights on': 'Torches on', 'Lights off': 'Torches out', 'Main': 'Main', 'Set as main': 'Make main', 'Swipe for your other air conditioners': 'Swipe for your other weather machines',
       '{n} on': '{n} powered', 'All off': 'All unpowered', '{n} unavailable': '{n} missing', 'Outside {t}': 'Overworld {t}', 'Average of {n} rooms': 'Average of {n} chunks', '{n} devices': '{n} redstone', '1 device': '1 redstone', 'Room {t}': 'Chunk {t}', 'to {t}': 'to {t}', 'Indoor': 'Inside the base',
       'Turn on': 'Power on', 'Turn off': 'Power off', 'Run': 'Activate',
-      'Change dashboard': 'Switch world', 'Back to Home': 'Back to Base', 'House average': 'Base average', 'Per room': 'Per chamber', 'All air conditioners': 'All ice machines', 'Info': 'F3 Debug', 'Search everything': 'Search all blocks', 'Heating': 'Furnaces', 'History': 'Logs', 'Device': 'Block', 'Set time': 'Clock', 'Next': 'Next tick', 'New timer': 'New redstone clock', 'Edit timer': 'Edit clock', 'Timers': 'Redstone clocks', 'Other automations': 'Other contraptions', 'Save': 'Craft', 'Delete': 'Break', 'Choose devices': 'Pick blocks', 'Home Assistant pages': 'Other worlds', 'Saved': 'Crafted!', 'Deleted': 'Broken', 'No timers yet. Tap + to make one.': 'No clocks yet. Tap + to build one.', 'Sunrise': 'Sunrise', 'Sunset': 'Sunset'
+      'Change dashboard': 'Switch world', 'Back to Home': 'Back to Base', 'House average': 'Base average', 'Per room': 'Per chamber', 'All air conditioners': 'All ice machines', 'Info': 'F3 Debug', 'Search everything': 'Search all blocks', 'Heating': 'Furnaces', 'History': 'Logs', 'Device': 'Block', 'Set time': 'Clock', 'Automations': 'Contraptions', 'Next': 'Next tick', 'New timer': 'New redstone clock', 'Edit timer': 'Edit clock', 'Timers': 'Redstone clocks', 'Other automations': 'Other contraptions', 'Save': 'Craft', 'Delete': 'Break', 'Choose devices': 'Pick blocks', 'Home Assistant pages': 'Other worlds', 'Saved': 'Crafted!', 'Deleted': 'Broken', 'No timers yet. Tap + to make one.': 'No clocks yet. Tap + to build one.', 'Sunrise': 'Sunrise', 'Sunset': 'Sunset'
     }
   };
   const t = (s, vars) => { let r = (I18N[settings.lang] && I18N[settings.lang][s]) || s; if (vars) Object.keys(vars).forEach((k) => { r = r.split('{' + k + '}').join(vars[k]); }); return r; };
@@ -651,7 +651,7 @@
   if (mql && mql.addEventListener) mql.addEventListener('change', applyTheme);
 
   /* ---------------- router ---------------- */
-  const TABS = [['home', 'Home', 'home'], ['climate', 'Climate', 'climate'], ['devices', 'Devices', 'devices'], ['info', 'Info', 'info'], ['timers', 'Set time', 'clock'], ['settings', 'Settings', 'settings']];
+  const TABS = [['home', 'Home', 'home'], ['climate', 'Climate', 'climate'], ['devices', 'Devices', 'devices'], ['info', 'Info', 'info'], ['timers', 'Set time', 'clock'], ['automations', 'Automations', 'auto'], ['settings', 'Settings', 'settings']];
   const scrollPos = {};
   function parseRoute() {
     const h = decodeURIComponent(location.hash.replace(/^#\/?/, '')); const [name, id] = h.split('/');
@@ -687,11 +687,11 @@
     let html;
     try {
       const r = S.route.name;
-      html = r === 'info' ? (S.route.id ? pInfoEnt(S.route.id) : pInfo()) : r === 'timers' ? pTimers() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
+      html = r === 'automations' ? pAutomations() : r === 'info' ? (S.route.id ? pInfoEnt(S.route.id) : pInfo()) : r === 'timers' ? pTimers() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
     } catch (e) { console.error(e); html = `<div class="page" data-k="err"><div class="msg bad">${ic('alert')}<div>Something went wrong showing this page. ${esc(e.message)}</div></div></div>`; }
     morphInto($('#view'), html);
     morphInto($('#nav'), navHTML());
-    morphInto($('#sheet'), S.sheet ? (S.sheet.startsWith('__') ? specialSheet(S.sheet) : sheetHTML(S.sheet)) : '');
+    morphInto($('#sheet'), S.sheet ? (S.sheet === '__osc' ? oscSheet() : S.sheet.startsWith('__') ? specialSheet(S.sheet) : sheetHTML(S.sheet)) : '');
   }
 
   /* tiny DOM morph: keeps elements alive so transitions play and scroll/focus survive live updates */
@@ -1351,6 +1351,324 @@ ${EMBED ? `<button class="btn" style="width:100%;margin-top:12px" data-act="go-p
     return '';
   }
 
+  /* =====================================================================
+     AUTOMATIONS TAB (new in 1.9) – separate section, uses the existing
+     connection, api() helper and automation config cache (S.autoCfg).
+     ===================================================================== */
+  S.aq = ''; S.af = 'all'; S.aopen = {};
+  const tl = (en, nl) => (settings.lang === 'nl' ? nl : en);
+  function nmE(e) { return S.states[e] ? nameOf(e) : String(e).split('.').pop().replace(/_/g, ' '); }
+  function nmList(ids) { ids = [].concat(ids || []); if (!ids.length) return ''; const n = ids.map(nmE); return n.length > 2 ? n.slice(0, 2).join(', ') + ' +' + (n.length - 2) : n.join(', '); }
+  function durTxt(d) { if (!d) return ''; if (typeof d === 'string') { const p = d.split(':').map(Number); d = { hours: p[0], minutes: p[1], seconds: p[2] }; } const h = +d.hours || 0, m = +d.minutes || 0, s = +d.seconds || 0; return [h ? h + ' u' : '', m ? m + ' min' : '', s && !h ? s + ' s' : ''].filter(Boolean).join(' ') || '0 s'; }
+  function stName(e, v) { if (v == null) return ''; const d = String(e).split('.')[0]; const MAP = { on: tl('on', 'aan'), off: tl('off', 'uit'), home: tl('home', 'thuis'), not_home: tl('away', 'weg'), open: tl('open', 'open'), closed: tl('closed', 'dicht'), heat: tl('heating', 'verwarmen'), cool: tl('cooling', 'koelen') }; return [].concat(v).map((x) => MAP[x] || (d === 'binary_sensor' && x === 'on' ? tl('detected', 'gedetecteerd') : String(x).replace(/_/g, ' '))).join(tl(' or ', ' of ')); }
+  function trigText(tr) {
+    if (!tr || typeof tr !== 'object') return '';
+    const pf = tr.trigger || tr.platform; const fr = tr.for ? ' ' + tl('for', 'gedurende') + ' ' + durTxt(tr.for) : '';
+    switch (pf) {
+      case 'time': return tl('At ', 'Om ') + [].concat(tr.at || []).map((x) => (/^\d/.test(x) ? String(x).slice(0, 5) : nmE(x))).join(', ');
+      case 'sun': return (tr.event === 'sunset' ? tl('At sunset', 'Bij zonsondergang') : tl('At sunrise', 'Bij zonsopkomst')) + (tr.offset ? ' (' + tr.offset + ')' : '');
+      case 'state': return nmList(tr.entity_id) + (tr.to != null ? ' → ' + stName([].concat(tr.entity_id)[0], tr.to) : tl(' changes', ' verandert')) + fr;
+      case 'numeric_state': return nmList(tr.entity_id) + (tr.below != null ? tl(' below ', ' onder ') + tr.below : '') + (tr.above != null ? tl(' above ', ' boven ') + tr.above : '') + fr;
+      case 'time_pattern': return tl('Every ', 'Elke ') + (tr.minutes ? String(tr.minutes).replace('/', '') + ' min' : tr.hours ? String(tr.hours).replace('/', '') + ' u' : tr.seconds ? String(tr.seconds).replace('/', '') + ' s' : tl('time', 'keer'));
+      case 'homeassistant': return tr.event === 'shutdown' ? tl('When Home Assistant stops', 'Als Home Assistant stopt') : tl('When Home Assistant starts', 'Als Home Assistant start');
+      case 'template': return tl('When a template is true', 'Als een sjabloon klopt') + fr;
+      case 'zone': return nmList(tr.entity_id) + (tr.event === 'leave' ? tl(' leaves ', ' verlaat ') : tl(' enters ', ' komt in ')) + nmE(tr.zone);
+      case 'device': return tl('Device: ', 'Apparaat: ') + String(tr.type || '').replace(/_/g, ' ') + (tr.entity_id ? ' (' + nmE(tr.entity_id) + ')' : '');
+      case 'event': return tl('Event ', 'Gebeurtenis ') + (tr.event_type || '');
+      case 'mqtt': return 'MQTT ' + (tr.topic || '');
+      case 'webhook': return 'Webhook';
+      case 'calendar': return tl('Calendar ', 'Agenda ') + nmE(tr.entity_id);
+      default: return pf ? cap(String(pf).replace(/_/g, ' ')) : '';
+    }
+  }
+  function condText(c) {
+    if (!c) return ''; if (typeof c === 'string') return tl('Template', 'Sjabloon');
+    if (c.enabled === false) return '';
+    const k = c.condition;
+    const wd = (w) => [].concat(w).map((d) => dayShort(d)).join(' ');
+    switch (k) {
+      case 'and': return [].concat(c.conditions || []).map(condText).filter(Boolean).join(tl(' and ', ' en '));
+      case 'or': return '(' + [].concat(c.conditions || []).map(condText).filter(Boolean).join(tl(' or ', ' of ')) + ')';
+      case 'not': return tl('not ', 'niet ') + '(' + [].concat(c.conditions || []).map(condText).filter(Boolean).join(', ') + ')';
+      case 'state': return nmList(c.entity_id) + ' = ' + stName([].concat(c.entity_id)[0], c.state) + (c.for ? ' ' + tl('for', 'gedurende') + ' ' + durTxt(c.for) : '');
+      case 'numeric_state': return nmList(c.entity_id) + (c.below != null ? ' < ' + c.below : '') + (c.above != null ? ' > ' + c.above : '');
+      case 'time': return [c.after ? tl('after ', 'na ') + String(c.after).slice(0, 5) : '', c.before ? tl('before ', 'voor ') + String(c.before).slice(0, 5) : '', c.weekday ? wd(c.weekday) : ''].filter(Boolean).join(', ');
+      case 'sun': return [c.after ? tl('after ', 'na ') + (c.after === 'sunset' ? tl('sunset', 'zonsondergang') : tl('sunrise', 'zonsopkomst')) : '', c.before ? tl('before ', 'voor ') + (c.before === 'sunset' ? tl('sunset', 'zonsondergang') : tl('sunrise', 'zonsopkomst')) : ''].filter(Boolean).join(', ');
+      case 'zone': return nmList(c.entity_id) + tl(' in ', ' in ') + nmE(c.zone);
+      case 'trigger': return tl('trigger ', 'trigger ') + [].concat(c.id).join(', ');
+      case 'template': return tl('template check', 'sjablooncontrole');
+      case 'device': return tl('device: ', 'apparaat: ') + String(c.type || '').replace(/_/g, ' ');
+      default: return k ? String(k).replace(/_/g, ' ') : '';
+    }
+  }
+  function actText(ac) {
+    if (!ac || typeof ac !== 'object') return '';
+    if (ac.enabled === false) return '';
+    const sv = ac.action || ac.service;
+    if (sv) { const ids = (ac.target && ac.target.entity_id) || ac.entity_id || (ac.data && ac.data.entity_id) || []; const verb = /turn_on/.test(sv) ? tl('Turn on', 'Zet aan') : /turn_off/.test(sv) ? tl('Turn off', 'Zet uit') : /toggle/.test(sv) ? tl('Toggle', 'Wissel') : /notify/.test(sv) ? tl('Send notification', 'Stuur melding') : cap(String(sv.split('.')[1] || sv).replace(/_/g, ' ')); return verb + (ids.length || (ac.target && ac.target.area_id) ? ': ' + (nmList(ids) || [].concat(ac.target.area_id).join(', ')) : ''); }
+    if (ac.delay) return tl('Wait ', 'Wacht ') + durTxt(ac.delay);
+    if (ac.wait_for_trigger || ac.wait_template) return tl('Wait for a condition', 'Wacht op een voorwaarde');
+    if (ac.choose) return tl('Choice', 'Keuze') + ' (' + [].concat(ac.choose).length + ')';
+    if (ac.if) return tl('If … then …', 'Als … dan …');
+    if (ac.scene) return tl('Scene ', 'Scène ') + nmE(ac.scene);
+    if (ac.repeat) return tl('Repeat', 'Herhaal');
+    if (ac.variables) return '';
+    if (ac.device_id) return tl('Device action', 'Apparaatactie') + (ac.entity_id ? ': ' + nmE(ac.entity_id) : '');
+    if (ac.event) return tl('Event ', 'Gebeurtenis ') + ac.event;
+    if (ac.stop) return 'Stop';
+    return '';
+  }
+  function autoSummary(cfg) {
+    const arr = (x) => [].concat(x || []);
+    const trig = arr(cfg && (cfg.triggers || cfg.trigger)).map(trigText).filter(Boolean);
+    const cond = arr(cfg && (cfg.conditions || cfg.condition)).map(condText).filter(Boolean);
+    const act = arr(cfg && (cfg.actions || cfg.action)).map(actText).filter(Boolean);
+    return { trig, cond, act };
+  }
+  function whenAgo(iso) {
+    if (!iso) return tl('Never', 'Nog nooit');
+    const t0 = Date.parse(iso); if (!isFinite(t0)) return '—';
+    const m = Math.round((Date.now() - t0) / 60000);
+    const rel = m < 1 ? tl('just now', 'zojuist') : m < 60 ? tl(m + ' min ago', m + ' min geleden') : m < 1440 ? tl(Math.round(m / 60) + ' h ago', Math.round(m / 60) + ' uur geleden') : tl(Math.round(m / 1440) + ' days ago', Math.round(m / 1440) + ' dagen geleden');
+    return rel;
+  }
+  function absTime(d) { return d.toLocaleString(loc(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }); }
+
+  /* ---- Oscar Airco Heating ---- */
+  const OSC_ID = 'comfort_oscar_airco_heating';
+  const OSC = { start: 16, target: 22, stop: 19, maxMin: 30, waitH: 2 };
+  const oscEnt = () => Object.keys(S.states).find((e) => e.startsWith('automation.') && String(S.states[e].attributes.id) === OSC_ID) || null;
+  function oscCfgEnts() { const c = S.autoCfg[OSC_ID]; if (!c || c.__err) return null; const v = (c.variables || {}); return v.ac ? v : null; }
+  function oscFind() {
+    const m = model();
+    const acs = m.climates.filter(isAC);
+    const ac = acs.find((e) => /oscar/i.test(fname(e) + ' ' + roomNameOf(e))) || null;
+    const room = ac && roomOfEid(ac);
+    let sensor = null;
+    if (room) { const cand = room.temps.filter((e) => !isOutside(e) && !isJunkT(e) && !isACsensor(e) && numOf(e) != null); sensor = cand[0] || null; }
+    const dev = ac && (S.ents[ac] || {}).device_id;
+    const conn = dev ? Object.keys(S.ents).find((e) => S.ents[e].device_id === dev && S.states[e] && /^sensor\./.test(e) && (S.states[e].attributes.options || []).includes('disconnected')) || null : null;
+    return { ac, sensor, conn };
+  }
+  function oscCaps(ac) {
+    const a = ((S.states[ac] || {}).attributes) || {};
+    const heat = (a.hvac_modes || []).includes('heat');
+    const preset = (a.preset_modes || []).find((p) => /^power/i.test(p) || /boost/i.test(p)) || null;
+    const fans = a.fan_modes || []; const fan = preset ? null : (fans.find((f) => /^(high|max|5|level 5|turbo)$/i.test(f)) || fans[fans.length - 1] || null);
+    return { heat, preset, fan, min: +a.min_temp || 16, max: +a.max_temp || 30 };
+  }
+  function oscConfig(f) {
+    const A = f.ac, T = f.sensor, CN = f.conn, cp = oscCaps(A);
+    const tgt = { entity_id: A };
+    const num = `states('${T}')`;
+    const valid = `is_number(${num})`;
+    const ours = `(is_state('${A}', 'heat') and (state_attr('${A}', 'temperature') | float(0)) == ${OSC.target}` + (cp.preset ? ` and is_state_attr('${A}', 'preset_mode', '${cp.preset}'))` : cp.fan ? ` and is_state_attr('${A}', 'fan_mode', '${cp.fan}'))` : ')');
+    const log = (msg) => ({ action: 'logbook.log', data: { name: 'Oscar Airco Heating', message: msg, entity_id: '{{ this.entity_id }}' }, continue_on_error: true });
+    const power = cp.preset ? { action: 'climate.set_preset_mode', target: tgt, data: { preset_mode: cp.preset }, continue_on_error: true }
+      : cp.fan ? { action: 'climate.set_fan_mode', target: tgt, data: { fan_mode: cp.fan }, continue_on_error: true } : null;
+    const startConds = [
+      { condition: 'trigger', id: 'start' },
+      { condition: 'template', value_template: `{{ ${valid} and (${num} | float) < ${OSC.start} }}` },
+      { condition: 'template', value_template: `{{ states('${A}') not in ['unavailable', 'unknown', ''] }}` },
+      { condition: 'template', value_template: `{{ this.attributes.last_triggered is none or (now() - this.attributes.last_triggered).total_seconds() >= ${OSC.waitH * 3600} }}` },
+      { condition: 'template', value_template: `{{ not ${ours} }}` }
+    ];
+    if (CN) startConds.splice(3, 0, { condition: 'template', value_template: `{{ states('${CN}') not in ['disconnected', 'authentication_error'] }}` });
+    const waits = [
+      { trigger: 'template', value_template: `{{ ${valid} and (${num} | float) >= ${OSC.stop} }}`, id: 'reached' },
+      { trigger: 'state', entity_id: T, to: ['unavailable', 'unknown'], for: { minutes: 1 }, id: 'lost' },
+      { trigger: 'state', entity_id: A, to: ['unavailable', 'unknown'], for: { minutes: 1 }, id: 'lost' },
+      { trigger: 'template', value_template: `{{ not ${ours} }}`, for: { seconds: 20 }, id: 'manual' }
+    ];
+    if (CN) waits.splice(3, 0, { trigger: 'state', entity_id: CN, to: ['disconnected', 'authentication_error'], for: { minutes: 2 }, id: 'lost' });
+    return {
+      alias: 'Oscar Airco Heating',
+      description: `Verwarmt de kamer van Oscar met alleen de airco ${nameOf(A)} als het kouder is dan ${OSC.start} °C: stand Heating, ${cp.preset ? 'Powerful' : 'ventilator maximaal'}, ${OSC.target} °C. Stopt bij ${OSC.stop} °C of na maximaal ${OSC.maxMin} minuten; maximaal één keer per ${OSC.waitH} uur. Zet daarna de oorspronkelijke airco-instellingen terug. Gemaakt met Comfort Home.`,
+      mode: 'single', max_exceeded: 'silent',
+      variables: { ac: A, sensor: T, conn: CN || '', start_below: OSC.start, target: OSC.target, stop_at: OSC.stop, max_minutes: OSC.maxMin, wait_hours: OSC.waitH },
+      triggers: [
+        { trigger: 'numeric_state', entity_id: T, below: OSC.start, for: { minutes: 2 }, id: 'start' },
+        { trigger: 'time_pattern', minutes: '/5', id: 'start' },
+        { trigger: 'homeassistant', event: 'start', id: 'recover' }
+      ],
+      conditions: [{ condition: 'or', conditions: [
+        { condition: 'and', conditions: startConds },
+        { condition: 'and', conditions: [{ condition: 'trigger', id: 'recover' }, { condition: 'template', value_template: `{{ ${ours} and this.attributes.last_triggered is not none and (now() - this.attributes.last_triggered).total_seconds() < ${OSC.waitH * 3600} }}` }] }
+      ] }],
+      actions: [{ choose: [{ conditions: [{ condition: 'trigger', id: 'recover' }], sequence: [
+        cp.preset ? { action: 'climate.set_preset_mode', target: tgt, data: { preset_mode: 'none' }, continue_on_error: true } : { delay: { seconds: 0 } },
+        { action: 'climate.turn_off', target: tgt, continue_on_error: true },
+        log('Home Assistant is herstart tijdens het verwarmen: veilig gestopt, airco uit.')
+      ] }], default: [
+        { variables: { was_off: `{{ is_state('${A}', 'off') }}`, start_temp: `{{ ${num} }}` } },
+        { action: 'scene.create', data: { scene_id: 'oscar_airco_heating_backup', snapshot_entities: [A] } },
+        log('Verwarmen gestart bij {{ start_temp }} °C.'),
+        { action: 'climate.set_hvac_mode', target: tgt, data: { hvac_mode: 'heat' }, continue_on_error: true },
+        { delay: { seconds: 3 } },
+        { action: 'climate.set_temperature', target: tgt, data: { temperature: OSC.target }, continue_on_error: true },
+        { delay: { seconds: 2 } }
+      ].concat(power ? [power] : []).concat([
+        { delay: { seconds: 30 } },
+        { wait_for_trigger: waits, timeout: { minutes: OSC.maxMin - 1, seconds: 25 }, continue_on_timeout: true },
+        { variables: { reason: "{{ wait.trigger.id if wait.trigger else 'max' }}" } },
+        { choose: [{ conditions: [{ condition: 'template', value_template: "{{ reason == 'manual' }}" }], sequence: [log('Gestopt: de airco is met de hand aangepast. Jouw instellingen blijven staan.')] }],
+          default: [
+            { action: 'scene.turn_on', target: { entity_id: 'scene.oscar_airco_heating_backup' }, continue_on_error: true },
+            { delay: { seconds: 5 } },
+            { if: [{ condition: 'template', value_template: `{{ was_off and not is_state('${A}', 'off') }}` }], then: [{ action: 'climate.turn_off', target: tgt, continue_on_error: true }] },
+            { choose: [
+              { conditions: [{ condition: 'template', value_template: "{{ reason == 'reached' }}" }], sequence: [log(`Temperatuur bereikt (${OSC.stop} °C): oorspronkelijke instellingen teruggezet.`)] },
+              { conditions: [{ condition: 'template', value_template: "{{ reason == 'lost' }}" }], sequence: [log('Verbinding of sensor verloren: veilig gestopt en oorspronkelijke instellingen teruggezet.')] }
+            ], default: [log(`Maximale verwarmingsduur bereikt (${OSC.maxMin} min): oorspronkelijke instellingen teruggezet.`)] }
+          ] }
+      ]) }]
+    };
+  }
+  S.oscLog = null;
+  async function loadOscLog(force) {
+    const e = oscEnt(); if (!e || !C || !C.authed) return;
+    if (!force && S.oscLog && Date.now() - S.oscLog.at < 60e3) return;
+    S.oscLog = Object.assign({ items: [] }, S.oscLog, { at: Date.now() });
+    try { const r = await C.send({ type: 'logbook/get_events', start_time: new Date(Date.now() - 24 * 3600e3).toISOString(), entity_ids: [e] }, 20000); S.oscLog = { at: Date.now(), items: (r || []).filter((x) => x.message && x.name === 'Oscar Airco Heating').map((x) => ({ t: (typeof x.when === 'number' ? x.when * 1000 : Date.parse(x.when)), m: x.message })).sort((x, y) => y.t - x.t) }; }
+    catch (er) { S.oscLog = { at: Date.now(), items: [], err: er.message }; }
+    schedule(true);
+  }
+  function oscStatus() {
+    const e = oscEnt(); if (!e) return { key: 'none' };
+    const s = S.states[e]; const a = s.attributes;
+    const lt = a.last_triggered ? Date.parse(a.last_triggered) : null;
+    const next = lt ? new Date(lt + OSC.waitH * 3600e3) : null;
+    const items = (S.oscLog && S.oscLog.items) || [];
+    const lastEnd = items.find((x) => !/gestart/i.test(x.m));
+    const lastStart = items.find((x) => /gestart/i.test(x.m));
+    const out = { e, s, lt, next, lastEnd, lastStart };
+    if (s.state !== 'on') return Object.assign(out, { key: 'disabled' });
+    if (+a.current > 0) return Object.assign(out, { key: 'heating' });
+    const recent = lastEnd && Date.now() - lastEnd.t < 15 * 60e3 && (!lt || (lastEnd.t >= lt && lastEnd.t - lt <= (OSC.maxMin + 5) * 60e3));
+    if (recent && /bereikt \(/i.test(lastEnd.m) && /Temperatuur/i.test(lastEnd.m)) return Object.assign(out, { key: 'reached' });
+    if (recent && /verwarmingsduur/i.test(lastEnd.m)) return Object.assign(out, { key: 'maxed' });
+    if (next && next > Date.now()) return Object.assign(out, { key: 'cooldown' });
+    return Object.assign(out, { key: 'idle' });
+  }
+  const OSC_ST = { none: ['Not installed', 'Niet geïnstalleerd', 'off'], disabled: ['Disabled', 'Uitgeschakeld', 'off'], heating: ['Heating', 'Verwarmen', 'heat'], reached: ['Temperature reached', 'Temperatuur bereikt', 'ok'], maxed: ['Maximum heating time reached', 'Maximale verwarmingsduur bereikt', 'warn'], cooldown: ['Waiting time active', 'Wachttijd actief', 'wait'], idle: ['Inactive', 'Inactief', 'idle'] };
+  function oscCard() {
+    const st0 = oscStatus(); const f = oscCfgEnts() || oscFind();
+    const sv = f.sensor ? numOf(f.sensor) : null;
+    const [en, nl, cls] = OSC_ST[st0.key];
+    if (st0.e) { const key = st0.s.last_updated + '|' + st0.s.attributes.current; const force = S.oscKey !== key; S.oscKey = key; setTimeout(() => loadOscLog(force), force ? 1500 : 0); }
+    let out = `<div class="osc st-${cls}" data-k="osc"><div class="osc-h"><span class="osc-i">${ic('flame')}</span><div class="osc-t"><b>Oscar Airco Heating</b><span>${tl('Heats Oscar’s room with the air conditioner when it gets cold', 'Verwarmt de kamer van Oscar met de airco als het koud wordt')}</span></div>`;
+    if (st0.e) out += `<button class="tg${S.pending[st0.e] ? ' pending' : ''}" role="switch" aria-checked="${st0.s.state === 'on'}" aria-label="Oscar Airco Heating" data-act="osc-toggle" ${C && C.authed ? '' : 'disabled'}><span class="kn"></span></button>`;
+    out += `</div><div class="osc-status"><span class="sdot"></span><b>${tl(en, nl)}</b>${st0.key === 'heating' && st0.lt ? `<span class="osc-sub">${tl('for', 'al')} ${Math.max(0, Math.round((Date.now() - st0.lt) / 60000))} / ${OSC.maxMin} min</span>` : ''}</div>`;
+    if (st0.key === 'heating' && st0.lt) out += `<div class="osc-bar"><i style="width:${clamp((Date.now() - st0.lt) / (OSC.maxMin * 60e3) * 100, 0, 100).toFixed(1)}%"></i></div>`;
+    const nextTxt = st0.key === 'none' ? '—' : st0.next && st0.next > Date.now() ? absTime(st0.next) : tl('Now (if colder than 16 °C)', 'Nu (als het kouder is dan 16 °C)');
+    const cells = [
+      [tl('Automation', 'Automatisering'), st0.key === 'none' ? '—' : st0.s.state === 'on' ? tl('On', 'Aan') : tl('Off', 'Uit')],
+      [tl('Room temperature', 'Kamertemperatuur'), sv != null ? fmtT(sv) : tl('No value', 'Geen waarde')],
+      [tl('Start temperature', 'Starttemperatuur'), OSC.start + ' °C'],
+      [tl('Target temperature', 'Gewenste temperatuur'), OSC.target + ' °C'],
+      [tl('Stop temperature', 'Stoptemperatuur'), OSC.stop + ' °C'],
+      [tl('Heating time', 'Verwarmingsduur'), tl('max. ', 'max. ') + OSC.maxMin + ' min'],
+      [tl('Next allowed cycle', 'Volgende toegestane cyclus'), nextTxt],
+      [tl('Last active', 'Laatst actief'), st0.lt ? whenAgo(new Date(st0.lt).toISOString()) : tl('Never', 'Nog nooit')]
+    ];
+    out += `<dl class="osc-grid">${cells.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd class="num">${esc(v)}</dd></div>`).join('')}</dl>`;
+    if (st0.lastEnd) out += `<div class="osc-last">${ic('info')}<span>${esc(st0.lastEnd.m)} <small>${esc(whenAgo(new Date(st0.lastEnd.t).toISOString()))}</small></span></div>`;
+    if (st0.key === 'none') {
+      out += `<p class="osc-note">${tl('This automation runs inside Home Assistant itself, also when this app is closed. Install it once:', 'Deze automatisering draait in Home Assistant zelf, ook als deze app dicht is. Installeer hem één keer:')}</p><button class="btn pri osc-btn" data-act="osc-install" ${C && C.authed ? '' : 'disabled'}>${ic('plus')}${tl('Install in Home Assistant', 'Installeren in Home Assistant')}</button>`;
+    } else {
+      out += `<div class="osc-act"><button class="btn" data-act="osc-install">${ic('settings')}${tl('Details & devices', 'Details en apparaten')}</button>${EMBED ? `<button class="btn" data-act="go-panel" data-p="config/automation/edit/${OSC_ID}">${ic('grid')}${tl('Open in Home Assistant', 'Openen in Home Assistant')}</button>` : ''}</div>`;
+    }
+    return out + '</div>';
+  }
+  function oscSheet() {
+    const head = `<div class="scrim" data-act="close-sheet" data-k="scrim"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Oscar Airco Heating" data-k="sheet-osc"><div class="grab"></div><div class="sh"><span class="dico" style="background:#fff1e6;color:#ea580c">${ic('flame')}</span><div class="t"><b>Oscar Airco Heating</b><span>${tl('Checked devices', 'Gecontroleerde apparaten')}</span></div><button class="star" data-act="close-sheet" aria-label="Close">${ic('x')}</button></div>`;
+    const f = S.oscForm || oscFind(); const m = model();
+    const acs = m.climates.filter(isAC);
+    const sensors = Object.keys(S.states).filter((e) => e.startsWith('sensor.') && (S.states[e].attributes.device_class === 'temperature') && !isOutside(e) && !isJunkT(e));
+    const cp = f.ac ? oscCaps(f.ac) : {};
+    const ok = (b) => `<span class="okb ${b ? 'y' : 'n'}">${b ? ic('ok') : ic('x')}</span>`;
+    const sel = (key, list, cur) => `<select data-in="osc-${key}" aria-label="${key}">${list.length ? '' : '<option value="">—</option>'}${list.map((e) => `<option value="${esc(e)}" ${e === cur ? 'selected' : ''}>${esc(nameOf(e))} · ${esc(e)}</option>`).join('')}</select>`;
+    const installed = !!oscEnt();
+    const ready = f.ac && f.sensor && cp.heat && (cp.preset || cp.fan) && numOf(f.sensor) != null;
+    let b = head + `<div class="oscf">
+<div class="oscrow">${ok(!!f.ac)}<div><b>${tl('Air conditioner (only this one is used)', 'Airco (alleen deze wordt bediend)')}</b>${sel('ac', acs, f.ac)}<small>${f.ac ? esc(roomNameOf(f.ac) || '') + ((S.devices[(S.ents[f.ac] || {}).device_id] || {}).model ? ' · ' + esc(S.devices[(S.ents[f.ac] || {}).device_id].model) : '') : tl('Not found – choose it above', 'Niet gevonden – kies hierboven')}</small></div></div>
+<div class="oscrow">${ok(f.sensor && numOf(f.sensor) != null)}<div><b>${tl('Room temperature sensor', 'Temperatuursensor van de kamer')}</b>${sel('sensor', sensors, f.sensor)}<small>${f.sensor ? tl('Now: ', 'Nu: ') + fmtT(numOf(f.sensor)) : ''}</small></div></div>
+<div class="oscrow">${ok(cp.heat)}<div><b>${tl('Heating mode', 'Verwarmingsstand')}</b><small>${cp.heat ? 'heat ✓' : tl('This air conditioner has no heat mode', 'Deze airco heeft geen verwarmingsstand')}</small></div></div>
+<div class="oscrow">${ok(!!(cp.preset || cp.fan))}<div><b>Power Full</b><small>${cp.preset ? `preset “${esc(cp.preset)}”` : cp.fan ? tl(`No Powerful preset: fan speed “${cp.fan}” is used`, `Geen Powerful-stand: ventilatorstand “${cp.fan}” wordt gebruikt`) : tl('No power setting found', 'Geen vermogensinstelling gevonden')}</small></div></div>
+<div class="oscrow">${ok(true)}<div><b>${tl('Connection check', 'Verbindingscontrole')}</b><small>${f.conn ? esc(nameOf(f.conn)) + ' (' + esc(S.states[f.conn] ? S.states[f.conn].state : '?') + ')' : tl('Uses the availability of the air conditioner and sensor', 'Gebruikt de beschikbaarheid van airco en sensor')}</small></div></div>
+<div class="oscrules"><b>${tl('Rules', 'Regels')}</b><ul>
+<li>${tl('Starts below', 'Start onder')} ${OSC.start} °C (${tl('2 min steady', '2 min stabiel')}) → Heating, Power Full, ${OSC.target} °C</li>
+<li>${tl('Stops at', 'Stopt bij')} ${OSC.stop} °C ${tl('or after', 'of na')} ${OSC.maxMin} min → ${tl('original settings restored', 'oorspronkelijke instellingen terug')}</li>
+<li>${tl('At most once every', 'Hooguit één keer per')} ${OSC.waitH} ${tl('hours', 'uur')}; ${tl('never two at the same time', 'nooit twee tegelijk')}</li>
+<li>${tl('Changed the AC yourself during heating? Then your settings stay.', 'Zelf de airco aangepast tijdens het verwarmen? Dan blijven jouw instellingen staan.')}</li>
+<li>${tl('No sensor value or connection lost → does not start / stops safely', 'Geen sensorwaarde of verbinding weg → start niet / stopt veilig')}</li></ul></div>`;
+    b += `<button class="btn pri" style="width:100%" data-act="osc-save" ${ready && !S.saving ? '' : 'disabled'}>${S.saving ? ic('refresh', 'spin') : ic('ok')}${installed ? tl('Update in Home Assistant', 'Bijwerken in Home Assistant') : tl('Install in Home Assistant', 'Installeren in Home Assistant')}</button>`;
+    if (installed) b += `<button class="btn danger" style="width:100%;margin-top:10px" data-act="osc-remove">${ic('x')}${tl('Remove automation', 'Automatisering verwijderen')}</button>`;
+    return b + '</div></div>';
+  }
+  async function oscSave() {
+    const f = S.oscForm; if (!f) return;
+    S.saving = true; schedule(true);
+    try { const cfg = oscConfig(f); await api('POST', 'config/automation/config/' + OSC_ID, cfg); S.autoCfg[OSC_ID] = Object.assign({ id: OSC_ID }, cfg); toast(tl('Oscar Airco Heating saved in Home Assistant', 'Oscar Airco Heating opgeslagen in Home Assistant'), 'ok'); closeSheet(); refreshSoon(); }
+    catch (e) { toast(e.message, 'bad', 6000); }
+    S.saving = false; schedule(true);
+  }
+  async function oscRemove() {
+    if (!confirm(tl('Remove Oscar Airco Heating from Home Assistant?', 'Oscar Airco Heating verwijderen uit Home Assistant?'))) return;
+    const e = oscEnt(); const st0 = oscStatus();
+    if (st0.key === 'heating') await oscRestore();
+    try { await api('DELETE', 'config/automation/config/' + OSC_ID); delete S.autoCfg[OSC_ID]; toast(tl('Removed', 'Verwijderd'), 'ok'); closeSheet(); refreshSoon(); } catch (er) { toast(er.message, 'bad', 6000); }
+    return e;
+  }
+  async function oscRestore() {
+    if (!S.states['scene.oscar_airco_heating_backup']) return;
+    try { await C.send({ type: 'call_service', domain: 'scene', service: 'turn_on', service_data: { entity_id: 'scene.oscar_airco_heating_backup' } }); await C.send({ type: 'call_service', domain: 'logbook', service: 'log', service_data: { name: 'Oscar Airco Heating', message: 'Uitgeschakeld tijdens het verwarmen: oorspronkelijke instellingen teruggezet.', entity_id: oscEnt() } }); } catch (e) { /* best effort */ }
+  }
+  async function oscToggle() {
+    const e = oscEnt(); if (!e) return; const s = S.states[e]; const was = s.state === 'on';
+    if (was && +s.attributes.current > 0) await oscRestore();
+    command(e, 'automation', was ? 'turn_off' : 'turn_on', null, (ns) => (ns.state === 'on') !== was);
+    setTimeout(() => loadOscLog(true), 2500);
+  }
+
+  /* ---- the tab ---- */
+  function pAutomations() {
+    let out = `<div class="page apage" data-k="p-automations"><div class="topbar"><h1>Automations</h1>${pill()}</div>${banner()}`;
+    if (!configured()) return out + welcomeHTML() + '</div>';
+    const all = Object.keys(S.states).filter((e) => e.startsWith('automation.'));
+    if (all.some((e) => S.states[e].attributes.id != null && !S.autoCfg[String(S.states[e].attributes.id)])) setTimeout(() => loadAutos(false), 0);
+    all.forEach((e) => used.add(e));
+    const osc = oscEnt();
+    const list = all.filter((e) => e !== osc);
+    const act = all.filter((e) => S.states[e].state === 'on').length;
+    out += `<div class="astats" data-k="astats"><div class="as on"><b class="num">${act}</b><span>${tl('Active', 'Actief')}</span></div><div class="as off"><b class="num">${all.length - act}</b><span>${tl('Disabled', 'Uitgeschakeld')}</span></div><div class="as tot"><b class="num">${all.length}</b><span>${tl('Total', 'Totaal')}</span></div></div>`;
+    out += `<div class="sec" data-k="osc-sec"><div class="sec-h"><h2>${tl('Climate automation', 'Klimaatautomatisering')}</h2></div>${oscCard()}</div>`;
+    const q = S.aq.trim().toLowerCase();
+    let shown = list.filter((e) => (S.af === 'all' || (S.af === 'on' ? S.states[e].state === 'on' : S.states[e].state !== 'on')));
+    if (q) shown = shown.filter((e) => { const c = S.autoCfg[String(S.states[e].attributes.id)] || {}; return (nameOf(e) + ' ' + (c.description || '')).toLowerCase().includes(q); });
+    shown.sort((x, y) => nameOf(x).localeCompare(nameOf(y)));
+    out += `<div class="sec" data-k="alist-sec"><div class="sec-h"><h2>${tl('All automations', 'Alle automatiseringen')}</h2><span class="aux">${shown.length}</span></div>
+<div class="atools"><label class="search" data-static>${ic('search')}<input type="search" placeholder="${tl('Search automations', 'Zoek automatisering')}" value="${esc(S.aq)}" data-in="asearch" aria-label="Search" autocomplete="off"></label>
+<div class="chips">${[['all', tl('All', 'Alle')], ['on', tl('Active', 'Actief')], ['off', tl('Disabled', 'Uitgeschakeld')]].map(([v, l]) => `<button class="chip${S.af === v ? ' sel' : ''}" data-act="afilter" data-v="${v}" data-k="af-${v}">${l}</button>`).join('')}</div></div>`;
+    out += shown.length ? `<div class="agrid">${shown.map(autoCard).join('')}</div>` : emptyHTML('auto', tl('No automations found.', 'Geen automatiseringen gevonden.'), 'aempty');
+    return out + '</div></div>';
+  }
+  function autoCard(e) {
+    const s = S.states[e]; const a = s.attributes; const id = a.id != null ? String(a.id) : null; const cfg = id ? S.autoCfg[id] : null;
+    const on = s.state === 'on'; const running = +a.current > 0; const na = !avail(s);
+    const sm = cfg && !cfg.__err ? autoSummary(cfg) : null;
+    const desc = cfg && !cfg.__err && cfg.description ? cfg.description : sm ? [sm.trig[0], sm.act[0]].filter(Boolean).join(' → ') : id ? '' : tl('Made in YAML: details only in Home Assistant', 'Gemaakt in YAML: details alleen in Home Assistant');
+    const open = !!S.aopen[e];
+    const row = (icon, label, items) => items && items.length ? `<div class="arow"><span class="ari">${ic(icon)}</span><div><span class="arl">${label}</span><span class="arv">${esc(items.slice(0, open ? 20 : 2).join(' · '))}${!open && items.length > 2 ? ` <i>+${items.length - 2}</i>` : ''}</span></div></div>` : '';
+    return `<article class="acard${on ? ' on' : ' off'}${running ? ' run' : ''}${na ? ' na' : ''}" data-k="ac-${esc(e)}">
+<div class="ac-h"><span class="ac-dot" aria-hidden="true"></span><div class="ac-t"><h3>${esc(a.friendly_name || e)}</h3><span class="ac-st">${running ? tl('Running now', 'Bezig') : on ? tl('Active', 'Actief') : na ? tl('Unavailable', 'Niet beschikbaar') : tl('Disabled', 'Uitgeschakeld')}</span></div>
+<button class="tg${S.pending[e] ? ' pending' : ''}" role="switch" aria-checked="${on}" aria-label="${esc(a.friendly_name || e)}" data-act="auto-toggle" data-eid="${esc(e)}" ${C && C.authed && !na ? '' : 'disabled'}><span class="kn"></span></button></div>
+${desc ? `<p class="ac-d">${esc(desc)}</p>` : ''}
+${!cfg && id ? '<div class="skel" style="min-height:44px"></div>' : ''}
+${sm ? row('clock', tl('When', 'Wanneer'), sm.trig) + row('shield', tl('Conditions', 'Voorwaarden'), sm.cond.length ? sm.cond : [tl('None', 'Geen')]) + row('play', tl('Then', 'Dan'), sm.act) : ''}
+<div class="ac-f"><span>${ic('clock')}${tl('Last active', 'Laatst actief')}: <b>${esc(whenAgo(a.last_triggered))}</b></span>${sm && (sm.trig.length > 2 || sm.cond.length > 2 || sm.act.length > 2) ? `<button class="ac-more" data-act="aopen" data-eid="${esc(e)}" aria-expanded="${open}">${open ? tl('Less', 'Minder') : tl('More', 'Meer')}</button>` : ''}${EMBED && id ? `<button class="ac-more" data-act="go-panel" data-p="config/automation/edit/${esc(id)}">${tl('Edit', 'Bewerken')}</button>` : ''}</div></article>`;
+  }
+
   /* ---------------- SETTINGS ---------------- */
   function pSettings() {
     const auth = loadAuth() || {}; const m = model();
@@ -1523,6 +1841,12 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
       case 'exit-demo': { if (C) C.close(); C = null; S.demo = false; clearData(); const a = loadAuth(); if (a) { loadCache(); startConnection(a); } else setStatus('idle'); break; }
       case 'go-settings': location.hash = '#/settings'; break;
       case 'ha-menu': openSheet('__ha'); break;
+      case 'osc-install': { const c = oscCfgEnts(); S.oscForm = c ? { ac: c.ac, sensor: c.sensor, conn: c.conn || null } : oscFind(); openSheet('__osc'); break; }
+      case 'osc-save': oscSave(); break;
+      case 'osc-remove': oscRemove(); break;
+      case 'osc-toggle': oscToggle(); break;
+      case 'afilter': S.af = el.dataset.v; schedule(true); break;
+      case 'aopen': S.aopen[eid] = !S.aopen[eid]; schedule(true); break;
       case 'ac-pick': { const cur = acList(model()); const i = cur.indexOf(eid); if (i >= 0) cur.splice(i, 1); else cur.push(eid); settings.acList = cur; saveSettings(); schedule(true); break; }
       case 'go-info': location.hash = '#/info/' + encodeURIComponent(eid); break;
       case 'grp-preset': grpSet(acList(model()), +el.dataset.v); break;
@@ -1582,6 +1906,9 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
     const el = e.target; const k = el.dataset && el.dataset.in; if (!k) return;
     if (k === 'search') { S.q = el.value; schedule(true); return; }
     if (k === 'tf-q') { S.form.q = el.value; schedule(true); return; }
+    if (k === 'asearch') { S.aq = el.value; schedule(true); return; }
+    if (k === 'osc-ac' && S.oscForm) { S.oscForm.ac = el.value; const d = (S.ents[el.value] || {}).device_id; S.oscForm.conn = d ? Object.keys(S.ents).find((x) => S.ents[x].device_id === d && S.states[x] && /^sensor\./.test(x) && (S.states[x].attributes.options || []).includes('disconnected')) || null : null; schedule(true); return; }
+    if (k === 'osc-sensor' && S.oscForm) { S.oscForm.sensor = el.value; schedule(true); return; }
     if (k === 'isearch') { S.iq = el.value; S.ishow = 150; schedule(true); return; }
     if (k === 'tf-time') { S.form.time = el.value; return; }
     if (el.type === 'range') {
