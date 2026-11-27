@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.13.0';
+  const VERSION = '1.14.0';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -2026,7 +2026,7 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
       S, settings, t, ic, esc, model: () => model(), st, nameOf, roomNameOf, avail, isOn, stateText, devIcon, houseTemp, outsideTemp, acList,
       tColor, shortRoom, mainTemp, tempOf, roomHum, roomOfEid, HVAC, ACTION, pSettings, oscEnt, oscStatus, OSC, toast, svc, climatePower,
       schedule: (f) => schedule(f), isAC, isOutside, isJunkT, extra: () => EXTRA, saveUD, command, canSend,
-      openSheet, closeSheet, baseNameOf
+      openSheet, closeSheet, baseNameOf, saveSettings
     });
   }
   function makeExtra() {

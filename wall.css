@@ -364,6 +364,7 @@ html.lay-wall .w-pg-screen{--wood:#9a6a43;--wood2:#c08a5b;--champ:#d8c3a0;--warm
 #wdim{position:fixed;top:0;left:0;right:0;bottom:0;z-index:90;background:#0b0806;opacity:0;pointer-events:none;-webkit-transition:opacity .45s ease-out;transition:opacity .45s ease-out}
 #wdim.on{opacity:.55;pointer-events:auto;-webkit-transition:opacity 4s ease-in;transition:opacity 4s ease-in}
 #wdim.waking{pointer-events:auto}
+#wdim.on.black{opacity:1;background:#000;-webkit-transition:opacity 3s ease-in;transition:opacity 3s ease-in}
 html:not(.lay-wall) #wdim,html:not(.lay-wall) #wfx{display:none}
 
 /* Christmas on standby: a few slow snowflakes, soft lights, and now and then Santa's sleigh across the top */
@@ -457,21 +458,10 @@ html.w-light #wdim{background:#140d07}
 /* =====================================================================================
    1.13 – animated Screen stage, overlay (Santa, fireworks, snow/petals/leaves) and living mood cards
    ===================================================================================== */
-.fx-wrap{position:relative;height:150px;border-radius:28px;overflow:hidden;margin-bottom:18px;background:#2a1f18;box-shadow:0 10px 30px rgba(70,40,15,.18);border:1px solid rgba(166,110,60,.28)}
-.fx-wrap.big{height:180px}
-.fx-stage{position:absolute;top:0;left:0;right:0;bottom:0}
-.fx-cv{display:block;width:100%;height:100%}
-.fx-wrap::after{content:"";position:absolute;top:0;left:0;bottom:0;width:60%;pointer-events:none;background:linear-gradient(90deg,rgba(20,12,6,.42),rgba(20,12,6,0))}
-.fx-lab{position:absolute;left:24px;bottom:22px;z-index:2;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.45)}
-.fx-lab b{display:block;font-size:28px;font-weight:300;letter-spacing:.01em} .fx-lab span{display:block;font-size:14px;opacity:.88;margin-top:4px}
-.fx-fw{position:absolute;top:14px;right:14px;z-index:2;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;min-height:42px;padding:0 14px;border-radius:21px;color:#fff;font-size:14px;font-weight:600;background:rgba(20,12,6,.38);border:1px solid rgba(255,230,190,.35)}
-.fx-fw svg{width:17px;height:17px;margin-right:6px;color:#ffd58a}
-.fx-wood{position:absolute;left:0;right:0;bottom:0;height:7px;z-index:2;background:repeating-linear-gradient(90deg,#9a6a43 0,#9a6a43 10px,#6e4628 10px,#6e4628 12px);opacity:.85}
 #fxov{position:fixed;top:0;left:0;z-index:35;pointer-events:none;display:none}
 #fxov.on{display:block}
 html.w-standby #fxov{z-index:92}
 html:not(.lay-wall) #fxov{display:none!important}
-@media (max-width:760px){.fx-wrap{height:130px} .fx-wrap.big{height:150px} .fx-lab b{font-size:22px}}
 
 /* living mood cards: every mood has its own small animation */
 .m-fx{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
@@ -526,3 +516,66 @@ html:not(.lay-wall) #fxov{display:none!important}
 .m-once{font-size:13px;font-weight:600;color:var(--accent)}
 .btn.m-addbtn{width:100%;margin:2px 0 4px;border:1px dashed var(--w-border);background:transparent;color:var(--accent)} .btn.m-addbtn svg{margin-right:8px}
 .m-pick{border:1px solid var(--w-border);border-radius:18px;padding:4px 12px 8px;margin:4px 0 6px;background:rgba(127,127,127,.04)}
+
+/* =====================================================================================
+   1.14 – speakers (Nest Mini), Sounds tab, more moods, Zermelo box
+   ===================================================================================== */
+.sp-card{border:1px solid var(--w-border);border-radius:22px;padding:16px;background:rgba(127,127,127,.03);margin-bottom:12px}
+.sp-card:last-child{margin-bottom:0}
+.sp-h{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center}
+.sp-ic{position:relative;width:52px;height:52px;border-radius:18px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;background:var(--accent-soft);color:var(--accent);margin-right:14px;-webkit-flex:none;flex:none} .sp-ic svg{width:26px;height:26px}
+.sp-ic .sp-eq{position:absolute;right:6px;bottom:6px;display:none}
+.sp-card.playing .sp-ic .sp-eq{display:-webkit-box;display:-webkit-flex;display:flex}
+.sp-eq{-webkit-align-items:flex-end;align-items:flex-end;height:14px} .sp-eq b{display:block;width:3px;height:100%;margin-left:2px;border-radius:2px;background:var(--accent);-webkit-transform-origin:50% 100%;transform-origin:50% 100%;-webkit-animation:speq .9s ease-in-out infinite;animation:speq .9s ease-in-out infinite}
+.sp-eq b:nth-child(2){-webkit-animation-delay:-.3s;animation-delay:-.3s} .sp-eq b:nth-child(3){-webkit-animation-delay:-.6s;animation-delay:-.6s}
+@-webkit-keyframes speq{0%,100%{-webkit-transform:scaleY(.3)}50%{-webkit-transform:scaleY(1)}} @keyframes speq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+.sp-t{-webkit-box-flex:1;-webkit-flex:1;flex:1;min-width:0} .sp-t b{display:block;font-size:18px;font-weight:650} .sp-t span{display:block;font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-off{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:flex-start;align-items:flex-start;font-size:13px;color:var(--warn);background:rgba(183,121,31,.08);border-radius:14px;padding:10px 12px;margin:12px 0 0} .sp-off svg{width:16px;height:16px;margin:1px 8px 0 0;-webkit-flex:none;flex:none}
+.sp-ctl{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;margin-top:14px}
+.sp-b{width:52px;height:52px;border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;background:var(--accent);color:var(--accent-ink);margin-right:8px;-webkit-flex:none;flex:none} .sp-b svg{width:22px;height:22px}
+.sp-b+.sp-b{background:rgba(127,127,127,.10);color:var(--text)} .sp-b.sm{width:40px;height:40px;background:rgba(127,127,127,.10);color:var(--text)} .sp-b[disabled]{opacity:.35}
+.sp-vol{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-box-flex:1;-webkit-flex:1;flex:1;margin-left:8px;min-width:0}
+.sp-vol input{-webkit-box-flex:1;-webkit-flex:1;flex:1;min-width:60px;margin:0 8px;accent-color:var(--accent)} .sp-vol b{min-width:44px;text-align:right;font-size:14px;margin-left:6px}
+.sp-sec{margin-top:16px} .sp-l{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;font-size:13px;font-weight:650;color:var(--muted);margin-bottom:8px} .sp-l svg{width:16px;height:16px;margin-right:6px}
+.sp-chips{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-3px}
+.sp-chip{min-height:42px;padding:0 14px;margin:3px;border-radius:21px;font-size:14px;font-weight:600;background:rgba(127,127,127,.08);border:1px solid var(--w-border);color:var(--text);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-chip.ghost{background:transparent;color:var(--accent)} .sp-chip[disabled]{opacity:.4}
+.sp-say{display:-webkit-box;display:-webkit-flex;display:flex;margin-bottom:8px} .sp-say input{-webkit-box-flex:1;-webkit-flex:1;flex:1;min-width:0;min-height:46px;border-radius:14px;border:1px solid var(--w-border);background:var(--card2);color:var(--text);font-size:16px;padding:0 12px;margin-right:8px} .sp-say .btn{width:auto;-webkit-flex:none;flex:none}
+.sp-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));grid-gap:8px}
+.sp-p{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;text-align:left;min-height:58px;padding:0 12px;border-radius:16px;border:1px solid var(--w-border);background:rgba(127,127,127,.04);color:var(--text)}
+.sp-p svg{width:20px;height:20px;margin-right:10px;color:var(--muted);-webkit-flex:none;flex:none} .sp-p span{min-width:0;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .sp-p small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.sp-p.on{border-color:var(--accent);background:var(--accent-soft)} .sp-p.on svg{color:var(--accent)} .sp-p.na{opacity:.55}
+.sp-cats{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-3px -3px 6px}
+.sp-cats button{min-height:40px;padding:0 14px;margin:3px;border-radius:20px;font-weight:600;font-size:14px;background:rgba(127,127,127,.08);color:var(--text2)} .sp-cats button.on{background:var(--accent);color:var(--accent-ink)}
+.snd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));grid-gap:10px;margin-top:6px}
+.snd{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;text-align:left;min-height:66px;padding:10px 12px;border-radius:18px;border:1px solid var(--w-border);background:rgba(127,127,127,.04);color:var(--text);-webkit-transition:-webkit-transform .12s;transition:transform .12s}
+.snd-i{width:40px;height:40px;border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;background:var(--accent-soft);color:var(--accent);margin-right:12px;-webkit-flex:none;flex:none} .snd-i svg{width:16px;height:16px}
+.snd-t{min-width:0} .snd-t b{display:block;font-size:15px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .snd-t small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.snd.on{border-color:var(--accent);background:var(--accent-soft)} .snd.on .snd-i{background:var(--accent)} .snd.on .snd-i .sp-eq b{background:var(--accent-ink)} .snd.on .sp-eq{display:-webkit-box;display:-webkit-flex;display:flex}
+.m-snd .m-row{margin:8px 0}
+/* new moods: their own small animations */
+.m-card.k-focus::before{background:linear-gradient(135deg,#eaf3ff,#cfe3ff)} .m-card.k-gaming::before{background:linear-gradient(135deg,#3b1d6e,#1d4f9c);opacity:1}
+.m-card.k-party::before{background:linear-gradient(135deg,#ff5fb2,#ffd166,#4cc9f0);opacity:.35} .m-card.k-night::before{background:linear-gradient(160deg,#160c08,#3a1a10);opacity:1}
+.m-card.k-cozy::before{background:linear-gradient(135deg,#f6b26b,#c0603a);opacity:.32} .m-card.k-dinner::before{background:linear-gradient(135deg,#f9d9a8,#d8925a);opacity:.3}
+.m-card.k-gaming .m-go b,.m-card.k-night .m-go b{color:#fff} .m-card.k-gaming .m-sub,.m-card.k-night .m-sub{color:rgba(255,255,255,.7)}
+.m-card.k-gaming .m-ic,.m-card.k-night .m-ic,.m-card.k-gaming .m-edit,.m-card.k-night .m-edit{background:rgba(255,255,255,.14);color:#fff}
+.k-gaming .m-fx i:nth-child(-n+2){width:110px;height:110px;border-radius:50%;opacity:.7;-webkit-animation:mdrift 5s ease-in-out infinite alternate;animation:mdrift 5s ease-in-out infinite alternate}
+.k-gaming .m-fx i:nth-child(1){left:-30px;top:-30px;background:radial-gradient(closest-side,rgba(180,90,255,.8),rgba(180,90,255,0))} .k-gaming .m-fx i:nth-child(2){right:-30px;bottom:-40px;background:radial-gradient(closest-side,rgba(60,160,255,.8),rgba(60,160,255,0));-webkit-animation-delay:-2.5s;animation-delay:-2.5s}
+.k-party .m-fx i{width:7px;height:7px;border-radius:2px;top:-10px;opacity:.9;-webkit-animation:mfall 3.2s linear infinite;animation:mfall 3.2s linear infinite}
+.k-party .m-fx i:nth-child(4n+1){background:#ff5fb2} .k-party .m-fx i:nth-child(4n+2){background:#ffd166} .k-party .m-fx i:nth-child(4n+3){background:#4cc9f0} .k-party .m-fx i:nth-child(4n){background:#7bd88f}
+.k-party .m-fx i:nth-child(1){left:10%} .k-party .m-fx i:nth-child(2){left:25%;-webkit-animation-delay:-1s;animation-delay:-1s} .k-party .m-fx i:nth-child(3){left:40%;-webkit-animation-delay:-2s;animation-delay:-2s} .k-party .m-fx i:nth-child(4){left:55%;-webkit-animation-delay:-.5s;animation-delay:-.5s}
+.k-party .m-fx i:nth-child(5){left:68%;-webkit-animation-delay:-1.6s;animation-delay:-1.6s} .k-party .m-fx i:nth-child(6){left:80%;-webkit-animation-delay:-2.6s;animation-delay:-2.6s} .k-party .m-fx i:nth-child(7){left:90%;-webkit-animation-delay:-.2s;animation-delay:-.2s} .k-party .m-fx i:nth-child(8){left:48%;-webkit-animation-delay:-2.9s;animation-delay:-2.9s}
+.k-night .m-fx i:nth-child(1){width:90px;height:90px;right:-10px;bottom:-20px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,110,60,.55),rgba(255,110,60,0));opacity:.8;-webkit-animation:mbreath 6s ease-in-out infinite;animation:mbreath 6s ease-in-out infinite}
+.k-cozy .m-fx i:nth-child(-n+3){bottom:-8px;width:16px;height:26px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 50% 70%,#ffe08a,#ff8a3d 60%,rgba(255,80,40,0) 75%);opacity:.85;-webkit-transform-origin:50% 100%;transform-origin:50% 100%;-webkit-animation:mflick 1.4s ease-in-out infinite alternate;animation:mflick 1.4s ease-in-out infinite alternate}
+.k-cozy .m-fx i:nth-child(1){right:22px} .k-cozy .m-fx i:nth-child(2){right:42px;-webkit-animation-delay:-.5s;animation-delay:-.5s} .k-cozy .m-fx i:nth-child(3){right:62px;-webkit-animation-delay:-.9s;animation-delay:-.9s}
+@-webkit-keyframes mflick{to{-webkit-transform:scale(.85,1.12) rotate(3deg)}} @keyframes mflick{to{transform:scale(.85,1.12) rotate(3deg)}}
+.k-focus .m-fx i:nth-child(1),.k-dinner .m-fx i:nth-child(1){width:150px;height:150px;left:-40px;top:-70px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.9),rgba(255,255,255,0));opacity:.8;-webkit-animation:mbreath 6s ease-in-out infinite;animation:mbreath 6s ease-in-out infinite}
+.k-dinner .m-fx i:nth-child(1){background:radial-gradient(closest-side,rgba(255,214,150,.8),rgba(255,214,150,0))}
+/* Zermelo box in the calendar */
+.cal-zm{display:block;border:1px solid var(--line,rgba(127,127,127,.2));border-radius:18px;padding:12px 14px;margin:0 0 14px;background:rgba(127,127,127,.04)}
+.cal-zm summary{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;cursor:pointer;list-style:none;min-height:36px} .cal-zm summary::-webkit-details-marker{display:none}
+.cal-zm svg{width:20px;height:20px;margin-right:10px;color:#e05a4f;-webkit-flex:none;flex:none}
+.cal-zm.on{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center} .cal-zm.on>div{-webkit-box-flex:1;-webkit-flex:1;flex:1;min-width:0} .cal-zm.on b{display:block} .cal-zm.on span{display:block;font-size:13px;opacity:.75}
+.cal-zf p{font-size:14px;margin:8px 0;opacity:.85} .cal-zrow{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-4px}
+.cal-zrow input{-webkit-box-flex:1;-webkit-flex:1;flex:1;min-width:150px;min-height:46px;margin:4px;border-radius:12px;border:1px solid var(--line,rgba(127,127,127,.25));background:var(--card,#fff);color:inherit;font-size:16px;padding:0 12px} .cal-zrow .cal-btn{margin:4px}
+.cal-zerr{color:#c2412d!important} .cal-zsm{font-size:12px!important;opacity:.6!important}

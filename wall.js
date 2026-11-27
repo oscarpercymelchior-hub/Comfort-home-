@@ -37,12 +37,7 @@
     let FX = null; // animated scenes (fx.js)
     // season for the Screen animations: setting wallScene = auto | winter | spring | summer | autumn | off
     function seasonKey() { const v = settings.wallScene || 'auto'; if (v !== 'auto') return v; const m = new Date().getMonth(); return m === 11 || m <= 1 ? 'winter' : m <= 4 ? 'spring' : m <= 7 ? 'summer' : 'autumn'; }
-    const SEASON_NAME = () => ({ winter: L('Winter', 'Winter'), spring: L('Spring', 'Lente'), summer: L('Summer', 'Zomer'), autumn: L('Autumn', 'Herfst') });
-    function isXmasTime() { const d = new Date(); return d.getMonth() === 11 || (d.getMonth() === 0 && d.getDate() <= 6); }
-    function stageHTML(scene, title, sub, room, trans, big) {
-      return `<section class="fx-wrap${big ? ' big' : ''} sc-${esc(scene)}" data-k="fx-wrap"><div class="fx-stage" data-static="1" data-k="fx-stage" data-scene="${esc(scene)}" data-room="${esc(room || '')}" data-trans="${esc(String(trans || 1.6))}"><canvas class="fx-cv"></canvas></div>
-<div class="fx-lab"><b>${esc(title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div><button class="fx-fw" data-wact="fx-fireworks" aria-label="${L('Fireworks', 'Vuurwerk')}">${ic('auto')}<span>${L('Fireworks', 'Vuurwerk')}</span></button><i class="fx-wood" aria-hidden="true"></i></section>`;
-    }
+    let SOUNDS = null; // speakers + Sounds tab (sounds.js)
 
     function active() {
       const lay = settings.layout || 'auto';
@@ -105,7 +100,7 @@
     function rail() {
       const cur = W.page;
       return `<nav class="w-rail" data-k="w-rail" aria-label="Dashboard"><div class="w-logo" aria-hidden="true"><i></i></div>${PAGES.map(([id, icon, lbl]) => `<button class="w-nav${cur === id ? ' on' : ''}" data-wact="page" data-v="${id}" data-k="wn-${id}" aria-label="${esc(lbl())}" ${cur === id ? 'aria-current="page"' : ''}>${ic(icon)}<span>${esc(lbl())}</span></button>`).join('')}
-<div class="w-rail-sp"></div><button class="w-nav${cur === 'settings' ? ' on' : ''}" data-wact="page" data-v="settings" data-k="wn-settings" aria-label="${L('Settings', 'Instellingen')}">${ic('settings')}<span>${L('Settings', 'Instellingen')}</span></button></nav>`;
+<div class="w-rail-sp"></div>${SOUNDS ? `<button class="w-nav${cur === 'sounds' ? ' on' : ''}" data-wact="page" data-v="sounds" data-k="wn-sounds" aria-label="Sounds">${ic('speaker')}<span>Sounds</span></button>` : ''}<button class="w-nav${cur === 'settings' ? ' on' : ''}" data-wact="page" data-v="settings" data-k="wn-settings" aria-label="${L('Settings', 'Instellingen')}">${ic('settings')}<span>${L('Settings', 'Instellingen')}</span></button></nav>`;
     }
     function tile(e, big) {
       const s = core.st(e); if (!s) return '';
@@ -284,8 +279,7 @@ ${scenes.map((e) => `<button class="w-q" data-act="run" data-eid="${esc(e)}">${i
       const ok = vals.filter((y) => y.v != null); const bad = vals.filter((y) => y.v == null || deadSensors(y.x.r).length);
       const avg = ok.length ? ok.reduce((s2, y) => s2 + y.v, 0) / ok.length : null;
       const heatingNow = heaters(m).filter((e) => heatStatus(e).k === 'heat').length;
-      const sk = seasonKey(); const pre = sk !== 'off' ? stageHTML(sk, SEASON_NAME()[sk] || '', sk === 'winter' && isXmasTime() ? L('Happy holidays', 'Fijne feestdagen') : '', '', 2, false) : '';
-      let out = pre + `<button class="s-avg" data-wact="screen-heat" data-k="s-avg"><span class="s-slats" aria-hidden="true"></span><span class="s-avg-l"><span class="s-cap">${L('Average house temperature', 'Gemiddelde huistemperatuur')}</span>${tempBig(avg)}<span class="s-avg-sub">${ok.length ? L(`Average of ${ok.length} rooms`, `Gemiddelde van ${ok.length} kamers`) : L('No valid sensor values', 'Geen geldige sensorwaarden')}${bad.length ? ' · ' + bad.map((y) => esc(y.x.label) + (y.v == null ? '' : L(' (backup sensor)', ' (reservesensor)'))).join(', ') + L(': sensor unavailable', ': sensor niet beschikbaar') : ''}</span></span>
+      let out = `<button class="s-avg" data-wact="screen-heat" data-k="s-avg"><span class="s-slats" aria-hidden="true"></span><span class="s-avg-l"><span class="s-cap">${L('Average house temperature', 'Gemiddelde huistemperatuur')}</span>${tempBig(avg)}<span class="s-avg-sub">${ok.length ? L(`Average of ${ok.length} rooms`, `Gemiddelde van ${ok.length} kamers`) : L('No valid sensor values', 'Geen geldige sensorwaarden')}${bad.length ? ' · ' + bad.map((y) => esc(y.x.label) + (y.v == null ? '' : L(' (backup sensor)', ' (reservesensor)'))).join(', ') + L(': sensor unavailable', ': sensor niet beschikbaar') : ''}</span></span>
 <span class="s-avg-r"><span class="s-heatnow${heatingNow ? ' on' : ''}">${ic('flame')}<b>${heatingNow ? L(`${heatingNow} heating`, `${heatingNow} verwarmt`) : L('No heating active', 'Geen verwarming actief')}</b></span><span class="s-go">${L('All heating', 'Alle verwarmingen')}${ic('chev')}</span></span></button>`;
       out += `<div class="s-rooms">${rooms.map(({ r, label }) => { const v = core.tempOf(core.mainTemp(r)); const h = core.roomHum(r); const hs = roomHeat(r);
         return `<button class="s-room${hs && hs.k === 'heat' ? ' heat' : ''}" data-wact="screen-room" data-v="${esc(r.id)}" data-k="s-room-${esc(r.id)}"><span class="s-rn">${esc(label)}</span>
@@ -312,16 +306,15 @@ ${hs.length ? `<div class="s-heaters">${hs.map(heaterCard).join('')}</div>` : `<
       const r = m.roomById[id]; if (!r) return `<div class="s-bar"><button class="s-back" data-wact="screen-back">${ic('back')}<span>Screen</span></button></div><p class="w-empty">${L('Room not found.', 'Kamer niet gevonden.')}</p>`;
       const v = core.tempOf(core.mainTemp(r)); const h = core.roomHum(r);
       const added = roomAdded(r).filter((e) => r.devs.indexOf(e) < 0);
-      const ctl = r.devs.filter((e) => m.kind[e] !== 'climate').concat(added.filter((e) => m.kind[e] !== 'climate')); const cl = r.devs.filter((e) => m.kind[e] === 'climate').concat(added.filter((e) => m.kind[e] === 'climate'));
+      const sps = SOUNDS ? SOUNDS.roomSpeakers(r) : [];
+      const ctl = r.devs.filter((e) => m.kind[e] !== 'climate').concat(added.filter((e) => m.kind[e] !== 'climate')).filter((e) => sps.indexOf(e) < 0); const cl = r.devs.filter((e) => m.kind[e] === 'climate').concat(added.filter((e) => m.kind[e] === 'climate'));
       const sens = r.temps.concat(r.hums, r.other); sens.forEach((e) => core.st(e)); r.bins.forEach((e) => core.st(e));
       const label = (SCREEN_ROOMS.find((x) => new RegExp(x[0], 'i').test(r.name)) || [0, r.name])[1];
       let out = `<div class="s-bar"><button class="s-back" data-wact="screen-back">${ic('back')}<span>Screen</span></button><h1>${esc(label)}</h1><span class="s-bar-t">${tempBig(v)}${h != null ? `<span class="s-bar-h">${ic('drop')}${Math.round(h)}%</span>` : ''}</span></div>`;
-      { const md = MOODS && MOODS.active(r); const sk = seasonKey();
-        if (md) out += stageHTML(MOODS.sceneOf(md), 'Mood: ' + md.name, label, r.id, md.wake ? 3 : Math.max(1.2, +md.trans || 1.6), true);
-        else if (sk !== 'off') out += stageHTML(sk, label, L('No mood active – choose one below', 'Geen mood actief – kies er hieronder een'), r.id, 2, true); }
       const addBtn = `<button class="w-link" data-wact="add-open" data-room="${esc(r.id)}">${ic('plus')}<span>${L('Add device', 'Apparaat toevoegen')}</span></button>`;
       out += panel(L('Control', 'Bediening'), ctl.length ? `<div class="w-tiles">${ctl.map((e) => tile(e)).join('')}</div>` : `<p class="w-empty" style="padding:8px 2px">${L('No devices to control yet.', 'Nog geen apparaten om te bedienen.')}</p>`, 's-p-ctl', addBtn);
       if (MOODS) out += MOODS.sectionHTML(r);
+      if (sps.length) out += panel(sps.length > 1 ? L('Speakers', 'Speakers') : core.nameOf(sps[0]).toLowerCase().indexOf('nest') >= 0 ? 'Nest Mini' : L('Speaker', 'Speaker'), sps.map((e) => SOUNDS.speakerCard(e)).join(''), 's-p-sp');
       if (cl.length) out += panel(L('Heating & air conditioning', 'Verwarming en airco'), `<div class="s-heaters">${cl.map((e) => (core.isAC(e) ? acCard(e) : heaterCard(e))).join('')}</div>`, 's-p-cl');
       if (sens.length || r.bins.length) out += panel(L('Sensors', 'Sensoren'), `<div class="w-bins">${sens.concat(r.bins).map((e) => { const s = S.states[e]; return `<div class="w-bin${core.avail(s) ? '' : ' na'}${s && s.state === 'on' && e.startsWith('binary_sensor.') ? ' on' : ''}"><span class="w-si">${ic(r.temps.indexOf(e) >= 0 ? 'thermo' : r.hums.indexOf(e) >= 0 ? 'drop' : e.startsWith('binary_sensor.') ? 'window' : (dc(e) === 'power' || dc(e) === 'energy') ? 'bolt' : 'info')}</span><span class="w-sl">${esc(core.nameOf(e))}</span><span class="w-sv num">${esc(core.stateText(e, s))}</span></div>`; }).join('')}</div>`, 's-p-sens');
       return out;
@@ -336,13 +329,14 @@ ${hs.length ? `<div class="s-heaters">${hs.map(heaterCard).join('')}</div>` : `<
       const st = `<div class="w-pagebar"><h1>${L('Settings', 'Instellingen')}</h1></div>
 <section class="w-panel" data-k="w-wallset"><div class="w-ph"><h2>${L('Wall panel', 'Muurpaneel')}</h2></div>
 ${sel('wallStart', startValue(), startOptions(), L('Homepage', 'Homepage'))}
-${sel('wallTheme', settings.wallTheme === 'dark' ? 'dark' : 'light', [['light', L('Light & warm', 'Licht en warm')], ['dark', L('Dark', 'Donker')]], L('Theme', 'Thema'))}
-${sel('wallDim', settings.wallDim === 'off' ? 'off' : 'on', [['on', L('After 30 seconds', 'Na 30 seconden')], ['off', L('Never', 'Nooit')]], L('Dim screen', 'Scherm dimmen'))}
+${sel('wallTheme', settings.wallTheme === 'dark' || settings.wallTheme === 'light' ? settings.wallTheme : 'auto', [['auto', L(`Day & night (light ${settings.dayStart || '07:00'}–${settings.nightStart || '20:00'})`, `Dag en nacht (licht ${settings.dayStart || '07:00'}–${settings.nightStart || '20:00'})`)], ['light', L('Always light & warm', 'Altijd licht en warm')], ['dark', L('Always dark', 'Altijd donker')]], L('Theme', 'Thema'))}
+${sel('wallFull', settings.wallFull === 'off' ? 'off' : 'on', [['on', L('On (tap once after start)', 'Aan (na het starten één keer tikken)')], ['off', L('Off', 'Uit')]], L('Full screen', 'Volledig scherm'))}
+${sel('wallDim', settings.wallDim === 'off' || settings.wallDim === 'dim' ? settings.wallDim : 'on', [['on', L('Dim after 30 s, black after 4 min', 'Dimmen na 30 s, zwart na 4 min')], ['dim', L('Only dim after 30 s', 'Alleen dimmen na 30 s')], ['off', L('Never', 'Nooit')]], L('Screen on standby', 'Scherm op stand-by'))}
 ${sel('wallScene', settings.wallScene || 'auto', [['auto', L('Automatic (current season)', 'Automatisch (huidig seizoen)')], ['winter', L('Winter', 'Winter')], ['spring', L('Spring', 'Lente')], ['summer', L('Summer', 'Zomer')], ['autumn', L('Autumn', 'Herfst')], ['off', L('Off', 'Uit')]], L('Season animation (Screen)', 'Seizoensanimatie (Screen)'))}
-${sel('wallFireworks', settings.wallFireworks === 'off' ? 'off' : 'on', [['on', L('On holidays and Old Christmas', 'Op feestdagen en bij Old Christmas')], ['off', L('Only with the button', 'Alleen met de knop')]], L('Fireworks', 'Vuurwerk'))}
 ${sel('wallSeason', settings.wallSeason === 'on' || settings.wallSeason === 'off' ? settings.wallSeason : 'auto', [['auto', L('Automatic (1 Dec – 6 Jan)', 'Automatisch (1 dec – 6 jan)')], ['on', L('Always on', 'Altijd aan')], ['off', L('Off', 'Uit')]], L('Christmas on standby', 'Kerst op stand-by'))}
 <div class="w-setrow"><span>Device Layout</span><select data-set="layout" aria-label="Device Layout">${[['auto', L('Automatic', 'Automatisch')], ['iphone', 'iPhone'], ['ipad', 'iPad'], ['laptop', 'Laptop']].map(([v, l]) => `<option value="${v}" ${(settings.layout || 'auto') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
-<p class="w-note">${L('Homepage and these options are stored on this device. The screen dims softly after 30 seconds without touch (never fully black, the iPad brightness itself is not changed); one tap wakes it. After 3 minutes the panel returns to the homepage.', 'Homepage en deze opties worden op dit apparaat bewaard. Het scherm dimt zacht na 30 seconden zonder aanraking (nooit helemaal zwart, de helderheid van de iPad zelf verandert niet); één tik maakt het weer normaal. Na 3 minuten gaat het paneel terug naar de homepage.')}</p></section>`;
+${ipadLike() && window.navigator.standalone !== true && settings.wallFull !== 'off' ? `<p class="w-note"><b>${L('Always full screen on this iPad:', 'Altijd volledig scherm op deze iPad:')}</b> ${L('in Safari tap Share → "Add to Home Screen" and open Comfort from that icon. (You log in once more there.)', 'tik in Safari op Delen → "Zet op beginscherm" en open Comfort voortaan via dat icoon. (Daar log je één keer opnieuw in.)')}</p>` : ''}
+<p class="w-note">${L('Homepage and these options are stored on this device. The screen dims softly after 30 seconds without touch and turns fully black after 4 minutes (the iPad brightness itself is not changed); one tap wakes it. After 3 minutes the panel returns to the homepage.', 'Homepage en deze opties worden op dit apparaat bewaard. Het scherm dimt zacht na 30 seconden zonder aanraking en wordt na 4 minuten helemaal zwart (de helderheid van de iPad zelf verandert niet); één tik maakt het weer normaal. Na 3 minuten gaat het paneel terug naar de homepage.')}</p></section>`;
       return st + `<div class="w-embed">${core.pSettings()}</div>`;
     }
 
@@ -371,13 +365,17 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
     }
     function sheet(name) { return name === '__wname' ? renameSheet() : name === '__wadd' ? addSheet() : name === '__wmood' && MOODS ? MOODS.sheetHTML() : ''; }
 
+    // theme: "auto" = light during the day, dark at night (uses the app's day/night times)
+    const mins = (v) => { const p = String(v || '').split(':'); return (+p[0] || 0) * 60 + (+p[1] || 0); };
+    function isDark() { if (settings.wallTheme === 'dark') return true; if (settings.wallTheme === 'light') return false; const n = new Date(); const t = n.getHours() * 60 + n.getMinutes(); const d = mins(settings.dayStart || '07:00'), nt = mins(settings.nightStart || '20:00'); return d < nt ? !(t >= d && t < nt) : (t >= nt && t < d); }
     function render() {
       if (!W.page) goStart();
       const m = core.model();
       const loading = !Object.keys(S.states).length;
-      document.documentElement.classList.toggle('w-light', settings.wallTheme !== 'dark');
+      document.documentElement.classList.toggle('w-light', !isDark());
       let body;
       if (W.page === 'settings') body = pSettingsWrap();
+      else if (W.page === 'sounds' && SOUNDS && !loading) body = SOUNDS.pageHTML();
       else if (loading) body = `<div class="w-load" data-k="w-load"><div class="w-ring"><i></i></div><p>${S.conn === 'idle' ? L('Log in to Home Assistant to start.', 'Log in bij Home Assistant om te beginnen.') : L('Connecting to Home Assistant…', 'Verbinden met Home Assistant…')}</p></div>`;
       else body = W.page === 'screen' ? pScreen(m) : W.page === 'calendar' ? (core.extra() ? core.extra().calendarHTML(true) : '') : W.page === 'lights' ? pLights(m) : W.page === 'climate' ? pClimate(m) : W.page === 'devices' ? pDevices(m) : W.page === 'sensors' ? pSensors(m) : W.page === 'autos' ? pAutos() : pHome(m);
       core.st('__clock');
@@ -416,7 +414,6 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       else if (a === 'screen-heat') { W.sub = { t: 'heat' }; core.schedule(true); window.scrollTo(0, 0); }
       else if (a === 'screen-room') { W.sub = { t: 'room', id: el.dataset.v }; core.schedule(true); window.scrollTo(0, 0); }
       else if (a === 'screen-back') { W.sub = null; core.schedule(true); window.scrollTo(0, 0); }
-      else if (a === 'fx-fireworks') { if (FX) { if (FX.reduced()) core.toast(L('Animations are reduced on this device', 'Animaties staan beperkt op dit apparaat'), 'ok'); else FX.show('big'); } }
       else if (a === 'rename') { W.ren = el.dataset.eid; W.renVal = null; core.openSheet('__wname'); }
       else if (a === 'ren-save') { const inp = document.querySelector('[data-win=ren]'); saveName(W.ren, inp ? inp.value : W.renVal); }
       else if (a === 'ren-reset') saveName(W.ren, '');
@@ -426,19 +423,21 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
         if (i >= 0) cur.splice(i, 1); else cur.push(e);
         ra[W.addRoom] = cur; S.ud.roomAdd = ra; core.saveUD();
       }
+      else if (/^sp-/.test(a) && SOUNDS) SOUNDS.onAct(a, el);
       else if (MOODS) MOODS.onAct(a, el);
     });
     const onWin = (ev) => {
       const el = ev.target; const k = el.dataset && el.dataset.win; if (!k) return;
       if (k === 'ren') { W.renVal = el.value; return; }
       if (k === 'add-q') { W.addQ = el.value; core.schedule(true); return; }
+      if (/^sp-/.test(k) && SOUNDS) { SOUNDS.onInput(k, el, ev); return; }
       if (MOODS) MOODS.onInput(k, el);
     };
-    document.addEventListener('input', onWin); document.addEventListener('change', (ev) => { const el = ev.target; if (el.dataset && el.dataset.win && (el.type === 'checkbox' || el.nodeName === 'SELECT')) onWin(ev); });
+    document.addEventListener('input', onWin); document.addEventListener('change', (ev) => { const el = ev.target; if (el.dataset && el.dataset.win && (el.type === 'checkbox' || el.type === 'range' || el.nodeName === 'SELECT')) onWin(ev); });
     document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && ev.target.dataset && ev.target.dataset.win === 'ren') { ev.preventDefault(); saveName(W.ren, ev.target.value); } });
 
     /* ------------ standby: soft dim after 30 s, Christmas sleigh (seasonal) ------------ */
-    let dimEl = null; let fxEl = null; let dimmed = false; let lastFly = 0; let dimSince = 0;
+    let dimEl = null; let fxEl = null; let dimmed = false; let black = false; let lastFly = 0; let dimSince = 0;
     function layers() {
       if (dimEl || !document.body) return;
       dimEl = document.createElement('div'); dimEl.id = 'wdim'; dimEl.setAttribute('aria-hidden', 'true');
@@ -448,10 +447,13 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       const wake = (ev) => { if (!dimmed) return; if (ev.cancelable) ev.preventDefault(); ev.stopPropagation(); W.lastTouch = Date.now(); setDim(false); };
       dimEl.addEventListener('touchstart', wake, { passive: false }); dimEl.addEventListener('mousedown', wake); dimEl.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); });
     }
-    function setDim(on) {
+    // level 0 = normal, 1 = soft dim (after 30 s), 2 = fully black (after 4 min). One tap always wakes the screen.
+    function setDim(on, blk) {
+      blk = !!(on && blk);
+      if (blk !== black) { black = blk; if (dimEl && on) dimEl.className = blk ? 'on black' : 'on'; if (!blk && FX) FX.kick(); }
       if (on === dimmed) return; dimmed = on; dimSince = on ? Date.now() : 0;
       if (!dimEl) return;
-      if (on) dimEl.className = 'on'; else { dimEl.className = 'waking'; setTimeout(() => { if (!dimmed && dimEl) dimEl.className = ''; }, 450); }
+      if (on) dimEl.className = black ? 'on black' : 'on'; else { dimEl.className = 'waking'; setTimeout(() => { if (!dimmed && dimEl) dimEl.className = ''; }, 450); }
     }
     function season() {
       const v = settings.wallSeason || 'auto'; if (v === 'off') return false; if (v === 'on' || settings.deco === 'xmas') return true;
@@ -463,12 +465,23 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       const html = document.documentElement;
       if (!on) { setDim(false); html.classList.remove('w-season'); html.classList.remove('w-season-own'); return; }
       const idle = Date.now() - W.lastTouch;
-      setDim(settings.wallDim !== 'off' && idle > 30000);
+      setDim(settings.wallDim !== 'off' && idle > 30000, settings.wallDim !== 'dim' && idle > 240000);
       const sea = season(); html.classList.toggle('w-season', sea); html.classList.toggle('w-season-own', sea && settings.deco !== 'xmas');
       // the sleigh flies now and then, only while nobody is using the panel (not constantly)
       if (FX) FX.standby(sea && idle > 30000);
     }, 1000);
 
+    // full screen (iPad only): browsers allow it only after a touch, so the first tap after start switches it on.
+    // On the old iPad (no full-screen support in Safari 12) "Add to Home Screen" gives the same result.
+    function fullOK() { const d = document.documentElement; return !!(d.requestFullscreen || d.webkitRequestFullscreen); }
+    function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement) || window.navigator.standalone === true; }
+    const ipadLike = () => /iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    function goFull() { if (!active() || settings.wallFull === 'off' || !ipadLike() || isFull() || !fullOK()) return; const d = document.documentElement; try { const r = (d.requestFullscreen || d.webkitRequestFullscreen).call(d); if (r && r.catch) r.catch(() => {}); } catch (e) { /* not allowed */ } }
+    document.addEventListener('touchend', goFull, { passive: true });
+    (function webAppMeta() { // lets "Add to Home Screen" open the app without Safari's bars
+      if (!document.head || !ipadLike()) return;
+      [['apple-mobile-web-app-capable', 'yes'], ['mobile-web-app-capable', 'yes'], ['apple-mobile-web-app-status-bar-style', 'black-translucent'], ['apple-mobile-web-app-title', 'Comfort']].forEach(([n, c]) => { if (!document.querySelector('meta[name="' + n + '"]')) { const m = document.createElement('meta'); m.name = n; m.content = c; document.head.appendChild(m); } });
+    })();
     // feedback on touch + idle timer
     const touch = (ev) => {
       W.lastTouch = Date.now();
@@ -480,11 +493,13 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       if (!active()) return;
       const now = new Date();
       if (now.getMinutes() !== W.minute) { W.minute = now.getMinutes(); core.schedule(true); }
-      if (Date.now() - W.lastTouch > 180000 && (!atStart() || S.sheet)) { W.lastTouch = Date.now() - 60000; S.sheet = null; goStart(); core.schedule(true); window.scrollTo(0, 0); }
+      if (Date.now() - W.lastTouch > 180000 && (!atStart() || S.sheet)) { S.sheet = null; goStart(); core.schedule(true); window.scrollTo(0, 0); }
     }, 5000);
 
+    if (window.ComfortSounds) SOUNDS = window.ComfortSounds(core);
     if (window.ComfortMoods) MOODS = window.ComfortMoods(Object.assign({}, core, { panel, fx: () => FX }));
-    if (window.ComfortFX) FX = window.ComfortFX(Object.assign({}, core, { wallInfo: () => ({ active: active(), page: W.page, dimmed }), moods: () => MOODS }));
+    if (window.ComfortFX) FX = window.ComfortFX(Object.assign({}, core, { wallInfo: () => ({ active: active(), page: W.page, dimmed, black, season: seasonKey() }), moods: () => MOODS }));
+    if (MOODS && SOUNDS && MOODS.useSounds) MOODS.useSounds(SOUNDS);
     return { active, render, go, page: () => W.page, sheet, startOptions, startValue, dimmed: () => dimmed, fly };
   };
 })();
