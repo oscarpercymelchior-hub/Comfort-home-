@@ -216,3 +216,68 @@ html.lay-wall .sheet{left:var(--rail);max-width:640px;border:1px solid var(--w-b
   html.lay-phone .fab{right:calc(50% - 262px);bottom:calc(var(--nav-h) + var(--safe-b) + 16px)}
   html.lay-phone .chome{padding:20px}
 }
+
+/* ===== SCREEN – warm luxury for an acoustic wood wall: anthracite, matte black, warm white, wood & champagne accents ===== */
+html.lay-wall .w-pg-screen{--wood:#9a6a43;--wood2:#c08a5b;--champ:#d8c3a0;--warmw:#f4ede3;--ink:#0d0c0b}
+.w-pg-screen .wv{color:var(--warmw)} .w-pg-screen .wv small{color:#bfae95}
+.s-cap{display:block;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#a8957b;margin-bottom:6px}
+.s-avg{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-gap:20px;-webkit-align-items:center;align-items:center;width:100%;text-align:left;padding:26px 28px;border-radius:30px;margin-bottom:18px;color:inherit;
+  background:linear-gradient(135deg,#1b1815 0%,#11100e 60%,#0d0c0b 100%);border:1px solid rgba(216,195,160,.16);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.s-avg::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,rgba(192,138,91,0),#c08a5b 30%,#d8c3a0 60%,rgba(216,195,160,0))}
+.s-slats{position:absolute;top:0;bottom:0;right:0;width:46%;opacity:.16;pointer-events:none;background:repeating-linear-gradient(90deg,#8a5b37 0,#8a5b37 14px,#5e3c22 14px,#5e3c22 16px,rgba(0,0,0,0) 16px,rgba(0,0,0,0) 22px)}
+.s-slats::after{content:"";position:absolute;top:0;bottom:0;left:0;width:60%;background:linear-gradient(90deg,#141210,rgba(20,18,16,0))}
+.s-avg-l,.s-avg-r{position:relative}
+.s-avg .wv{font-size:84px;font-weight:200;letter-spacing:-.02em} .s-avg .wv small{font-size:36px}
+.s-avg-sub{display:block;font-size:14px;color:#a8957b;margin-top:8px}
+.s-avg-r{text-align:right}
+.s-heatnow{display:-webkit-inline-box;display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;height:44px;padding:0 16px;border-radius:22px;background:rgba(244,237,227,.05);border:1px solid rgba(216,195,160,.14);color:#cdbda4;font-size:15px}
+.s-heatnow svg{width:18px;height:18px;margin-right:8px} .s-heatnow.on{color:#f6c89a;border-color:rgba(214,140,80,.45);background:rgba(214,140,80,.10);box-shadow:0 0 22px rgba(214,140,80,.18)}
+.s-go{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:flex-end;justify-content:flex-end;margin-top:14px;color:#d8c3a0;font-weight:600;font-size:15px} .s-go svg{width:18px;height:18px;margin-left:4px}
+.s-rooms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-gap:14px}
+.s-room{position:relative;text-align:left;padding:20px 18px 18px;border-radius:26px;color:inherit;min-height:210px;background:#11100e;border:1px solid rgba(216,195,160,.12);-webkit-transition:border-color .3s,box-shadow .3s;transition:border-color .3s,box-shadow .3s}
+.s-room::before{content:"";position:absolute;left:18px;right:18px;top:0;height:2px;border-radius:2px;background:linear-gradient(90deg,#9a6a43,#d8c3a0);opacity:.7}
+.s-room.heat{border-color:rgba(214,140,80,.45);box-shadow:0 0 28px rgba(214,140,80,.14)}
+.s-rn{display:block;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#cdbda4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-rt{display:block;margin:14px 0 10px;min-height:52px} .s-room .wv{font-size:48px} .s-room .wv.na{color:#6f655a}
+.s-na{display:block;font-size:12px;color:#d9a066;margin-top:4px}
+.s-rmeta{display:block;min-height:24px;font-size:13px;color:#a8957b}
+.s-rmeta>span{display:-webkit-inline-box;display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;margin-right:12px}
+.s-rmeta svg{width:15px;height:15px;margin-right:4px}
+.s-hs{display:-webkit-inline-box;display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;font-size:13px;color:#8e8273}
+.s-hs svg{width:15px;height:15px;margin-right:4px} .s-hs.heat{color:#f3a86b} .s-hs.idle,.s-hs.other{color:#d8c3a0} .s-hs.na{color:#6f655a}
+.s-gauge{display:block;position:relative;height:6px;border-radius:3px;margin-top:16px;background:linear-gradient(90deg,#3c6b8f 0%,#6f8f6a 45%,#c08a5b 70%,#c4553d 100%);opacity:.9}
+.s-gfill{display:none}
+.s-gauge b{position:absolute;top:-5px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#f4ede3;box-shadow:0 0 0 3px rgba(13,12,11,.9),0 0 12px rgba(244,237,227,.5)}
+.s-gl{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-justify-content:space-between;justify-content:space-between;font-size:10.5px;color:#6f655a;margin-top:6px}
+.s-bar{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;margin:0 2px 18px}
+.s-bar h1{margin:0 0 0 16px;font-size:30px;font-weight:300;color:#f4ede3;-webkit-box-flex:1;-webkit-flex:1;flex:1}
+.s-back{display:-webkit-inline-box;display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;height:52px;padding:0 18px 0 12px;border-radius:26px;background:rgba(244,237,227,.06);border:1px solid rgba(216,195,160,.18);color:#e8dcc8;font-size:15px;font-weight:600}
+.s-back svg{width:22px;height:22px;margin-right:6px}
+.s-bar-t{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center} .s-bar-t .wv{font-size:40px;color:#f4ede3}
+.s-bar-h{display:-webkit-inline-box;display:-webkit-inline-flex;display:inline-flex;-webkit-align-items:center;align-items:center;margin-left:14px;color:#a8957b;font-size:15px} .s-bar-h svg{width:16px;height:16px;margin-right:4px}
+.s-heaters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-gap:14px}
+.s-heater{padding:20px;border-radius:26px;background:#11100e;border:1px solid rgba(216,195,160,.12)}
+.s-heater.heat{border-color:rgba(214,140,80,.45);box-shadow:0 0 26px rgba(214,140,80,.12)} .s-heater.busy{opacity:.85}
+.s-hh{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:space-between;justify-content:space-between}
+.s-hh b{display:block;font-size:20px;font-weight:600;color:#f4ede3;margin-bottom:4px}
+.s-pwr{width:58px;height:58px;border-radius:20px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;background:rgba(244,237,227,.05);border:1px solid rgba(216,195,160,.16);color:#cdbda4}
+.s-pwr svg{width:24px;height:24px} .s-pwr.on{background:linear-gradient(135deg,#d8a06a,#a9693f);color:#1a0f07;border-color:transparent;box-shadow:0 0 20px rgba(214,140,80,.35)}
+.s-hm{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-gap:10px;-webkit-align-items:center;align-items:center;margin-top:16px}
+.s-set{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center}
+.s-step{width:62px;height:62px;border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;background:rgba(244,237,227,.06);border:1px solid rgba(216,195,160,.18);color:#f4ede3}
+.s-step svg{width:24px;height:24px} .s-step[disabled],.s-pwr[disabled]{opacity:.35}
+.s-tv{text-align:center;min-width:88px;margin:0 8px} .s-tv .num{font-size:28px;font-weight:300;color:#f4ede3}
+.w-pg-screen .w-panel{background:#11100e;border-color:rgba(216,195,160,.12)} .w-pg-screen .w-ph h2{color:#a8957b}
+.w-pg-screen .w-tile.on{background:rgba(214,160,100,.08);border-color:rgba(216,170,120,.5);box-shadow:0 0 24px rgba(214,140,80,.14)}
+.w-pg-screen .w-tile.on .w-ti{background:linear-gradient(135deg,#e2b07c,#a9693f);color:#1a0f07;box-shadow:0 0 16px rgba(214,140,80,.4)} .w-pg-screen .w-tile.on .w-ts{color:#f0c9a0}
+.w-pg-screen .w-bar i{background:linear-gradient(90deg,#c08a5b,#d8c3a0)}
+@media (max-width:900px){.s-rooms{grid-template-columns:repeat(2,minmax(0,1fr))} .s-avg .wv{font-size:66px} .s-slats{width:60%}}
+@media (max-width:760px){.s-heaters{grid-template-columns:minmax(0,1fr)}}
+/* tighter rail now that there are 8 pages + settings */
+.w-nav{min-height:64px;margin:3px 0} .w-nav svg{width:24px;height:24px;margin-bottom:4px} .w-logo{margin-bottom:14px}
+@media (max-height:700px){.w-nav span{display:none} .w-nav{min-height:56px}}
+/* on Screen the frame turns warm too (champagne instead of cyan) */
+.w-warm .w-logo{border-color:rgba(216,195,160,.6);box-shadow:0 0 18px rgba(214,160,100,.35)} .w-warm .w-logo i{background:#e2b07c;box-shadow:0 0 12px #e2b07c}
+.w-warm .w-nav.on{background:rgba(216,195,160,.10);color:#f4ede3} .w-warm .w-nav.on::before{background:#d8c3a0;box-shadow:0 0 10px #c08a5b}
+.w-warm .w-time{color:#f4ede3;text-shadow:0 0 24px rgba(214,160,100,.22)} .w-warm .w-wi svg{color:#e2b07c}
+.w-warm .w-top{border-bottom-color:rgba(216,195,160,.12)}

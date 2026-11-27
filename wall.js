@@ -10,14 +10,16 @@
     const nl = () => settings.lang === 'nl' || (settings.lang !== 'en' && settings.lang !== 'mc' && /^nl/i.test(navigator.language || ''));
     const L = (en, du) => (nl() ? du : en);
     const PAGES = [
+      ['screen', 'grid', () => 'Screen'],
       ['home', 'home', () => L('Overview', 'Overzicht')],
       ['lights', 'light', () => L('Lights', 'Verlichting')],
       ['climate', 'climate', () => L('Climate', 'Klimaat')],
       ['devices', 'devices', () => L('Devices', 'Apparaten')],
       ['sensors', 'thermo', () => L('Sensors', 'Sensoren')],
-      ['autos', 'auto', () => L('Automations', 'Automations')]
+      ['autos', 'auto', () => L('Automations', 'Automations')],
+      ['calendar', 'clock', () => L('Calendar', 'Kalender')]
     ];
-    const W = { page: null, lastTouch: Date.now(), minute: -1, press: {} };
+    const W = { page: null, sub: null, lastTouch: Date.now(), minute: -1, press: {} };
     const startPage = () => (PAGES.some((p) => p[0] === settings.wallStart) ? settings.wallStart : 'home');
 
     function active() {
@@ -72,10 +74,13 @@
       const conn = S.conn === 'connected' ? 'ok' : S.conn === 'error' || S.conn === 'auth_invalid' ? 'bad' : 'warn';
       const connTxt = S.conn === 'connected' ? L('Connected', 'Verbonden') : S.conn === 'reconnecting' ? L('Reconnecting', 'Opnieuw verbinden') : S.conn === 'idle' ? L('Not logged in', 'Niet ingelogd') : S.conn === 'error' ? L('No connection', 'Geen verbinding') : L('Connecting', 'Verbinden');
       return `<header class="w-top" data-k="w-top"><div class="w-clock"><span class="w-time num">${hh}<i class="w-colon">:</i>${mm}</span><span class="w-date">${esc(date)}</span></div>
-<div class="w-weather">${out.v != null ? `<span class="w-wi">${ic(WI[cond] || 'sun')}</span><span class="w-out num">${T(out.v)}</span><span class="w-wl">${esc(cond ? cap(cond) : L('Outside', 'Buiten'))}</span>` : ''}</div>
+<div class="w-weather">${out.v != null ? `<span class="w-wi">${ic(WI[cond] || 'sun')}</span><span class="w-out num">${T(out.v)}</span><span class="w-wl">${esc(cond ? wName(cond) : L('Outside', 'Buiten'))}</span>` : ''}</div>
 <div class="w-stat"><span class="w-chip" title="${L('Lights on', 'Lampen aan')}">${ic('light')}<b class="num">${lamps}</b></span><span class="w-chip" title="${L('Air conditioners on', 'Airco’s aan')}">${ic('climate')}<b class="num">${acsOn}</b></span>${unav ? `<span class="w-chip warn">${ic('alert')}<b class="num">${unav}</b></span>` : ''}<span class="w-conn ${conn}"><i></i>${esc(connTxt)}</span></div></header>`;
     }
     const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const WNL = { sunny: 'Zonnig', 'clear night': 'Helder', cloudy: 'Bewolkt', partlycloudy: 'Half bewolkt', rainy: 'Regen', pouring: 'Stortregen', snowy: 'Sneeuw', 'snowy rainy': 'Natte sneeuw', fog: 'Mist', hail: 'Hagel', lightning: 'Onweer', 'lightning rainy': 'Onweer en regen', windy: 'Winderig', 'windy variant': 'Winderig', exceptional: 'Uitzonderlijk' };
+    const WEN = { partlycloudy: 'Partly cloudy', 'clear night': 'Clear night' };
+    const wName = (c) => (nl() ? WNL[c] : WEN[c]) || cap(c);
     function rail() {
       const cur = W.page;
       return `<nav class="w-rail" data-k="w-rail" aria-label="Dashboard"><div class="w-logo" aria-hidden="true"><i></i></div>${PAGES.map(([id, icon, lbl]) => `<button class="w-nav${cur === id ? ' on' : ''}" data-wact="page" data-v="${id}" data-k="wn-${id}" aria-label="${esc(lbl())}" ${cur === id ? 'aria-current="page"' : ''}>${ic(icon)}<span>${esc(lbl())}</span></button>`).join('')}
@@ -199,6 +204,78 @@ ${scenes.map((e) => `<button class="w-q" data-act="run" data-eid="${esc(e)}">${i
       out += `<div class="w-alist">${all.filter((e) => e !== osc).map((e) => { const s = S.states[e]; const on = s.state === 'on'; return `<div class="w-auto${on ? ' on' : ''}" data-k="wa-${esc(e)}"><span class="w-dot"></span><div class="w-at"><b>${esc(s.attributes.friendly_name || e)}</b><span>${on ? L('Active', 'Actief') : L('Disabled', 'Uitgeschakeld')}${s.attributes.last_triggered ? ' · ' + esc(ago(s.attributes.last_triggered)) : ''}</span></div><button class="w-tg${on ? ' on' : ''}" data-act="auto-toggle" data-eid="${esc(e)}" role="switch" aria-checked="${on}" aria-label="${esc(s.attributes.friendly_name || e)}" ${core.avail(s) ? '' : 'disabled'}><i></i></button></div>`; }).join('') || `<p class="w-empty">${L('No automations.', 'Geen automatiseringen.')}</p>`}</div>`;
       return out;
     }
+    /* ------------ SCREEN (wall dashboard for the acoustic wood wall) ------------ */
+    const SCREEN_ROOMS = [['woonkamer', 'Woonkamer'], ['oscar', 'Kamer Oscar'], ['rosa', 'Kamer Rosa'], ['ouders', 'Kamer Ouders']];
+    function screenRooms(m) {
+      const taken = {}; const out = [];
+      SCREEN_ROOMS.forEach(([re, label]) => { const r = m.rooms.find((x) => !taken[x.id] && new RegExp(re, 'i').test(x.name)); if (r) { taken[r.id] = 1; out.push({ r, label }); } });
+      if (out.length < 4) core.acList(m).map((e) => core.roomOfEid(e)).filter(Boolean).forEach((r) => { if (out.length < 4 && !taken[r.id]) { taken[r.id] = 1; out.push({ r, label: r.name }); } });
+      return out;
+    }
+    const HOTWATER = /dhw|hot.?water|warm.?water|tapwater|boiler.?water/i;
+    const heaters = (m) => m.climates.filter((e) => !HOTWATER.test(e + ' ' + core.nameOf(e)) && ((S.states[e].attributes.hvac_modes || []).indexOf('heat') >= 0 || core.isAC(e)));
+    function heatStatus(e) {
+      const s = S.states[e]; if (!s || !core.avail(s)) return { k: 'na', t: L('Unavailable', 'Niet beschikbaar') };
+      const a = s.attributes; const on = core.isOn(e, s);
+      if (!on) return { k: 'off', t: L('Off', 'Uit') };
+      if (a.hvac_action === 'heating' || (s.state === 'heat' && a.hvac_action == null)) return { k: 'heat', t: L('Heating', 'Verwarmt') };
+      if (s.state === 'heat') return { k: 'idle', t: L('Heat · idle', 'Verwarmen · wacht') };
+      return { k: 'other', t: core.HVAC[s.state] || cap(s.state) };
+    }
+    function roomHeat(r) {
+      const cs = r.devs.filter((e) => core.model().kind[e] === 'climate'); if (!cs.length) return null;
+      const st0 = cs.map(heatStatus); return st0.find((x) => x.k === 'heat') || st0.find((x) => x.k === 'idle') || st0.find((x) => x.k === 'other') || st0[0];
+    }
+    function deadSensors(r) { return r.temps.filter((e) => !(core.isOutside && core.isOutside(e)) && !(core.isJunkT && core.isJunkT(e)) && S.states[e] && !core.avail(S.states[e])); }
+    function gauge(v) {
+      const p = v == null ? null : Math.max(0, Math.min(100, (v - 14) / 12 * 100));
+      return `<span class="s-gauge"><i class="s-gfill" style="width:${p == null ? 0 : p.toFixed(0)}%"></i>${p == null ? '' : `<b style="left:${p.toFixed(0)}%"></b>`}</span><span class="s-gl"><span>14°</span><span>20°</span><span>26°</span></span>`;
+    }
+    function screenMain(m) {
+      const rooms = screenRooms(m);
+      rooms.forEach((x) => { const te = core.mainTemp(x.r); if (te) core.st(te); x.r.devs.forEach((e) => core.st(e)); });
+      const vals = rooms.map((x) => ({ x, v: core.tempOf(core.mainTemp(x.r)) }));
+      const ok = vals.filter((y) => y.v != null); const bad = vals.filter((y) => y.v == null || deadSensors(y.x.r).length);
+      const avg = ok.length ? ok.reduce((s2, y) => s2 + y.v, 0) / ok.length : null;
+      const heatingNow = heaters(m).filter((e) => heatStatus(e).k === 'heat').length;
+      let out = `<button class="s-avg" data-wact="screen-heat" data-k="s-avg"><span class="s-slats" aria-hidden="true"></span><span class="s-avg-l"><span class="s-cap">${L('Average house temperature', 'Gemiddelde huistemperatuur')}</span>${tempBig(avg)}<span class="s-avg-sub">${ok.length ? L(`Average of ${ok.length} rooms`, `Gemiddelde van ${ok.length} kamers`) : L('No valid sensor values', 'Geen geldige sensorwaarden')}${bad.length ? ' · ' + bad.map((y) => esc(y.x.label) + (y.v == null ? '' : L(' (backup sensor)', ' (reservesensor)'))).join(', ') + L(': sensor unavailable', ': sensor niet beschikbaar') : ''}</span></span>
+<span class="s-avg-r"><span class="s-heatnow${heatingNow ? ' on' : ''}">${ic('flame')}<b>${heatingNow ? L(`${heatingNow} heating`, `${heatingNow} verwarmt`) : L('No heating active', 'Geen verwarming actief')}</b></span><span class="s-go">${L('All heating', 'Alle verwarmingen')}${ic('chev')}</span></span></button>`;
+      out += `<div class="s-rooms">${rooms.map(({ r, label }) => { const v = core.tempOf(core.mainTemp(r)); const h = core.roomHum(r); const hs = roomHeat(r);
+        return `<button class="s-room${hs && hs.k === 'heat' ? ' heat' : ''}" data-wact="screen-room" data-v="${esc(r.id)}" data-k="s-room-${esc(r.id)}"><span class="s-rn">${esc(label)}</span>
+<span class="s-rt">${v == null ? `<span class="wv na">—</span><span class="s-na">${L('Sensor unavailable', 'Sensor niet beschikbaar')}</span>` : tempBig(v) + (deadSensors(r).length ? `<span class="s-na">${L('Room sensor unavailable · backup sensor used', 'Kamersensor niet beschikbaar · reservesensor gebruikt')}</span>` : '')}</span>
+<span class="s-rmeta">${h != null ? `<span>${ic('drop')}${Math.round(h)}%</span>` : ''}${hs ? `<span class="s-hs ${hs.k}">${ic('flame')}${esc(hs.t)}</span>` : ''}</span>${gauge(v)}</button>`; }).join('')}</div>`;
+      if (!rooms.length) out += `<p class="w-empty">${L('No rooms with temperature sensors found.', 'Geen kamers met temperatuursensoren gevonden.')}</p>`;
+      return out;
+    }
+    function heaterCard(e) {
+      const s = core.st(e); if (!s) return ''; const a = s.attributes; const r = core.roomOfEid(e); const hs = heatStatus(e);
+      const te = r && core.isAC(e) ? core.mainTemp(r) : null; const cur = te ? core.tempOf(te) : a.current_temperature != null ? +a.current_temperature : null;
+      const tgt = S.draft[e] ? S.draft[e].v : a.temperature != null ? +a.temperature : null; const ok = core.avail(s) && S.conn === 'connected';
+      const canOff = (a.hvac_modes || []).indexOf('off') >= 0; const on = core.isOn(e, s);
+      const name = core.isAC(e) && r ? core.shortRoom(r.name) : core.nameOf(e);
+      return `<div class="s-heater ${hs.k}${S.pending[e] ? ' busy' : ''}" data-k="s-h-${esc(e)}"><div class="s-hh"><div><b>${esc(name)}</b><span class="s-hs ${hs.k}">${ic('flame')}${esc(hs.t)}</span></div>${canOff ? `<button class="s-pwr${on ? ' on' : ''}" data-act="clim-power" data-eid="${esc(e)}" ${ok ? '' : 'disabled'} aria-pressed="${on}" aria-label="${esc(name)} ${L('on/off', 'aan/uit')}">${ic('power')}</button>` : ''}</div>
+<div class="s-hm"><div><span class="s-cap">${L('Now', 'Nu')}</span>${tempBig(cur)}</div><div class="s-set"><button class="s-step" data-act="clim-step" data-eid="${esc(e)}" data-d="-1" ${ok && tgt != null ? '' : 'disabled'} aria-label="${L('Lower', 'Lager')}">${ic('minus')}</button><div class="s-tv"><span class="s-cap">${L('Set', 'Ingesteld')}</span><span class="num">${T(tgt)}</span></div><button class="s-step" data-act="clim-step" data-eid="${esc(e)}" data-d="1" ${ok && tgt != null ? '' : 'disabled'} aria-label="${L('Higher', 'Hoger')}">${ic('plus')}</button></div></div></div>`;
+    }
+    function screenHeat(m) {
+      const hs = heaters(m);
+      return `<div class="s-bar"><button class="s-back" data-wact="screen-back">${ic('back')}<span>Screen</span></button><h1>${L('All heating', 'Alle verwarmingen')}</h1></div>
+${hs.length ? `<div class="s-heaters">${hs.map(heaterCard).join('')}</div>` : `<p class="w-empty">${L('No heating found in Home Assistant.', 'Geen verwarming gevonden in Home Assistant.')}</p>`}`;
+    }
+    function screenRoom(m, id) {
+      const r = m.roomById[id]; if (!r) return `<div class="s-bar"><button class="s-back" data-wact="screen-back">${ic('back')}<span>Screen</span></button></div><p class="w-empty">${L('Room not found.', 'Kamer niet gevonden.')}</p>`;
+      const v = core.tempOf(core.mainTemp(r)); const h = core.roomHum(r);
+      const ctl = r.devs.filter((e) => m.kind[e] !== 'climate'); const cl = r.devs.filter((e) => m.kind[e] === 'climate');
+      const sens = r.temps.concat(r.hums, r.other); sens.forEach((e) => core.st(e)); r.bins.forEach((e) => core.st(e));
+      const label = (SCREEN_ROOMS.find((x) => new RegExp(x[0], 'i').test(r.name)) || [0, r.name])[1];
+      let out = `<div class="s-bar"><button class="s-back" data-wact="screen-back">${ic('back')}<span>Screen</span></button><h1>${esc(label)}</h1><span class="s-bar-t">${tempBig(v)}${h != null ? `<span class="s-bar-h">${ic('drop')}${Math.round(h)}%</span>` : ''}</span></div>`;
+      if (ctl.length) out += panel(L('Control', 'Bediening'), `<div class="w-tiles">${ctl.map((e) => tile(e)).join('')}</div>`, 's-p-ctl');
+      if (cl.length) out += panel(L('Heating & air conditioning', 'Verwarming en airco'), `<div class="s-heaters">${cl.map(heaterCard).join('')}</div>`, 's-p-cl');
+      if (sens.length || r.bins.length) out += panel(L('Sensors', 'Sensoren'), `<div class="w-bins">${sens.concat(r.bins).map((e) => { const s = S.states[e]; return `<div class="w-bin${core.avail(s) ? '' : ' na'}${s && s.state === 'on' && e.startsWith('binary_sensor.') ? ' on' : ''}"><span class="w-si">${ic(r.temps.indexOf(e) >= 0 ? 'thermo' : r.hums.indexOf(e) >= 0 ? 'drop' : e.startsWith('binary_sensor.') ? 'window' : (dc(e) === 'power' || dc(e) === 'energy') ? 'bolt' : 'info')}</span><span class="w-sl">${esc(core.nameOf(e))}</span><span class="w-sv num">${esc(core.stateText(e, s))}</span></div>`; }).join('')}</div>`, 's-p-sens');
+      if (!ctl.length && !cl.length && !sens.length && !r.bins.length) out += `<p class="w-empty">${L('No devices in this room.', 'Geen apparaten in deze kamer.')}</p>`;
+      return out;
+    }
+    function pScreen(m) { return W.sub && W.sub.t === 'heat' ? screenHeat(m) : W.sub && W.sub.t === 'room' ? screenRoom(m, W.sub.id) : screenMain(m); }
+
     function ago(iso) { const mnt = Math.round((Date.now() - Date.parse(iso)) / 60000); if (!isFinite(mnt)) return ''; return mnt < 1 ? L('just now', 'zojuist') : mnt < 60 ? mnt + ' min' : mnt < 1440 ? Math.round(mnt / 60) + L(' h', ' uur') : Math.round(mnt / 1440) + L(' d', ' d'); }
     function pSettingsWrap() {
       const st = `<div class="w-pagebar"><h1>${L('Settings', 'Instellingen')}</h1></div>
@@ -216,14 +293,14 @@ ${scenes.map((e) => `<button class="w-q" data-act="run" data-eid="${esc(e)}">${i
       let body;
       if (W.page === 'settings') body = pSettingsWrap();
       else if (loading) body = `<div class="w-load" data-k="w-load"><div class="w-ring"><i></i></div><p>${S.conn === 'idle' ? L('Log in to Home Assistant to start.', 'Log in bij Home Assistant om te beginnen.') : L('Connecting to Home Assistant…', 'Verbinden met Home Assistant…')}</p></div>`;
-      else body = W.page === 'lights' ? pLights(m) : W.page === 'climate' ? pClimate(m) : W.page === 'devices' ? pDevices(m) : W.page === 'sensors' ? pSensors(m) : W.page === 'autos' ? pAutos() : pHome(m);
+      else body = W.page === 'screen' ? pScreen(m) : W.page === 'calendar' ? (core.extra() ? core.extra().calendarHTML(true) : '') : W.page === 'lights' ? pLights(m) : W.page === 'climate' ? pClimate(m) : W.page === 'devices' ? pDevices(m) : W.page === 'sensors' ? pSensors(m) : W.page === 'autos' ? pAutos() : pHome(m);
       core.st('__clock');
-      return `<div class="page w-root" data-k="w-root">${rail()}<div class="w-main">${topbar(m)}<div class="w-page w-pg-${esc(W.page)}" data-k="w-page-${esc(W.page)}">${body}</div></div></div>`;
+      return `<div class="page w-root${W.page === 'screen' ? ' w-warm' : ''}" data-k="w-root">${rail()}<div class="w-main">${topbar(m)}<div class="w-page w-pg-${esc(W.page)}" data-k="w-page-${esc(W.page)}${W.sub ? '-' + esc(W.sub.t + (W.sub.id || '')) : ''}">${body}</div></div></div>`;
     }
 
     function go(page) {
-      if (page === W.page) { window.scrollTo(0, 0); return; }
-      W.page = page; S.sheet = null; core.schedule(true); window.scrollTo(0, 0);
+      if (page === W.page && !W.sub) { window.scrollTo(0, 0); return; }
+      W.page = page; W.sub = null; S.sheet = null; core.schedule(true); window.scrollTo(0, 0);
     }
     function allOff() {
       const m = core.model();
@@ -242,6 +319,9 @@ ${scenes.map((e) => `<button class="w-q" data-act="run" data-eid="${esc(e)}">${i
       const el = ev.target.closest && ev.target.closest('[data-wact]'); if (!el || !active()) return;
       const a = el.dataset.wact;
       if (a === 'page') go(el.dataset.v); else if (a === 'alloff') allOff();
+      else if (a === 'screen-heat') { W.sub = { t: 'heat' }; core.schedule(true); window.scrollTo(0, 0); }
+      else if (a === 'screen-room') { W.sub = { t: 'room', id: el.dataset.v }; core.schedule(true); window.scrollTo(0, 0); }
+      else if (a === 'screen-back') { W.sub = null; core.schedule(true); window.scrollTo(0, 0); }
     });
     // feedback on touch + idle timer
     const touch = (ev) => {
@@ -254,7 +334,7 @@ ${scenes.map((e) => `<button class="w-q" data-act="run" data-eid="${esc(e)}">${i
       if (!active()) return;
       const now = new Date();
       if (now.getMinutes() !== W.minute) { W.minute = now.getMinutes(); core.schedule(true); }
-      if (Date.now() - W.lastTouch > 180000 && (W.page !== startPage() || S.sheet)) { W.lastTouch = Date.now(); S.sheet = null; W.page = startPage(); core.schedule(true); window.scrollTo(0, 0); }
+      if (Date.now() - W.lastTouch > 180000 && (W.page !== startPage() || W.sub || S.sheet)) { W.lastTouch = Date.now(); S.sheet = null; W.sub = null; W.page = startPage(); core.schedule(true); window.scrollTo(0, 0); }
     }, 5000);
 
     return { active, render, go, page: () => W.page };

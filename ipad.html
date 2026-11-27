@@ -32,11 +32,20 @@
   var dev = { legacy: legacy, ios: ios, w: screen.width, h: screen.height, dpr: window.devicePixelRatio || 1, standalone: navigator.standalone === true, flexGap: flexGap() };
   window.__COMFORT_DEVICE = dev;
   document.documentElement.className += legacy ? ' legacy' + (dev.flexGap ? '' : ' nofg') : ' modern';
+  window.__COMFORT_BASE = BASE;
   var v = '?v=' + Math.floor(Date.now() / 600000);
   function css(href) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href + v; document.head.appendChild(l); }
   function js(list, i) { if (i >= list.length) { var b = document.getElementById('boot'); if (b) b.parentNode.removeChild(b); return; } var s = document.createElement('script'); s.src = list[i] + v; s.onload = function () { js(list, i + 1); }; s.onerror = function () { var b = document.getElementById('boot'); if (b) b.innerHTML = 'Kon Comfort niet laden. Controleer de internetverbinding en probeer opnieuw.'; }; document.body.appendChild(s); }
+  function load() {
   if (legacy) { css(BASE + 'comfort-legacy.css'); js([BASE + 'comfort-legacy.js'], 0); }
-  else { css(BASE + 'styles.css'); css(BASE + 'wall.css'); js([BASE + 'icons.js', BASE + 'wall.js', BASE + 'app.js'], 0); }
+  else { css(BASE + 'styles.css'); css(BASE + 'wall.css'); css(BASE + 'extra.css'); js([BASE + 'icons.js', BASE + 'wall.js', BASE + 'extra.js', BASE + 'app.js'], 0); }
+  }
+  // ask GitHub for the current version (never cached) so a new release shows up right away
+  var done = false; function go() { if (!done) { done = true; load(); } }
+  try { var x = new XMLHttpRequest(); x.open('GET', BASE + 'version.json?t=' + Date.now(), true); x.timeout = 3000;
+    x.onload = function () { try { var ver = JSON.parse(x.responseText).version; if (ver) v = '?v=' + encodeURIComponent(ver); } catch (e) { /* */ } go(); };
+    x.onerror = go; x.ontimeout = go; x.send(); } catch (e) { go(); }
+  setTimeout(go, 3500);
 })();
 </script>
 </body>

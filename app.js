@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.10.0';
+  const VERSION = '1.11.0';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -16,7 +16,7 @@
     del(k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) { /* ignore */ } }
   };
   const DEFAULTS = { theme: 'auto', autoSource: 'time', dayStart: '07:00', nightStart: '20:00', houseSource: 'auto', showHum: true,
-    favorites: [], roomMain: {}, devGroup: 'type', climate: null, lastMode: {}, discoSwitches: [], lang: 'en', layout: 'auto', wallStart: 'home' };
+    favorites: [], roomMain: {}, devGroup: 'type', climate: null, lastMode: {}, discoSwitches: [], lang: 'en', layout: 'auto', wallStart: 'home', deco: 'none' };
   const settings = Object.assign({}, DEFAULTS, store.get('ch.settings', {}));
   const saveSettings = () => store.set('ch.settings', settings);
   /* ---------------- languages ---------------- */
@@ -117,6 +117,14 @@
   };
   let C = null;            // active connection
   let WALL = null;         // iPad wall-panel layout (wall.js), created at boot
+  let EXTRA = null;        // decorations + calendar + auto-update for iPad/laptop (extra.js)
+  /* which layout is showing now: 'ipad' (wall panel), 'laptop' or 'iphone' (Settings → Device Layout; Automatic follows the screen) */
+  function effLayout() {
+    if (WALL && WALL.active()) return 'ipad';
+    const l = settings.layout || 'auto';
+    if (l === 'iphone' || l === 'laptop') return l;
+    return window.innerWidth >= 1024 ? 'laptop' : 'iphone';
+  }
   let M = null;            // derived model
   let modelDirty = true;
 
@@ -658,6 +666,7 @@
     const h = decodeURIComponent(location.hash.replace(/^#\/?/, '')); const [name, id] = h.split('/');
     if (name === 'room' && id) return { name: 'room', id, key: 'room/' + id };
     if ((name === 'climate' || name === 'info') && id) return { name, id, key: name + '/' + id };
+    if (name === 'calendar' && EXTRA && effLayout() !== 'iphone') return { name: 'calendar', key: 'calendar' };
     if (name === 'rooms') return { name: 'rooms', key: 'rooms' };
     const n = TABS.some((t) => t[0] === name) ? name : 'home'; return { name: n, key: n };
   }
@@ -691,10 +700,11 @@
     let html;
     try {
       const r = S.route.name;
-      html = wallOn ? WALL.render() : r === 'automations' ? pAutomations() : r === 'info' ? (S.route.id ? pInfoEnt(S.route.id) : pInfo()) : r === 'timers' ? pTimers() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
+      html = wallOn ? WALL.render() : r === 'calendar' && EXTRA && effLayout() !== 'iphone' ? EXTRA.calendarHTML(false) : r === 'automations' ? pAutomations() : r === 'info' ? (S.route.id ? pInfoEnt(S.route.id) : pInfo()) : r === 'timers' ? pTimers() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
     } catch (e) { console.error(e); html = `<div class="page" data-k="err"><div class="msg bad">${ic('alert')}<div>Something went wrong showing this page. ${esc(e.message)}</div></div></div>`; }
     morphInto($('#view'), html);
     morphInto($('#nav'), wallOn ? '' : navHTML());
+    if (EXTRA) EXTRA.applyDeco(effLayout());
     morphInto($('#sheet'), S.sheet ? (S.sheet === '__osc' ? oscSheet() : S.sheet.startsWith('__') ? specialSheet(S.sheet) : sheetHTML(S.sheet)) : '');
   }
 
@@ -731,7 +741,8 @@
   /* ---------------- shared components ---------------- */
   function navHTML() {
     const cur = S.route.name === 'room' || S.route.name === 'rooms' ? 'home' : S.route.name;
-    return `<nav class="bn" aria-label="Main"><div class="in">${TABS.map(([id, label, icon]) => `<a href="#/${id}" class="${cur === id ? 'sel' : ''}" ${cur === id ? 'aria-current="page"' : ''} data-k="n-${id}"><span class="ic">${ic(icon)}</span>${t(label)}</a>`).join('')}</div></nav>`;
+    const tabs = EXTRA && effLayout() === 'laptop' ? TABS.slice(0, -1).concat([['calendar', settings.lang === 'nl' ? 'Kalender' : 'Calendar', 'clock'], TABS[TABS.length - 1]]) : TABS;
+    return `<nav class="bn" aria-label="Main"><div class="in${tabs.length > 7 ? ' n8' : ''}">${tabs.map(([id, label, icon]) => `<a href="#/${id}" class="${cur === id ? 'sel' : ''}" ${cur === id ? 'aria-current="page"' : ''} data-k="n-${id}"><span class="ic">${ic(icon)}</span>${t(label)}</a>`).join('')}</div></nav>`;
   }
   function pill() {
     if (S.demo) return `<span class="pill demo"><span class="dot"></span>${t('Preview')}</span>`;
@@ -1719,6 +1730,7 @@ ${S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-a
     out += `<div class="sec-h" style="margin-top:24px"><h2>Device Layout</h2></div><div class="card set" data-k="layoutset">
 <div class="it"><span class="ic">${ic('smartphone')}</span><span class="lb"><b>Device Layout</b><span>${settings.lang === 'nl' ? 'Kies hoe de app eruitziet op dit apparaat' : 'Choose how the app looks on this device'}</span></span><select data-set="layout" aria-label="Device Layout">${[['auto', settings.lang === 'nl' ? 'Automatisch' : 'Automatic'], ['iphone', 'iPhone'], ['ipad', 'iPad'], ['laptop', 'Laptop']].filter((o) => o[0] !== 'ipad' || window.ComfortWall).map(([v, l]) => `<option value="${v}" ${(settings.layout || 'auto') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
 ${settings.layout === 'ipad' || (WALL && WALL.active()) ? `<div class="it"><span class="ic">${ic('home')}</span><span class="lb"><b>${settings.lang === 'nl' ? 'Startpagina iPad' : 'iPad start page'}</b></span><select data-set="wallStart" aria-label="Start page">${[['home', settings.lang === 'nl' ? 'Overzicht' : 'Overview'], ['lights', settings.lang === 'nl' ? 'Verlichting' : 'Lights'], ['climate', settings.lang === 'nl' ? 'Klimaat' : 'Climate'], ['devices', settings.lang === 'nl' ? 'Apparaten' : 'Devices'], ['sensors', settings.lang === 'nl' ? 'Sensoren' : 'Sensors'], ['autos', 'Automations']].map(([v, l]) => `<option value="${v}" ${(settings.wallStart || 'home') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>` : ''}</div>`;
+    if (EXTRA) out += EXTRA.decoSettingsHTML(effLayout());
     // air conditioners
     if (m.climates.length) {
       const sel = acList(m);
@@ -1986,6 +1998,7 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
   window.addEventListener('pageshow', (e) => { if (e.persisted && C) C.retryNow(); });  // iOS restores pages from memory
   window.addEventListener('offline', () => { if (C && C.ws) try { C.ws.close(); } catch (e) { /* */ } });
   setInterval(() => { applyTheme(); if (S.route.name === 'home' || S.route.name === 'room') { changed.add('__clock'); schedule(false); } }, 20000);
+  let lastLay = null; window.addEventListener('resize', () => { const l = effLayout(); if (l !== lastLay) { lastLay = l; schedule(true); } });
   window.__navCount = 0; window.addEventListener('hashchange', () => { window.__navCount++; });
 
   /* ---------------- iPad wall panel (separate module wall.js) ---------------- */
@@ -1994,13 +2007,18 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
     return window.ComfortWall({
       S, settings, t, ic, esc, model: () => model(), st, nameOf, roomNameOf, avail, isOn, stateText, devIcon, houseTemp, outsideTemp, acList,
       tColor, shortRoom, mainTemp, tempOf, roomHum, roomOfEid, HVAC, ACTION, pSettings, oscEnt, oscStatus, OSC, toast, svc, climatePower,
-      schedule: (f) => schedule(f)
+      schedule: (f) => schedule(f), isAC, isOutside, isJunkT, extra: () => EXTRA
     });
+  }
+  function makeExtra() {
+    if (!window.ComfortExtra) return null;
+    return window.ComfortExtra({ S, settings, ic, esc, st, api, pill, toast, VERSION, saveSettings, schedule: (f) => schedule(f) });
   }
 
   /* ---------------- boot ---------------- */
-  S.route = parseRoute();
+  EXTRA = makeExtra();
   WALL = makeWall();
+  S.route = parseRoute();
   applyTheme();
   const q = new URLSearchParams(location.search);
   const auth = loadAuth();
