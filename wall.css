@@ -369,19 +369,11 @@ html:not(.lay-wall) #wdim,html:not(.lay-wall) #wfx{display:none}
 /* Christmas on standby: a few slow snowflakes, soft lights, and now and then Santa's sleigh across the top */
 #wfx{position:fixed;top:0;left:0;right:0;bottom:0;z-index:91;pointer-events:none;overflow:hidden;display:none}
 html.w-season #wfx{display:block}
-.fx-lights,.fx-snow{display:none} html.w-season-own .fx-lights,html.w-season-own .fx-snow{display:block}
+.fx-lights{display:none} html.w-season-own .fx-lights{display:block}
 .fx-lights{position:absolute;top:0;left:var(--rail);right:0;height:16px}
 .fx-lights i{position:absolute;top:4px;width:8px;height:11px;border-radius:50%;background:#f2c14e;opacity:.55;-webkit-animation:fxtw 3.6s ease-in-out infinite;animation:fxtw 3.6s ease-in-out infinite}
 .fx-lights i:nth-child(3n+1){background:#e05a4f} .fx-lights i:nth-child(3n+2){background:#5fb36f}
 @-webkit-keyframes fxtw{50%{opacity:.95}} @keyframes fxtw{50%{opacity:.95}}
-.fx-snow b{position:absolute;top:-30px;color:rgba(190,205,225,.75);font-weight:400;-webkit-animation:fxfall 18s linear infinite;animation:fxfall 18s linear infinite;will-change:transform}
-html.w-light .fx-snow b{color:rgba(150,170,200,.55)}
-@-webkit-keyframes fxfall{from{-webkit-transform:translate3d(0,0,0)}to{-webkit-transform:translate3d(40px,110vh,0)}} @keyframes fxfall{from{transform:translate3d(0,0,0)}to{transform:translate3d(40px,110vh,0)}}
-.fx-santa{position:absolute;top:34px;left:100%;font-size:34px;white-space:nowrap;opacity:0;will-change:transform}
-.fx-santa span{display:inline-block;margin-right:2px} .fx-santa .fx-sl{margin-left:6px}
-.fx-santa.go{opacity:1;-webkit-animation:fxfly 14s linear 1 both;animation:fxfly 14s linear 1 both}
-@-webkit-keyframes fxfly{0%{-webkit-transform:translate3d(0,0,0)}25%{-webkit-transform:translate3d(-35vw,14px,0)}50%{-webkit-transform:translate3d(-70vw,0,0)}75%{-webkit-transform:translate3d(-105vw,12px,0)}100%{-webkit-transform:translate3d(-140vw,-6px,0)}}
-@keyframes fxfly{0%{transform:translate3d(0,0,0)}25%{transform:translate3d(-35vw,14px,0)}50%{transform:translate3d(-70vw,0,0)}75%{transform:translate3d(-105vw,12px,0)}100%{transform:translate3d(-140vw,-6px,0)}}
 html.w-season.lay-wall body{background-image:radial-gradient(900px 520px at 80% -10%,rgba(200,220,245,.20),rgba(0,0,0,0) 60%),radial-gradient(700px 500px at 0% 110%,rgba(214,90,70,.07),rgba(0,0,0,0) 60%)}
 
 /* Screen: living but calm animations (opacity/transform only) */
@@ -461,3 +453,76 @@ html.w-light .s-avg::after{background:linear-gradient(90deg,rgba(255,255,255,0),
 html.w-light .w-warm::before{background:radial-gradient(closest-side,rgba(255,190,120,.22),rgba(255,190,120,0))}
 html.w-light .m-ic,html.w-light .m-edit{background:rgba(255,255,255,.8)}
 html.w-light #wdim{background:#140d07}
+
+/* =====================================================================================
+   1.13 – animated Screen stage, overlay (Santa, fireworks, snow/petals/leaves) and living mood cards
+   ===================================================================================== */
+.fx-wrap{position:relative;height:150px;border-radius:28px;overflow:hidden;margin-bottom:18px;background:#2a1f18;box-shadow:0 10px 30px rgba(70,40,15,.18);border:1px solid rgba(166,110,60,.28)}
+.fx-wrap.big{height:180px}
+.fx-stage{position:absolute;top:0;left:0;right:0;bottom:0}
+.fx-cv{display:block;width:100%;height:100%}
+.fx-wrap::after{content:"";position:absolute;top:0;left:0;bottom:0;width:60%;pointer-events:none;background:linear-gradient(90deg,rgba(20,12,6,.42),rgba(20,12,6,0))}
+.fx-lab{position:absolute;left:24px;bottom:22px;z-index:2;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.45)}
+.fx-lab b{display:block;font-size:28px;font-weight:300;letter-spacing:.01em} .fx-lab span{display:block;font-size:14px;opacity:.88;margin-top:4px}
+.fx-fw{position:absolute;top:14px;right:14px;z-index:2;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;min-height:42px;padding:0 14px;border-radius:21px;color:#fff;font-size:14px;font-weight:600;background:rgba(20,12,6,.38);border:1px solid rgba(255,230,190,.35)}
+.fx-fw svg{width:17px;height:17px;margin-right:6px;color:#ffd58a}
+.fx-wood{position:absolute;left:0;right:0;bottom:0;height:7px;z-index:2;background:repeating-linear-gradient(90deg,#9a6a43 0,#9a6a43 10px,#6e4628 10px,#6e4628 12px);opacity:.85}
+#fxov{position:fixed;top:0;left:0;z-index:35;pointer-events:none;display:none}
+#fxov.on{display:block}
+html.w-standby #fxov{z-index:92}
+html:not(.lay-wall) #fxov{display:none!important}
+@media (max-width:760px){.fx-wrap{height:130px} .fx-wrap.big{height:150px} .fx-lab b{font-size:22px}}
+
+/* living mood cards: every mood has its own small animation */
+.m-fx{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
+.m-fx i{position:absolute;display:block;opacity:0}
+.m-card.k-sleep,.m-card.k-movie{border-color:rgba(255,255,255,.08)}
+.m-card.k-sleep::before{background:linear-gradient(160deg,#0b1030,#252a5a);opacity:1}
+.m-card.k-movie::before{background:linear-gradient(160deg,#141018,#2a1c2c);opacity:1}
+.m-card.k-sleep .m-go b,.m-card.k-movie .m-go b{color:#fff} .m-card.k-sleep .m-sub,.m-card.k-movie .m-sub{color:rgba(255,255,255,.7)}
+.m-card.k-sleep .m-ic,.m-card.k-movie .m-ic,.m-card.k-sleep .m-edit,.m-card.k-movie .m-edit{background:rgba(255,255,255,.14);color:#fff}
+/* Old Christmas: falling snow + twinkling bulbs */
+.k-christmas .m-fx i{width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 3px rgba(120,140,170,.8);top:-8px;opacity:.9;-webkit-animation:mfall 5s linear infinite;animation:mfall 5s linear infinite}
+.k-christmas .m-fx i:nth-child(1){left:12%} .k-christmas .m-fx i:nth-child(2){left:30%;-webkit-animation-delay:-1.4s;animation-delay:-1.4s;-webkit-animation-duration:6s;animation-duration:6s}
+.k-christmas .m-fx i:nth-child(3){left:52%;-webkit-animation-delay:-3s;animation-delay:-3s} .k-christmas .m-fx i:nth-child(4){left:70%;-webkit-animation-delay:-2.2s;animation-delay:-2.2s;-webkit-animation-duration:7s;animation-duration:7s}
+.k-christmas .m-fx i:nth-child(5){left:88%;-webkit-animation-delay:-4s;animation-delay:-4s}
+.k-christmas .m-fx i:nth-child(n+6){top:6px;width:7px;height:9px;-webkit-animation:mtw 2.4s ease-in-out infinite;animation:mtw 2.4s ease-in-out infinite;box-shadow:0 0 8px currentColor}
+.k-christmas .m-fx i:nth-child(6){left:38%;background:#f2c14e;color:#f2c14e} .k-christmas .m-fx i:nth-child(7){left:52%;background:#e0453a;color:#e0453a;-webkit-animation-delay:.8s;animation-delay:.8s} .k-christmas .m-fx i:nth-child(8){left:66%;background:#3fae62;color:#3fae62;-webkit-animation-delay:1.6s;animation-delay:1.6s}
+@-webkit-keyframes mfall{from{-webkit-transform:translate3d(0,0,0)}to{-webkit-transform:translate3d(14px,140px,0)}} @keyframes mfall{from{transform:translate3d(0,0,0)}to{transform:translate3d(14px,140px,0)}}
+@-webkit-keyframes mtw{0%,100%{opacity:.35}50%{opacity:1}} @keyframes mtw{0%,100%{opacity:.35}50%{opacity:1}}
+/* Sleep: twinkling stars + floating moon */
+.k-sleep .m-fx i{width:3px;height:3px;border-radius:50%;background:#fff;-webkit-animation:mtw 3.2s ease-in-out infinite;animation:mtw 3.2s ease-in-out infinite}
+.k-sleep .m-fx i:nth-child(1){left:20%;top:30%} .k-sleep .m-fx i:nth-child(2){left:42%;top:18%;-webkit-animation-delay:-1s;animation-delay:-1s} .k-sleep .m-fx i:nth-child(3){left:60%;top:40%;-webkit-animation-delay:-2s;animation-delay:-2s}
+.k-sleep .m-fx i:nth-child(4){left:34%;top:56%;-webkit-animation-delay:-.5s;animation-delay:-.5s} .k-sleep .m-fx i:nth-child(5){left:12%;top:70%;-webkit-animation-delay:-2.6s;animation-delay:-2.6s} .k-sleep .m-fx i:nth-child(6){left:52%;top:72%;-webkit-animation-delay:-1.8s;animation-delay:-1.8s}
+.k-sleep .m-fx i:nth-child(7){left:28%;top:10%;-webkit-animation-delay:-3s;animation-delay:-3s}
+.k-sleep .m-fx i:nth-child(8){width:30px;height:30px;right:18px;left:auto;top:auto;bottom:16px;background:transparent;box-shadow:9px -6px 0 0 #fdf1cf;opacity:.95;-webkit-animation:mfloat 6s ease-in-out infinite;animation:mfloat 6s ease-in-out infinite}
+@-webkit-keyframes mfloat{50%{-webkit-transform:translateY(-6px)}} @keyframes mfloat{50%{transform:translateY(-6px)}}
+/* Read: breathing lamp glow + motes */
+.k-read .m-fx i:nth-child(1){width:150px;height:150px;left:-40px;top:-70px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,206,120,.75),rgba(255,206,120,0));opacity:.8;-webkit-animation:mbreath 5s ease-in-out infinite;animation:mbreath 5s ease-in-out infinite}
+.k-read .m-fx i:nth-child(n+2){width:3px;height:3px;border-radius:50%;background:#ffd88a;bottom:10px;-webkit-animation:mrise 6s linear infinite;animation:mrise 6s linear infinite}
+.k-read .m-fx i:nth-child(2){left:20%} .k-read .m-fx i:nth-child(3){left:35%;-webkit-animation-delay:-2s;animation-delay:-2s} .k-read .m-fx i:nth-child(4){left:50%;-webkit-animation-delay:-4s;animation-delay:-4s} .k-read .m-fx i:nth-child(5){left:28%;-webkit-animation-delay:-3s;animation-delay:-3s}
+@-webkit-keyframes mbreath{50%{opacity:1;-webkit-transform:scale(1.12)}} @keyframes mbreath{50%{opacity:1;transform:scale(1.12)}}
+@-webkit-keyframes mrise{0%{opacity:0;-webkit-transform:translate3d(0,0,0)}20%{opacity:.9}100%{opacity:0;-webkit-transform:translate3d(10px,-90px,0)}} @keyframes mrise{0%{opacity:0;transform:translate3d(0,0,0)}20%{opacity:.9}100%{opacity:0;transform:translate3d(10px,-90px,0)}}
+/* Wake Up: the sun rises again and again */
+.k-wake .m-fx i:nth-child(1){width:46px;height:46px;border-radius:50%;right:22px;bottom:-50px;background:radial-gradient(circle,#fff6d8 0,#ffc163 55%,rgba(255,170,80,0) 72%);opacity:1;-webkit-animation:msun 7s ease-in-out infinite;animation:msun 7s ease-in-out infinite}
+@-webkit-keyframes msun{0%{-webkit-transform:translateY(0);opacity:.4}60%,100%{-webkit-transform:translateY(-78px);opacity:1}} @keyframes msun{0%{transform:translateY(0);opacity:.4}60%,100%{transform:translateY(-78px);opacity:1}}
+/* Movie: sweeping projector beam + flicker */
+.k-movie .m-fx i:nth-child(1){width:200%;height:40px;right:-30%;top:10px;background:linear-gradient(90deg,rgba(220,215,255,0),rgba(220,215,255,.22));-webkit-transform-origin:100% 50%;transform-origin:100% 50%;opacity:1;-webkit-animation:mbeam 6s ease-in-out infinite;animation:mbeam 6s ease-in-out infinite}
+.k-movie .m-fx i:nth-child(n+2){width:2px;height:2px;background:#fff;-webkit-animation:mtw .9s steps(2) infinite;animation:mtw .9s steps(2) infinite}
+.k-movie .m-fx i:nth-child(2){left:30%;top:30%} .k-movie .m-fx i:nth-child(3){left:55%;top:60%;-webkit-animation-delay:-.4s;animation-delay:-.4s} .k-movie .m-fx i:nth-child(4){left:75%;top:25%;-webkit-animation-delay:-.2s;animation-delay:-.2s}
+@-webkit-keyframes mbeam{0%,100%{-webkit-transform:rotate(-6deg)}50%{-webkit-transform:rotate(8deg)}} @keyframes mbeam{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(8deg)}}
+/* Relax / custom: drifting warm blobs; Bright: turning rays */
+.k-relax .m-fx i:nth-child(-n+3),.k-custom .m-fx i:nth-child(-n+3){width:90px;height:90px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,170,120,.6),rgba(255,170,120,0));opacity:.8;-webkit-animation:mdrift 9s ease-in-out infinite alternate;animation:mdrift 9s ease-in-out infinite alternate}
+.k-relax .m-fx i:nth-child(1),.k-custom .m-fx i:nth-child(1){left:-20px;top:-20px} .k-relax .m-fx i:nth-child(2),.k-custom .m-fx i:nth-child(2){right:-10px;top:30px;-webkit-animation-delay:-3s;animation-delay:-3s} .k-relax .m-fx i:nth-child(3),.k-custom .m-fx i:nth-child(3){left:40%;bottom:-40px;-webkit-animation-delay:-6s;animation-delay:-6s}
+@-webkit-keyframes mdrift{to{-webkit-transform:translate3d(24px,14px,0) scale(1.15)}} @keyframes mdrift{to{transform:translate3d(24px,14px,0) scale(1.15)}}
+.k-bright .m-fx i:nth-child(1){width:140px;height:140px;right:-50px;top:-50px;border-radius:50%;opacity:.7;background:repeating-conic-gradient(rgba(255,230,150,.45) 0 10deg,rgba(255,230,150,0) 10deg 30deg);-webkit-animation:mspin 24s linear infinite;animation:mspin 24s linear infinite}
+@-webkit-keyframes mspin{to{-webkit-transform:rotate(360deg)}} @keyframes mspin{to{transform:rotate(360deg)}}
+.m-go{z-index:1} .m-edit,.m-stop{z-index:2}
+@media (prefers-reduced-motion:reduce){.m-fx i{-webkit-animation:none!important;animation:none!important}}
+/* mood editor: devices from anywhere in the house */
+.m-from{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-top:1px}
+.m-chk span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.m-rm{width:38px;height:38px;border-radius:12px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;-webkit-justify-content:center;justify-content:center;color:var(--muted);background:rgba(127,127,127,.08);margin:0 8px 0 auto;-webkit-flex:none;flex:none} .m-rm svg{width:16px;height:16px}
+.m-once{font-size:13px;font-weight:600;color:var(--accent)}
+.btn.m-addbtn{width:100%;margin:2px 0 4px;border:1px dashed var(--w-border);background:transparent;color:var(--accent)} .btn.m-addbtn svg{margin-right:8px}
+.m-pick{border:1px solid var(--w-border);border-radius:18px;padding:4px 12px 8px;margin:4px 0 6px;background:rgba(127,127,127,.04)}

@@ -34,6 +34,15 @@
       return out;
     }
     let MOODS = null; // created after panel() exists (see below)
+    let FX = null; // animated scenes (fx.js)
+    // season for the Screen animations: setting wallScene = auto | winter | spring | summer | autumn | off
+    function seasonKey() { const v = settings.wallScene || 'auto'; if (v !== 'auto') return v; const m = new Date().getMonth(); return m === 11 || m <= 1 ? 'winter' : m <= 4 ? 'spring' : m <= 7 ? 'summer' : 'autumn'; }
+    const SEASON_NAME = () => ({ winter: L('Winter', 'Winter'), spring: L('Spring', 'Lente'), summer: L('Summer', 'Zomer'), autumn: L('Autumn', 'Herfst') });
+    function isXmasTime() { const d = new Date(); return d.getMonth() === 11 || (d.getMonth() === 0 && d.getDate() <= 6); }
+    function stageHTML(scene, title, sub, room, trans, big) {
+      return `<section class="fx-wrap${big ? ' big' : ''} sc-${esc(scene)}" data-k="fx-wrap"><div class="fx-stage" data-static="1" data-k="fx-stage" data-scene="${esc(scene)}" data-room="${esc(room || '')}" data-trans="${esc(String(trans || 1.6))}"><canvas class="fx-cv"></canvas></div>
+<div class="fx-lab"><b>${esc(title)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</div><button class="fx-fw" data-wact="fx-fireworks" aria-label="${L('Fireworks', 'Vuurwerk')}">${ic('auto')}<span>${L('Fireworks', 'Vuurwerk')}</span></button><i class="fx-wood" aria-hidden="true"></i></section>`;
+    }
 
     function active() {
       const lay = settings.layout || 'auto';
@@ -275,7 +284,8 @@ ${scenes.map((e) => `<button class="w-q" data-act="run" data-eid="${esc(e)}">${i
       const ok = vals.filter((y) => y.v != null); const bad = vals.filter((y) => y.v == null || deadSensors(y.x.r).length);
       const avg = ok.length ? ok.reduce((s2, y) => s2 + y.v, 0) / ok.length : null;
       const heatingNow = heaters(m).filter((e) => heatStatus(e).k === 'heat').length;
-      let out = `<button class="s-avg" data-wact="screen-heat" data-k="s-avg"><span class="s-slats" aria-hidden="true"></span><span class="s-avg-l"><span class="s-cap">${L('Average house temperature', 'Gemiddelde huistemperatuur')}</span>${tempBig(avg)}<span class="s-avg-sub">${ok.length ? L(`Average of ${ok.length} rooms`, `Gemiddelde van ${ok.length} kamers`) : L('No valid sensor values', 'Geen geldige sensorwaarden')}${bad.length ? ' · ' + bad.map((y) => esc(y.x.label) + (y.v == null ? '' : L(' (backup sensor)', ' (reservesensor)'))).join(', ') + L(': sensor unavailable', ': sensor niet beschikbaar') : ''}</span></span>
+      const sk = seasonKey(); const pre = sk !== 'off' ? stageHTML(sk, SEASON_NAME()[sk] || '', sk === 'winter' && isXmasTime() ? L('Happy holidays', 'Fijne feestdagen') : '', '', 2, false) : '';
+      let out = pre + `<button class="s-avg" data-wact="screen-heat" data-k="s-avg"><span class="s-slats" aria-hidden="true"></span><span class="s-avg-l"><span class="s-cap">${L('Average house temperature', 'Gemiddelde huistemperatuur')}</span>${tempBig(avg)}<span class="s-avg-sub">${ok.length ? L(`Average of ${ok.length} rooms`, `Gemiddelde van ${ok.length} kamers`) : L('No valid sensor values', 'Geen geldige sensorwaarden')}${bad.length ? ' · ' + bad.map((y) => esc(y.x.label) + (y.v == null ? '' : L(' (backup sensor)', ' (reservesensor)'))).join(', ') + L(': sensor unavailable', ': sensor niet beschikbaar') : ''}</span></span>
 <span class="s-avg-r"><span class="s-heatnow${heatingNow ? ' on' : ''}">${ic('flame')}<b>${heatingNow ? L(`${heatingNow} heating`, `${heatingNow} verwarmt`) : L('No heating active', 'Geen verwarming actief')}</b></span><span class="s-go">${L('All heating', 'Alle verwarmingen')}${ic('chev')}</span></span></button>`;
       out += `<div class="s-rooms">${rooms.map(({ r, label }) => { const v = core.tempOf(core.mainTemp(r)); const h = core.roomHum(r); const hs = roomHeat(r);
         return `<button class="s-room${hs && hs.k === 'heat' ? ' heat' : ''}" data-wact="screen-room" data-v="${esc(r.id)}" data-k="s-room-${esc(r.id)}"><span class="s-rn">${esc(label)}</span>
@@ -306,6 +316,9 @@ ${hs.length ? `<div class="s-heaters">${hs.map(heaterCard).join('')}</div>` : `<
       const sens = r.temps.concat(r.hums, r.other); sens.forEach((e) => core.st(e)); r.bins.forEach((e) => core.st(e));
       const label = (SCREEN_ROOMS.find((x) => new RegExp(x[0], 'i').test(r.name)) || [0, r.name])[1];
       let out = `<div class="s-bar"><button class="s-back" data-wact="screen-back">${ic('back')}<span>Screen</span></button><h1>${esc(label)}</h1><span class="s-bar-t">${tempBig(v)}${h != null ? `<span class="s-bar-h">${ic('drop')}${Math.round(h)}%</span>` : ''}</span></div>`;
+      { const md = MOODS && MOODS.active(r); const sk = seasonKey();
+        if (md) out += stageHTML(MOODS.sceneOf(md), 'Mood: ' + md.name, label, r.id, md.wake ? 3 : Math.max(1.2, +md.trans || 1.6), true);
+        else if (sk !== 'off') out += stageHTML(sk, label, L('No mood active – choose one below', 'Geen mood actief – kies er hieronder een'), r.id, 2, true); }
       const addBtn = `<button class="w-link" data-wact="add-open" data-room="${esc(r.id)}">${ic('plus')}<span>${L('Add device', 'Apparaat toevoegen')}</span></button>`;
       out += panel(L('Control', 'Bediening'), ctl.length ? `<div class="w-tiles">${ctl.map((e) => tile(e)).join('')}</div>` : `<p class="w-empty" style="padding:8px 2px">${L('No devices to control yet.', 'Nog geen apparaten om te bedienen.')}</p>`, 's-p-ctl', addBtn);
       if (MOODS) out += MOODS.sectionHTML(r);
@@ -325,6 +338,8 @@ ${hs.length ? `<div class="s-heaters">${hs.map(heaterCard).join('')}</div>` : `<
 ${sel('wallStart', startValue(), startOptions(), L('Homepage', 'Homepage'))}
 ${sel('wallTheme', settings.wallTheme === 'dark' ? 'dark' : 'light', [['light', L('Light & warm', 'Licht en warm')], ['dark', L('Dark', 'Donker')]], L('Theme', 'Thema'))}
 ${sel('wallDim', settings.wallDim === 'off' ? 'off' : 'on', [['on', L('After 30 seconds', 'Na 30 seconden')], ['off', L('Never', 'Nooit')]], L('Dim screen', 'Scherm dimmen'))}
+${sel('wallScene', settings.wallScene || 'auto', [['auto', L('Automatic (current season)', 'Automatisch (huidig seizoen)')], ['winter', L('Winter', 'Winter')], ['spring', L('Spring', 'Lente')], ['summer', L('Summer', 'Zomer')], ['autumn', L('Autumn', 'Herfst')], ['off', L('Off', 'Uit')]], L('Season animation (Screen)', 'Seizoensanimatie (Screen)'))}
+${sel('wallFireworks', settings.wallFireworks === 'off' ? 'off' : 'on', [['on', L('On holidays and Old Christmas', 'Op feestdagen en bij Old Christmas')], ['off', L('Only with the button', 'Alleen met de knop')]], L('Fireworks', 'Vuurwerk'))}
 ${sel('wallSeason', settings.wallSeason === 'on' || settings.wallSeason === 'off' ? settings.wallSeason : 'auto', [['auto', L('Automatic (1 Dec – 6 Jan)', 'Automatisch (1 dec – 6 jan)')], ['on', L('Always on', 'Altijd aan')], ['off', L('Off', 'Uit')]], L('Christmas on standby', 'Kerst op stand-by'))}
 <div class="w-setrow"><span>Device Layout</span><select data-set="layout" aria-label="Device Layout">${[['auto', L('Automatic', 'Automatisch')], ['iphone', 'iPhone'], ['ipad', 'iPad'], ['laptop', 'Laptop']].map(([v, l]) => `<option value="${v}" ${(settings.layout || 'auto') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
 <p class="w-note">${L('Homepage and these options are stored on this device. The screen dims softly after 30 seconds without touch (never fully black, the iPad brightness itself is not changed); one tap wakes it. After 3 minutes the panel returns to the homepage.', 'Homepage en deze opties worden op dit apparaat bewaard. Het scherm dimt zacht na 30 seconden zonder aanraking (nooit helemaal zwart, de helderheid van de iPad zelf verandert niet); één tik maakt het weer normaal. Na 3 minuten gaat het paneel terug naar de homepage.')}</p></section>`;
@@ -366,6 +381,7 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       else if (loading) body = `<div class="w-load" data-k="w-load"><div class="w-ring"><i></i></div><p>${S.conn === 'idle' ? L('Log in to Home Assistant to start.', 'Log in bij Home Assistant om te beginnen.') : L('Connecting to Home Assistant…', 'Verbinden met Home Assistant…')}</p></div>`;
       else body = W.page === 'screen' ? pScreen(m) : W.page === 'calendar' ? (core.extra() ? core.extra().calendarHTML(true) : '') : W.page === 'lights' ? pLights(m) : W.page === 'climate' ? pClimate(m) : W.page === 'devices' ? pDevices(m) : W.page === 'sensors' ? pSensors(m) : W.page === 'autos' ? pAutos() : pHome(m);
       core.st('__clock');
+      if (FX) setTimeout(FX.kick, 0);
       return `<div class="page w-root${W.page === 'screen' ? ' w-warm' : ''}" data-k="w-root">${rail()}<div class="w-main">${topbar(m)}<div class="w-page w-pg-${esc(W.page)}" data-k="w-page-${esc(W.page)}${W.sub ? '-' + esc(W.sub.t + (W.sub.id || '')) : ''}">${body}</div></div></div>`;
     }
 
@@ -400,6 +416,7 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       else if (a === 'screen-heat') { W.sub = { t: 'heat' }; core.schedule(true); window.scrollTo(0, 0); }
       else if (a === 'screen-room') { W.sub = { t: 'room', id: el.dataset.v }; core.schedule(true); window.scrollTo(0, 0); }
       else if (a === 'screen-back') { W.sub = null; core.schedule(true); window.scrollTo(0, 0); }
+      else if (a === 'fx-fireworks') { if (FX) { if (FX.reduced()) core.toast(L('Animations are reduced on this device', 'Animaties staan beperkt op dit apparaat'), 'ok'); else FX.show('big'); } }
       else if (a === 'rename') { W.ren = el.dataset.eid; W.renVal = null; core.openSheet('__wname'); }
       else if (a === 'ren-save') { const inp = document.querySelector('[data-win=ren]'); saveName(W.ren, inp ? inp.value : W.renVal); }
       else if (a === 'ren-reset') saveName(W.ren, '');
@@ -426,9 +443,7 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       if (dimEl || !document.body) return;
       dimEl = document.createElement('div'); dimEl.id = 'wdim'; dimEl.setAttribute('aria-hidden', 'true');
       fxEl = document.createElement('div'); fxEl.id = 'wfx'; fxEl.setAttribute('aria-hidden', 'true');
-      let fx = '<div class="fx-lights">'; for (let i = 0; i < 18; i++) fx += `<i style="left:${(i * 5.6 + 1.5).toFixed(1)}%;-webkit-animation-delay:${(i % 5) * 0.7}s;animation-delay:${(i % 5) * 0.7}s"></i>`; fx += '</div><div class="fx-snow">';
-      for (let i = 0; i < 9; i++) { const d = 16 + (i * 7) % 13; const dl = -((i * 3.7) % d); fx += `<b style="left:${(i * 11 + 4) % 100}%;-webkit-animation-duration:${d}s;animation-duration:${d}s;-webkit-animation-delay:${dl.toFixed(1)}s;animation-delay:${dl.toFixed(1)}s;font-size:${12 + (i * 5) % 10}px">❄</b>`; }
-      fx += '</div><div class="fx-santa"><span>🦌</span><span>🦌</span><span class="fx-sl">🛷</span><span>🎅</span></div>';
+      let fx = '<div class="fx-lights">'; for (let i = 0; i < 18; i++) fx += `<i style="left:${(i * 5.6 + 1.5).toFixed(1)}%;-webkit-animation-delay:${(i % 5) * 0.7}s;animation-delay:${(i % 5) * 0.7}s"></i>`; fx += '</div>'; // snow and Santa are drawn by fx.js (animated canvas)
       fxEl.innerHTML = fx; document.body.appendChild(dimEl); document.body.appendChild(fxEl);
       const wake = (ev) => { if (!dimmed) return; if (ev.cancelable) ev.preventDefault(); ev.stopPropagation(); W.lastTouch = Date.now(); setDim(false); };
       dimEl.addEventListener('touchstart', wake, { passive: false }); dimEl.addEventListener('mousedown', wake); dimEl.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); });
@@ -442,7 +457,7 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       const v = settings.wallSeason || 'auto'; if (v === 'off') return false; if (v === 'on' || settings.deco === 'xmas') return true;
       const d = new Date(); return d.getMonth() === 11 || (d.getMonth() === 0 && d.getDate() <= 6);
     }
-    function fly() { if (!fxEl) return; const sEl = fxEl.querySelector('.fx-santa'); if (!sEl) return; sEl.className = 'fx-santa'; void sEl.offsetWidth; sEl.className = 'fx-santa go'; lastFly = Date.now(); }
+    function fly() { lastFly = Date.now(); return FX ? FX.fly() : false; }
     setInterval(() => {
       const on = active(); if (on) layers();
       const html = document.documentElement;
@@ -451,7 +466,7 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       setDim(settings.wallDim !== 'off' && idle > 30000);
       const sea = season(); html.classList.toggle('w-season', sea); html.classList.toggle('w-season-own', sea && settings.deco !== 'xmas');
       // the sleigh flies now and then, only while nobody is using the panel (not constantly)
-      if (sea && idle > 30000 && Date.now() - lastFly > (lastFly ? 240000 : 6000) && (!dimSince || Date.now() - dimSince > 5000)) fly();
+      if (FX) FX.standby(sea && idle > 30000);
     }, 1000);
 
     // feedback on touch + idle timer
@@ -468,7 +483,8 @@ ${own ? `<div class="m-btns"><button class="btn" data-wact="ren-reset">${ic('ref
       if (Date.now() - W.lastTouch > 180000 && (!atStart() || S.sheet)) { W.lastTouch = Date.now() - 60000; S.sheet = null; goStart(); core.schedule(true); window.scrollTo(0, 0); }
     }, 5000);
 
-    if (window.ComfortMoods) MOODS = window.ComfortMoods(Object.assign({}, core, { panel }));
+    if (window.ComfortMoods) MOODS = window.ComfortMoods(Object.assign({}, core, { panel, fx: () => FX }));
+    if (window.ComfortFX) FX = window.ComfortFX(Object.assign({}, core, { wallInfo: () => ({ active: active(), page: W.page, dimmed }), moods: () => MOODS }));
     return { active, render, go, page: () => W.page, sheet, startOptions, startValue, dimmed: () => dimmed, fly };
   };
 })();
