@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.11.0';
+  const VERSION = '1.12.0';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -256,6 +256,7 @@
     if (c !== C) return;
     S.everConnected = true; S.haVersion = c.haVersion || '';
     c.send({ type: 'auth/current_user' }).then((u) => { S.userName = u && u.name; schedule(true); }).catch(() => { /* optional */ });
+    loadUD(c);
     try {
       const first = !c._subscribed; c._subscribed = true;
       if (first) await c.subscribe('state_changed', (ev) => onStateChanged(ev.data));
@@ -430,7 +431,24 @@
   const st = (eid) => { used.add(eid); return S.states[eid]; };
   const avail = (s) => !!s && s.state !== 'unavailable' && s.state !== 'unknown';
   const numOf = (eid) => { const s = st(eid); if (!avail(s)) return null; const v = parseFloat(s.state); return isFinite(v) ? v : null; };
+  /* own display names / moods / extra room devices: kept in the Home Assistant user profile (frontend user data),
+     so every device logged in as this user sees the same. Entity IDs and Home Assistant names are never changed. */
+  S.ud = Object.assign({ names: {}, moods: {}, roomAdd: {} }, store.get('ch.ud', {}));
+  function loadUD(c) {
+    c.send({ type: 'frontend/get_user_data', key: 'comfort_home' }).then((r) => {
+      const v = r && r.value; if (v && typeof v === 'object') { S.ud = Object.assign({ names: {}, moods: {}, roomAdd: {} }, v); store.set('ch.ud', S.ud); modelDirty = true; schedule(true); }
+    }).catch(() => { /* older Home Assistant: keep the copy on this device */ });
+  }
+  function saveUD() {
+    store.set('ch.ud', S.ud); modelDirty = true; schedule(true);
+    if (C && C.authed) return C.send({ type: 'frontend/set_user_data', key: 'comfort_home', value: S.ud }).catch(() => { toast(settings.lang === 'nl' ? 'Alleen op dit apparaat bewaard' : 'Saved on this device only', 'bad'); });
+    return Promise.resolve();
+  }
   function nameOf(eid, room) {
+    if (S.ud && S.ud.names && S.ud.names[eid]) return S.ud.names[eid];
+    return baseNameOf(eid, room);
+  }
+  function baseNameOf(eid, room) { // the Home Assistant name, without the user's own display name
     const s = S.states[eid]; let n = (s && s.attributes.friendly_name) || eid.split('.')[1].replace(/_/g, ' ');
     if (room && room.name && n.toLowerCase().startsWith(room.name.toLowerCase() + ' ') && n.length > room.name.length + 1) n = cap(n.slice(room.name.length + 1));
     return n;
@@ -705,7 +723,7 @@
     morphInto($('#view'), html);
     morphInto($('#nav'), wallOn ? '' : navHTML());
     if (EXTRA) EXTRA.applyDeco(effLayout());
-    morphInto($('#sheet'), S.sheet ? (S.sheet === '__osc' ? oscSheet() : S.sheet.startsWith('__') ? specialSheet(S.sheet) : sheetHTML(S.sheet)) : '');
+    morphInto($('#sheet'), S.sheet ? (S.sheet.startsWith('__w') && WALL && WALL.sheet ? WALL.sheet(S.sheet) : S.sheet === '__osc' ? oscSheet() : S.sheet.startsWith('__') ? specialSheet(S.sheet) : sheetHTML(S.sheet)) : '');
   }
 
   /* tiny DOM morph: keeps elements alive so transitions play and scroll/focus survive live updates */
@@ -822,7 +840,7 @@ ${toggleHTML(eid, s)}</div>`;
     if (clim.length) { const a = clim[0].attributes; const act = a.hvac_action; out += `<span class="stat">${ic(act === 'heating' || (!act && clim[0].state === 'heat') ? 'flame' : act === 'cooling' || (!act && clim[0].state === 'cool') ? 'snow' : act === 'drying' ? 'droplet' : 'climate')}${esc(ACTION[a.hvac_action] && a.hvac_action !== 'idle' ? ACTION[a.hvac_action] : HVAC[clim[0].state] || 'On')}${a.temperature != null ? ' ' + t('to {t}', { t: fmtT(+a.temperature) }) : ''}</span>`; }
     const open = m.rooms.reduce((n, r) => n + r.bins.filter((e) => { const s = st(e); return s && s.state === 'on' && ['door', 'window', 'garage_door', 'opening'].includes(s.attributes.device_class); }).length, 0);
     if (open) out += `<span class="stat warn">${ic('window')}${t('{n} open', { n: open })}</span>`;
-    if (unav) out += `<span class="stat bad">${ic('alert')}${t('{n} unavailable', { n: unav })}</span>`;
+    // (hidden on request: the "N unavailable" notice. The devices themselves are untouched and still listed under Info → Unavailable.)
     out += `</div></div>`;
     out += `<div class="sec" data-k="bnr">${installHint()}${banner()}</div>`;
     if (acList(m).length && !loading) out += `<div class="sec" data-k="s-clim"><div class="sec-h"><h2>${t('Climate')}</h2><a href="#/climate">${t('Controls')}</a></div>${climStrip(m)}</div>`;
@@ -1729,7 +1747,7 @@ ${S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-a
     // device layout (iPhone / iPad wall panel / laptop)
     out += `<div class="sec-h" style="margin-top:24px"><h2>Device Layout</h2></div><div class="card set" data-k="layoutset">
 <div class="it"><span class="ic">${ic('smartphone')}</span><span class="lb"><b>Device Layout</b><span>${settings.lang === 'nl' ? 'Kies hoe de app eruitziet op dit apparaat' : 'Choose how the app looks on this device'}</span></span><select data-set="layout" aria-label="Device Layout">${[['auto', settings.lang === 'nl' ? 'Automatisch' : 'Automatic'], ['iphone', 'iPhone'], ['ipad', 'iPad'], ['laptop', 'Laptop']].filter((o) => o[0] !== 'ipad' || window.ComfortWall).map(([v, l]) => `<option value="${v}" ${(settings.layout || 'auto') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
-${settings.layout === 'ipad' || (WALL && WALL.active()) ? `<div class="it"><span class="ic">${ic('home')}</span><span class="lb"><b>${settings.lang === 'nl' ? 'Startpagina iPad' : 'iPad start page'}</b></span><select data-set="wallStart" aria-label="Start page">${[['home', settings.lang === 'nl' ? 'Overzicht' : 'Overview'], ['lights', settings.lang === 'nl' ? 'Verlichting' : 'Lights'], ['climate', settings.lang === 'nl' ? 'Klimaat' : 'Climate'], ['devices', settings.lang === 'nl' ? 'Apparaten' : 'Devices'], ['sensors', settings.lang === 'nl' ? 'Sensoren' : 'Sensors'], ['autos', 'Automations']].map(([v, l]) => `<option value="${v}" ${(settings.wallStart || 'home') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>` : ''}</div>`;
+${settings.layout === 'ipad' || (WALL && WALL.active()) ? `<div class="it"><span class="ic">${ic('home')}</span><span class="lb"><b>${settings.lang === 'nl' ? 'Startpagina iPad' : 'iPad start page'}</b></span><select data-set="wallStart" aria-label="Start page">${(WALL && WALL.startOptions ? WALL.startOptions() : [['home', settings.lang === 'nl' ? 'Overzicht' : 'Overview'], ['lights', settings.lang === 'nl' ? 'Verlichting' : 'Lights'], ['climate', settings.lang === 'nl' ? 'Klimaat' : 'Climate'], ['devices', settings.lang === 'nl' ? 'Apparaten' : 'Devices'], ['sensors', settings.lang === 'nl' ? 'Sensoren' : 'Sensors'], ['autos', 'Automations']]).map(([v, l]) => `<option value="${esc(v)}" ${(WALL && WALL.startValue ? WALL.startValue() : settings.wallStart || 'home') === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>` : ''}</div>`;
     if (EXTRA) out += EXTRA.decoSettingsHTML(effLayout());
     // air conditioners
     if (m.climates.length) {
@@ -2007,7 +2025,8 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
     return window.ComfortWall({
       S, settings, t, ic, esc, model: () => model(), st, nameOf, roomNameOf, avail, isOn, stateText, devIcon, houseTemp, outsideTemp, acList,
       tColor, shortRoom, mainTemp, tempOf, roomHum, roomOfEid, HVAC, ACTION, pSettings, oscEnt, oscStatus, OSC, toast, svc, climatePower,
-      schedule: (f) => schedule(f), isAC, isOutside, isJunkT, extra: () => EXTRA
+      schedule: (f) => schedule(f), isAC, isOutside, isJunkT, extra: () => EXTRA, saveUD, command, canSend,
+      openSheet, closeSheet, baseNameOf
     });
   }
   function makeExtra() {

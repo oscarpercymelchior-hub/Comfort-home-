@@ -338,6 +338,8 @@
           case 'subscribe_events': subs.set(id, m.event_type || '*'); return ok(id);
           case 'unsubscribe_events': subs.delete(m.subscription); return ok(id);
           case 'history/history_during_period': return ok(id, ha._history(m));
+          case 'frontend/get_user_data': ha.userData = ha.userData || {}; return ok(id, { value: ha.userData[m.key] === undefined ? null : JSON.parse(JSON.stringify(ha.userData[m.key])) });
+          case 'frontend/set_user_data': ha.userData = ha.userData || {}; ha.userData[m.key] = m.value; return ok(id, null);
           case 'logbook/get_events': { const st0 = Date.parse(m.start_time) / 1000 || 0; const ids = m.entity_ids || null; return ok(id, (ha.logbook || []).filter((x) => x.when >= st0 && (!ids || ids.includes(x.entity_id)))); }
           case 'call_service': return ha._service(m.domain, m.service, Object.assign({}, m.service_data || {}, m.target || {}), (e) => e ? err(id, e.code, e.message) : ok(id, { context: { id: 'x' } }));
           default: return err(id, 'unknown_command', 'Unknown command.');
