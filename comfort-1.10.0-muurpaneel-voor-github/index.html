@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ws: wss: http: https:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#f2f4f7">
+<meta name="color-scheme" content="light dark">
+<meta name="format-detection" content="telephone=no">
+<!-- iPhone / iPad home-screen app -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Comfort">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="application-name" content="Comfort Home">
+<title>Comfort Home</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="wall.css">
+</head>
+<body>
+<div id="app"><main id="view" aria-live="polite"></main><div id="sheet"></div><div id="nav"></div></div>
+<div id="toasts" aria-live="assertive"></div>
+<noscript>Comfort Home needs JavaScript.</noscript>
+<script src="icons.js"></script>
+<script src="wall.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
