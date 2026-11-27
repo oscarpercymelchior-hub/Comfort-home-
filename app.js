@@ -1,7 +1,7 @@
 /* Comfort Home — a calm smart-home app for Home Assistant. */
 (function () {
   'use strict';
-  const VERSION = '1.9.0';
+  const VERSION = '1.10.0';
   const $ = (s, r) => (r || document).querySelector(s);
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ESC[c]);
@@ -16,7 +16,7 @@
     del(k) { try { localStorage.removeItem(k); sessionStorage.removeItem(k); } catch (e) { /* ignore */ } }
   };
   const DEFAULTS = { theme: 'auto', autoSource: 'time', dayStart: '07:00', nightStart: '20:00', houseSource: 'auto', showHum: true,
-    favorites: [], roomMain: {}, devGroup: 'type', climate: null, lastMode: {}, discoSwitches: [], lang: 'en' };
+    favorites: [], roomMain: {}, devGroup: 'type', climate: null, lastMode: {}, discoSwitches: [], lang: 'en', layout: 'auto', wallStart: 'home' };
   const settings = Object.assign({}, DEFAULTS, store.get('ch.settings', {}));
   const saveSettings = () => store.set('ch.settings', settings);
   /* ---------------- languages ---------------- */
@@ -116,6 +116,7 @@
     hist: {}, spark: {}, pending: {}, draft: {}, sheet: null, q: '', cat: 'all', revealToken: false, testing: false
   };
   let C = null;            // active connection
+  let WALL = null;         // iPad wall-panel layout (wall.js), created at boot
   let M = null;            // derived model
   let modelDirty = true;
 
@@ -684,13 +685,16 @@
   function render() {
     used = new Set(['__clock']);
     applyTheme();
+    const wallOn = !!(WALL && WALL.active());
+    document.documentElement.classList.toggle('lay-wall', wallOn);
+    document.documentElement.classList.toggle('lay-phone', !wallOn && settings.layout === 'iphone');
     let html;
     try {
       const r = S.route.name;
-      html = r === 'automations' ? pAutomations() : r === 'info' ? (S.route.id ? pInfoEnt(S.route.id) : pInfo()) : r === 'timers' ? pTimers() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
+      html = wallOn ? WALL.render() : r === 'automations' ? pAutomations() : r === 'info' ? (S.route.id ? pInfoEnt(S.route.id) : pInfo()) : r === 'timers' ? pTimers() : r === 'climate' ? pClimate() : r === 'rooms' ? pRooms() : r === 'room' ? pRoom(S.route.id) : r === 'devices' ? pDevices() : r === 'settings' ? pSettings() : pHome();
     } catch (e) { console.error(e); html = `<div class="page" data-k="err"><div class="msg bad">${ic('alert')}<div>Something went wrong showing this page. ${esc(e.message)}</div></div></div>`; }
     morphInto($('#view'), html);
-    morphInto($('#nav'), navHTML());
+    morphInto($('#nav'), wallOn ? '' : navHTML());
     morphInto($('#sheet'), S.sheet ? (S.sheet === '__osc' ? oscSheet() : S.sheet.startsWith('__') ? specialSheet(S.sheet) : sheetHTML(S.sheet)) : '');
   }
 
@@ -1711,6 +1715,10 @@ ${S.demo ? `<div class="btns" style="margin-top:10px"><button class="btn" data-a
       if (settings.autoSource === 'time') out += `<div class="it"><span class="ic">${ic('sun')}</span><span class="lb"><b>${t('Day starts')}</b></span><input type="time" data-set="dayStart" value="${esc(settings.dayStart)}" aria-label="Day starts"></div><div class="it"><span class="ic">${ic('moon')}</span><span class="lb"><b>${t('Night starts')}</b></span><input type="time" data-set="nightStart" value="${esc(settings.nightStart)}" aria-label="Night starts"></div>`;
     }
     out += `</div>`;
+    // device layout (iPhone / iPad wall panel / laptop)
+    out += `<div class="sec-h" style="margin-top:24px"><h2>Device Layout</h2></div><div class="card set" data-k="layoutset">
+<div class="it"><span class="ic">${ic('smartphone')}</span><span class="lb"><b>Device Layout</b><span>${settings.lang === 'nl' ? 'Kies hoe de app eruitziet op dit apparaat' : 'Choose how the app looks on this device'}</span></span><select data-set="layout" aria-label="Device Layout">${[['auto', settings.lang === 'nl' ? 'Automatisch' : 'Automatic'], ['iphone', 'iPhone'], ['ipad', 'iPad'], ['laptop', 'Laptop']].filter((o) => o[0] !== 'ipad' || window.ComfortWall).map(([v, l]) => `<option value="${v}" ${(settings.layout || 'auto') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+${settings.layout === 'ipad' || (WALL && WALL.active()) ? `<div class="it"><span class="ic">${ic('home')}</span><span class="lb"><b>${settings.lang === 'nl' ? 'Startpagina iPad' : 'iPad start page'}</b></span><select data-set="wallStart" aria-label="Start page">${[['home', settings.lang === 'nl' ? 'Overzicht' : 'Overview'], ['lights', settings.lang === 'nl' ? 'Verlichting' : 'Lights'], ['climate', settings.lang === 'nl' ? 'Klimaat' : 'Climate'], ['devices', settings.lang === 'nl' ? 'Apparaten' : 'Devices'], ['sensors', settings.lang === 'nl' ? 'Sensoren' : 'Sensors'], ['autos', 'Automations']].map(([v, l]) => `<option value="${v}" ${(settings.wallStart || 'home') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>` : ''}</div>`;
     // air conditioners
     if (m.climates.length) {
       const sel = acList(m);
@@ -1980,8 +1988,19 @@ ${CONTROL_KINDS.has(k) ? `<button class="star${fav ? ' fav' : ''}" data-act="fav
   setInterval(() => { applyTheme(); if (S.route.name === 'home' || S.route.name === 'room') { changed.add('__clock'); schedule(false); } }, 20000);
   window.__navCount = 0; window.addEventListener('hashchange', () => { window.__navCount++; });
 
+  /* ---------------- iPad wall panel (separate module wall.js) ---------------- */
+  function makeWall() {
+    if (!window.ComfortWall) return null;
+    return window.ComfortWall({
+      S, settings, t, ic, esc, model: () => model(), st, nameOf, roomNameOf, avail, isOn, stateText, devIcon, houseTemp, outsideTemp, acList,
+      tColor, shortRoom, mainTemp, tempOf, roomHum, roomOfEid, HVAC, ACTION, pSettings, oscEnt, oscStatus, OSC, toast, svc, climatePower,
+      schedule: (f) => schedule(f)
+    });
+  }
+
   /* ---------------- boot ---------------- */
   S.route = parseRoute();
+  WALL = makeWall();
   applyTheme();
   const q = new URLSearchParams(location.search);
   const auth = loadAuth();
